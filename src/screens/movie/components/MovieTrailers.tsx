@@ -28,18 +28,20 @@ export const MovieTrailers = ({ videos }: { videos: MovieVideosProps[] }) => {
         scrollEventThrottle={16}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         renderItem={({ item: video }) => (
-          <View className="w-60 gap-2">
-            <View className="overflow-hidden rounded-2xl border border-white/10">
+          <View className="w-72 gap-2">
+            <View className="justify-center overflow-hidden rounded-2xl border border-white/10">
               <YoutubePlayer
                 ref={videoRef}
-                height={140}
-                webViewStyle={{ borderRadius: 16, width: 256 }}
+                height={141}
+                webViewStyle={{ borderRadius: 14, flex: 1 }}
                 videoId={video.key}
               />
             </View>
 
             <View className="flex-1 gap-1 overflow-hidden">
-              <Text className="!text-md font-semibold">{video.name}</Text>
+              <Text numberOfLines={1} className="!text-md font-semibold">
+                {video.name}
+              </Text>
 
               <Text className="!text-neutral-500 dark:!text-neutral-400">
                 {formatDate(video?.published_at as any)}

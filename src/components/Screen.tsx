@@ -14,8 +14,8 @@ import {
 } from 'react-native';
 
 import { ExtendedEdge, useSafeAreaInsetsStyle } from '@/hooks';
-import { RowBack } from './RowBack';
 import { cn } from '@/utils';
+import { RowBack } from './RowBack';
 
 interface BaseScreenProps {
   /**

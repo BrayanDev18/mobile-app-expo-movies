@@ -21,19 +21,19 @@ export const MovieHeader = ({ movie }: { movie: MovieDetailsProps }) => {
         }}
       />
 
-      <View className="items-center justify-center px-8">
-        <View className="relative">
-          <Image
-            source={{ uri: movie?.poster_path }}
-            style={{
-              width: 240,
-              height: 360,
-              borderRadius: 20,
-            }}
-            cachePolicy="memory-disk"
-            contentFit="cover"
-          />
-        </View>
+      <View
+        style={{
+          borderRadius: 16,
+          overflow: 'hidden',
+          width: 230,
+          height: 340,
+        }}>
+        <Image
+          source={{ uri: movie?.poster_path }}
+          style={{ width: '100%', height: '100%' }}
+          cachePolicy="memory-disk"
+          contentFit="cover"
+        />
       </View>
     </View>
   );
