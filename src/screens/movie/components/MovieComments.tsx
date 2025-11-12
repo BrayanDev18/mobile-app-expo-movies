@@ -16,7 +16,7 @@ export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) =>
       data={comments?.slice(0, 10)}
       scrollEventThrottle={16}
       keyExtractor={(item, i) => `${item.id}-${i}`}
-      ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
       renderItem={({ item: review, index }) => (
         <Animated.View
           entering={FadeInDown.delay(100 * index).springify()}
@@ -54,7 +54,7 @@ export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) =>
             )}
           </View>
 
-          <Text numberOfLines={4} className="!text-md leading-6 !text-neutral-400">
+          <Text numberOfLines={4} className="!text-[14px] leading-6 !text-neutral-400">
             {review.content}
           </Text>
         </Animated.View>

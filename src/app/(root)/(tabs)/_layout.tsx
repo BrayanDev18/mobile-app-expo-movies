@@ -118,6 +118,7 @@ const HomeTabsLayout: React.FC = () => {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        sceneStyle: { backgroundColor: '#171717' },
         tabBarStyle: { display: 'none' },
         animation: 'shift',
       }}>

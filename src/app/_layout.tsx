@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { View } from 'react-native';
 import '../../global.css';
 
 const queryClient = new QueryClient({
@@ -34,9 +35,10 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>
         <StatusBar style="light" />
-        <Stack
-          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#171717' } }}
-        />
+
+        <View className="flex-1 bg-neutral-900">
+          <Stack screenOptions={{ headerShown: false }} />
+        </View>
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

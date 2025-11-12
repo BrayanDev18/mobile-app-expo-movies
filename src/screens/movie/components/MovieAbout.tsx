@@ -99,41 +99,43 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
       />
     </View>
 
-    <View className="gap-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="!text-lg font-bold">Gallery</Text>
+    {gallery.length ? (
+      <View className="gap-3">
+        <View className="flex-row items-center justify-between">
+          <Text className="!text-lg font-bold">Gallery</Text>
 
-        <Pressable
-          className="p-2"
-          onPress={() =>
-            router.push({ pathname: '/(root)/movie/gallery', params: { id: movieDetails.id } })
-          }>
-          <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-        </Pressable>
+          <Pressable
+            className="p-2"
+            onPress={() =>
+              router.push({ pathname: '/(root)/movie/gallery', params: { id: movieDetails.id } })
+            }>
+            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
+          </Pressable>
+        </View>
+
+        <FlashList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={gallery}
+          scrollEventThrottle={16}
+          keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+          renderItem={({ item: image }) => (
+            <View className="flex-row items-center gap-3">
+              <Image
+                source={{ uri: image.file_path as string }}
+                style={{
+                  width: 280,
+                  borderRadius: 12,
+                  aspectRatio: image.aspect_ratio || 0,
+                }}
+                cachePolicy="memory-disk"
+                contentFit="cover"
+              />
+            </View>
+          )}
+        />
       </View>
-
-      <FlashList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={gallery}
-        scrollEventThrottle={16}
-        keyExtractor={(item, i) => `${item.movie_id}-${i}`}
-        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-        renderItem={({ item: image }) => (
-          <View className="flex-row items-center gap-3">
-            <Image
-              source={{ uri: image.file_path as string }}
-              style={{
-                width: 280,
-                borderRadius: 12,
-                aspectRatio: image.aspect_ratio || 0,
-              }}
-              cachePolicy="memory-disk"
-              contentFit="cover"
-            />
-          </View>
-        )}
-      />
-    </View>
+    ) : null}
   </Animated.View>
 );
