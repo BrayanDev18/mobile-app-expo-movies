@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1759866590202,
+      "tag": "0000_youthful_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1759869083329,
+      "tag": "0001_eminent_rick_jones",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1759870196711,
+      "tag": "0002_brown_sharon_ventura",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1759876587823,
+      "tag": "0003_robust_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1759876991718,
+      "tag": "0004_cooing_satana",
+      "breakpoints": true
+    }
+  ]
+}
