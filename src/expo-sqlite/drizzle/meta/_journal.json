@@ -36,6 +36,41 @@
       "when": 1759876991718,
       "tag": "0004_cooing_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1763045508223,
+      "tag": "0005_known_venom",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1763045719283,
+      "tag": "0006_fresh_rhino",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1763053095147,
+      "tag": "0007_cheerful_corsair",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1763053576404,
+      "tag": "0008_brown_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1763056589168,
+      "tag": "0009_parched_skullbuster",
+      "breakpoints": true
     }
   ]
 }

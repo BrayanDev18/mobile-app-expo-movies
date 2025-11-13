@@ -4,7 +4,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const ICON_SIZE = 48;
+const ICON_SIZE = 44;
 
 export const RowBack = ({ onPress = () => router.back() }) => {
   const { top } = useSafeAreaInsets();
@@ -26,7 +26,7 @@ export const RowBack = ({ onPress = () => router.back() }) => {
             borderRadius: 50,
             overflow: 'hidden',
           }}>
-          <ChevronLeft color="white" size={30} />
+          <ChevronLeft color="white" size={28} />
         </BlurView>
       </Pressable>
     </View>

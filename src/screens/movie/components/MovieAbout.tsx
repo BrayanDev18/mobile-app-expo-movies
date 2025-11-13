@@ -99,7 +99,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
       />
     </View>
 
-    {gallery.length ? (
+    {gallery?.length ? (
       <View className="gap-3">
         <View className="flex-row items-center justify-between">
           <Text className="!text-lg font-bold">Gallery</Text>

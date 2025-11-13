@@ -1,8 +1,12 @@
-import { Loader, RowBack, Text } from '@/components';
+import { Loader, Screen, Text } from '@/components';
+import { useMovieCast } from '@/hooks';
+import { MovieCastProps } from '@/interfaces';
 import { Ionicons } from '@expo/vector-icons';
+import { FlashList } from '@shopify/flash-list';
+import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { memo } from 'react';
-import { FlatList, Image, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,25 +14,19 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const CastList = () => {
   const { id } = useLocalSearchParams();
-  const { top, bottom } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
 
-  return null;
+  const { movieCast, isMovieCastLoading } = useMovieCast(+id);
 
-  const {
-    castMovieQuery: { data: castMovieQuery, isLoading },
-  } = useGetMovie(+id);
-
-  if (isLoading || !castMovieQuery) {
+  if (!movieCast.length || isMovieCastLoading) {
     return <Loader />;
   }
 
   return (
-    <View className="flex-1 bg-neutral-900 px-4">
-      <RowBack />
-
+    <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="px-4">
       <View className="items-center justify-center">
-        <View style={{ paddingTop: top }} className="mb-5 flex-row gap-5">
-          <View className="items-center justify-center rounded-full border-[1px] border-white px-5 dark:bg-dark-300">
+        <View className="mb-5 flex-row gap-5">
+          <View className="items-center justify-center rounded-full border-[1px] bg-dark-300 px-5">
             <Text className="">Actors</Text>
           </View>
 
@@ -42,34 +40,40 @@ const CastList = () => {
         </View>
       </View>
 
-      <FlatList
-        data={castMovieQuery}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item, index }) => <CastItem cast={item} index={index} />}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: 12, paddingBottom: bottom }}
-        initialNumToRender={20}
-        maxToRenderPerBatch={20}
-        removeClippedSubviews
-      />
-    </View>
+      <View style={{ paddingBottom: bottom + 60 }} className="h-full">
+        <FlashList
+          data={movieCast}
+          scrollEventThrottle={16}
+          removeClippedSubviews
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          renderItem={({ item, index }) => <CastItem cast={item} index={index} />}
+        />
+      </View>
+    </Screen>
   );
 };
 
 export default CastList;
 
-const CastItem = memo(({ cast, index }: { cast: ShortCastProps; index: number }) => {
+const CastItem = memo(({ cast, index }: { cast: MovieCastProps; index: number }) => {
   return (
     <AnimatedPressable
       entering={FadeInDown.delay(100 * index).springify()}
       onPress={() => router.push(`/movie/cast/${cast.id}`)}
-      className="flex-row items-center justify-between rounded-xl bg-neutral-800 p-2">
+      className="flex-row items-center justify-between rounded-xl bg-neutral-800 p-2.5">
       <View className="flex-row items-center gap-x-3">
-        <Image source={{ uri: cast.avatar }} style={{ width: 70, height: 70, borderRadius: 6 }} />
+        <Image
+          source={{ uri: cast.profile_path as string }}
+          style={{ width: 62, height: 62, borderRadius: 8 }}
+          cachePolicy="memory-disk"
+        />
 
-        <View className="gap-1">
+        <View className="gap-1.5">
           <Text className="!text-lg font-medium">{cast.name}</Text>
-          <Text className="!text-md font-normal !text-neutral-400">{cast.character}</Text>
+
+          <Text className="!text-[14.5px] font-normal !text-neutral-400">{cast.character}</Text>
         </View>
       </View>
 

@@ -1,5 +1,6 @@
-import { Loader, RowBack, Text } from '@/components';
-import { MovieImagesProps } from '@/interfaces';
+import { RowBack, Text } from '@/components';
+import { useCastDetails } from '@/hooks';
+import { CastCreditProps, CastDetailsProps, CastImagesResponse } from '@/interfaces';
 import { CastBiography, CastFilmography } from '@/screens/movie/components';
 import { Image, ImageBackground } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,37 +27,29 @@ interface TabsProps {
 
 interface RenderTabContentProps {
   activeTab: string;
-  cast: any;
-  images: MovieImagesProps[];
-  filmography: any[];
+  cast: CastDetailsProps;
+  images: CastImagesResponse;
+  castCredits: CastCreditProps[];
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const CastDescriptionScreen = () => {
-  const [activeTab, setActiveTab] = useState('filmography');
+  const [activeTab, setActiveTab] = useState('castCredits');
 
   const { id } = useLocalSearchParams();
   const { height } = useWindowDimensions();
   const { top } = useSafeAreaInsets();
 
-  return null;
-
-  const {
-    movieCastDescription: { data: cast },
-    movieCastImages: { data: images },
-    movieCastFilmography: { data: filmography },
-  } = useGetMovieCast(+id);
-
-  if (!cast?.id || !images?.length || !filmography?.length) return <Loader />;
+  const { castDetails, castImages, castCredits } = useCastDetails(+id);
 
   return (
     <View className="flex-1 bg-neutral-900">
       <RowBack />
 
-      <View style={{ height: height * 0.4 }} className="relative justify-end">
+      <View style={{ height: height * 0.35 }} className="relative justify-end">
         <ImageBackground
-          source={{ uri: cast?.avatar }}
+          source={{ uri: castDetails?.profile_path }}
           style={StyleSheet.absoluteFillObject}
           contentPosition="top center"
           blurRadius={2}>
@@ -76,36 +69,43 @@ const CastDescriptionScreen = () => {
           style={{ paddingTop: top }}
           className="flex-1 items-center justify-center gap-4 px-8 pb-7">
           <Image
-            source={{ uri: cast?.avatar }}
+            source={{ uri: castDetails?.profile_path }}
             style={{
               width: 140,
               height: 140,
               borderRadius: 500,
             }}
+            cachePolicy="memory-disk"
             contentFit="cover"
           />
 
           <View className="items-center gap-1">
-            <Text className="!text-3xl font-semibold">{cast?.name}</Text>
+            <Text className="!text-3xl font-semibold">{castDetails?.name}</Text>
 
             <View className="flex-row">
-              <Text className="!text-md font-semibold !text-neutral-400">{cast?.birthday} </Text>
+              <Text className="!text-md font-medium !text-neutral-400">
+                {castDetails?.birthday}
+              </Text>
 
-              {cast?.deathday ? (
-                <Text className="!text-md font-semibold !text-neutral-400">- {cast?.deathday}</Text>
+              {castDetails?.deathday ? (
+                <Text className="!text-md font-semibold !text-neutral-400">
+                  - {castDetails?.deathday}
+                </Text>
               ) : null}
             </View>
 
-            {cast?.homepage ? (
-              <Link href={cast?.homepage as any} className="!text-md text-blue-500 underline">
-                {cast?.homepage}
+            {castDetails?.homepage ? (
+              <Link
+                href={castDetails?.homepage as any}
+                className="!text-md text-blue-500 underline">
+                {castDetails?.homepage}
               </Link>
             ) : null}
           </View>
         </View>
       </View>
 
-      <View className="flex-1 gap-6 p-4">
+      <View className="flex-1 gap-4 p-4">
         <Animated.View
           entering={FadeInDown.delay(100).springify()}
           className="flex-row border-b-2 border-neutral-700">
@@ -127,9 +127,9 @@ const CastDescriptionScreen = () => {
         <View className="flex-1">
           {renderTabContent({
             activeTab,
-            cast: cast as PersonDetailsShortProps,
-            images: images as MovieImagesProps[],
-            filmography: filmography as ShortMovieProps[],
+            cast: castDetails as CastDetailsProps,
+            images: castImages as CastImagesResponse,
+            castCredits: castCredits as CastCreditProps[],
           })}
         </View>
       </View>
@@ -174,12 +174,12 @@ const Tab = memo(({ title, isActive, onPress, delay }: TabsProps) => {
   );
 });
 
-const renderTabContent = ({ activeTab, cast, images, filmography }: RenderTabContentProps) => {
+const renderTabContent = ({ activeTab, cast, images, castCredits }: RenderTabContentProps) => {
   switch (activeTab) {
     case 'biography':
-      return <CastBiography cast={cast} images={images} />;
-    case 'filmography':
-      return <CastFilmography filmography={filmography} />;
+      return <CastBiography cast={cast} images={images?.profiles} />;
+    case 'castCredits':
+      return <CastFilmography filmography={castCredits} />;
     default:
       return null;
   }
