@@ -18,23 +18,21 @@ const CastList = () => {
 
   const { movieCast, isMovieCastLoading } = useMovieCast(+id);
 
-  if (!movieCast.length || isMovieCastLoading) {
-    return <Loader />;
-  }
+  if (!movieCast?.length || isMovieCastLoading) return <Loader />;
 
   return (
-    <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="px-4">
-      <View className="items-center justify-center">
-        <View className="mb-5 flex-row gap-5">
-          <View className="items-center justify-center rounded-full border-[1px] bg-dark-300 px-5">
+    <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="gap-4 px-4">
+      <View className="mb-5 items-center justify-center pt-10">
+        <View className="flex-row gap-5">
+          <View className="items-center justify-center rounded-full bg-dark-300 px-5">
             <Text className="">Actors</Text>
           </View>
 
-          <View className="items-center justify-center rounded-full px-5 dark:bg-dark-300">
+          <View className="items-center justify-center rounded-full bg-dark-300 px-5">
             <Text className="">Producers</Text>
           </View>
 
-          <View className="rounded-full px-5 py-2.5 dark:bg-dark-300">
+          <View className="rounded-full bg-dark-300 px-5 py-2.5">
             <Text className="">Directors</Text>
           </View>
         </View>

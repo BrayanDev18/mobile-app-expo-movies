@@ -14,6 +14,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 0,
+      // refetchOnMount: true,
     },
   },
 });
@@ -22,6 +23,8 @@ export default function RootLayout() {
   const { language } = useLanguageStore();
 
   const { success } = useInitDb();
+
+  // resetDatabase();
 
   useEffect(() => {
     if (language && language !== i18n.locale) {

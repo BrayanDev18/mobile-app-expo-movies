@@ -42,9 +42,9 @@ export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
   }, [movies]);
 
   return (
-    <View className="gap-4">
+    <View className="gap-3">
       <View className="flex-row justify-between px-1">
-        {title ? <Text className="!text-xl font-semibold">{title}</Text> : null}
+        {title ? <Text className="!text-[18px] font-semibold">{title}</Text> : null}
       </View>
 
       <FlashList
@@ -68,8 +68,8 @@ export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
               });
             }}
             movieImage={item.poster_path}
-            width={width || 150}
-            height={height || 220}
+            width={width || 140}
+            height={height || 210}
           />
         )}
       />

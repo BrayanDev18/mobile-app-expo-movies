@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { TouchableHighlight, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface AboutSectionProps {
@@ -23,7 +23,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
           <Text key={index}>
             {language.name}
 
-            {index == movieDetails.spoken_languages.length - 1 ? '' : ', '}
+            {index === movieDetails.spoken_languages.length - 1 ? '' : ', '}
           </Text>
         ))}
       </Text>
@@ -34,7 +34,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
           <Text key={index}>
             {company.name}
 
-            {index == movieDetails.production_companies.length - 1 ? '' : ','}
+            {index === movieDetails.production_companies.length - 1 ? '' : ','}
           </Text>
         ))}
       </Text>
@@ -56,8 +56,9 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
       <View className="flex-row items-center justify-between">
         <Text className="!text-lg font-bold">Cast & Crew</Text>
 
-        <Pressable
-          className="p-2"
+        <TouchableHighlight
+          className="h-12 w-12 items-center justify-center rounded-full"
+          underlayColor="#404040"
           onPress={() =>
             router.push({
               pathname: '/(root)/movie/cast/castList',
@@ -65,7 +66,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
             })
           }>
           <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-        </Pressable>
+        </TouchableHighlight>
       </View>
 
       <FlashList
@@ -104,19 +105,20 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
         <View className="flex-row items-center justify-between">
           <Text className="!text-lg font-bold">Gallery</Text>
 
-          <Pressable
-            className="p-2"
+          <TouchableHighlight
+            className="h-12 w-12 items-center justify-center rounded-full"
+            underlayColor="#404040"
             onPress={() =>
               router.push({ pathname: '/(root)/movie/gallery', params: { id: movieDetails.id } })
             }>
             <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </Pressable>
+          </TouchableHighlight>
         </View>
 
         <FlashList
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={gallery}
+          data={gallery.slice(0, 5)}
           scrollEventThrottle={16}
           keyExtractor={(item, i) => `${item.movie_id}-${i}`}
           ItemSeparatorComponent={() => <View style={{ width: 12 }} />}

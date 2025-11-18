@@ -21,3 +21,30 @@ export const resetDatabase = () => {
     console.error('❌ Error resetting database:', error);
   }
 };
+
+export const clearDatabase = () => {
+  try {
+    // 1. Obtener listado de todas las tablas
+    const result = expoDb.getAllSync<{
+      name: string;
+    }>(
+      `SELECT name FROM sqlite_master 
+       WHERE type='table' 
+       AND name NOT LIKE 'sqlite_%';`
+    );
+
+    const tables = result.map((row) => row.name);
+
+    console.log('🔍 Tablas encontradas:', tables);
+
+    // 2. Limpiar cada tabla
+    tables.forEach((table) => {
+      expoDb.execSync(`DELETE FROM ${table};`);
+      expoDb.execSync(`DELETE FROM sqlite_sequence WHERE name='${table}';`);
+    });
+
+    console.log('✅ Todas las tablas fueron limpiadas');
+  } catch (error) {
+    console.error('❌ Error al limpiar base de datos:', error);
+  }
+};

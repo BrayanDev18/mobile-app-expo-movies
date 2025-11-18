@@ -1,15 +1,7 @@
-/* eslint-env node */
-const { defineConfig } = require('eslint/config');
+/* eslint-env node */ const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
-
 module.exports = defineConfig([
   expoConfig,
-  {
-    ignores: ['dist/*'],
-  },
-  {
-    rules: {
-      'react/display-name': 'off',
-    },
-  },
+  { ignores: ['dist/*'] },
+  { rules: { 'react/display-name': 'off' } },
 ]);

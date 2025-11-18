@@ -54,7 +54,7 @@ const HomeScreen = () => {
         style={[StyleSheet.absoluteFillObject, { height: '100%' }]}
       />
 
-      <ScrollView style={{ marginBottom: bottom + 60 }} contentContainerClassName="gap-8">
+      <ScrollView style={{ paddingBottom: bottom }} contentContainerClassName="gap-8">
         <MoviesHeader movies={upcomingMovies} scrollX={scrollX} />
 
         <View className="gap-8 p-3">
