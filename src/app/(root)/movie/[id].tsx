@@ -1,10 +1,11 @@
-import { Loader, Screen, Text } from '@/components';
+import { Loader, Screen, Tab } from '@/components';
 import {
   useMovieCast,
   useMovieDetails,
   useMovieImages,
   useMovieReview,
   useMovieVideos,
+  useMovieWatchProviders,
   useSimilarMovies,
 } from '@/hooks';
 import {
@@ -22,26 +23,12 @@ import {
   MovieInfo,
   MovieSimilar,
   MovieTrailers,
+  MovieWatchProviders,
 } from '@/screens/movie/components';
 import { useLocalSearchParams } from 'expo-router';
-import { memo, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  SlideInLeft,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
-
-interface TabsProps {
-  title: string;
-  isActive: boolean;
-  onPress: () => void;
-  delay: number;
-}
+import { useMemo, useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface RenderTabContentProps {
   activeTab: string;
@@ -52,8 +39,6 @@ interface RenderTabContentProps {
   comments: MovieReviewProps[];
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 const MovieDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
 
@@ -63,6 +48,7 @@ const MovieDescriptionScreen = () => {
   const { movieCast, isMovieCastLoading } = useMovieCast(+id);
   const { movieImages, isMovieImagesLoading } = useMovieImages(+id);
   const { movieReviews, isMovieReviewsLoading } = useMovieReview(+id);
+  const { movieWatchProviders, isMovieWatchProviders } = useMovieWatchProviders(+id);
 
   const [activeTab, setActiveTab] = useState('More Like This');
 
@@ -80,7 +66,7 @@ const MovieDescriptionScreen = () => {
         gallery: movieImages as MovieImagesProps[],
         comments: movieReviews as MovieReviewProps[],
       }),
-    [activeTab, similarMovies]
+    [activeTab, similarMovies, movieDetails, movieCast, movieImages, movieReviews]
   );
 
   if (
@@ -89,7 +75,8 @@ const MovieDescriptionScreen = () => {
     isSimilarMoviesLoading ||
     isMovieCastLoading ||
     isMovieImagesLoading ||
-    isMovieReviewsLoading
+    isMovieReviewsLoading ||
+    isMovieWatchProviders
   )
     return <Loader />;
 
@@ -105,31 +92,30 @@ const MovieDescriptionScreen = () => {
         <View className="gap-6 px-4">
           <MovieInfo movie={movieDetails} />
 
+          <MovieWatchProviders providers={movieWatchProviders} />
+
           <MovieTrailers videos={filteredVideos as MovieVideosProps[]} />
 
-          <View className="flex-1 gap-6">
+          <View className="flex-1 gap-4">
             <Animated.View
               entering={FadeInDown.delay(100).springify()}
-              className="flex-row border-b-2 border-neutral-700">
+              className="flex-row gap-2 rounded-full bg-neutral-800/50 p-1.5">
               <Tab
                 title="More Like This"
                 isActive={activeTab === 'More Like This'}
                 onPress={() => setActiveTab('More Like This')}
-                delay={200}
               />
 
               <Tab
                 title="About"
                 isActive={activeTab === 'About'}
                 onPress={() => setActiveTab('About')}
-                delay={300}
               />
 
               <Tab
                 title="Comments"
                 isActive={activeTab === 'Comments'}
                 onPress={() => setActiveTab('Comments')}
-                delay={400}
               />
             </Animated.View>
 
@@ -142,43 +128,6 @@ const MovieDescriptionScreen = () => {
 };
 
 export default MovieDescriptionScreen;
-
-const Tab = memo((props: TabsProps) => {
-  const { title, isActive, onPress, delay } = props;
-
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePress = () => {
-    scale.value = withSpring(0.95, {}, () => {
-      scale.value = withSpring(1);
-    });
-    scheduleOnRN(onPress);
-  };
-
-  return (
-    <AnimatedPressable
-      entering={SlideInLeft.delay(delay).springify()}
-      style={animatedStyle}
-      onPress={handlePress}
-      className="flex-1 items-center justify-center py-3">
-      <Text
-        className={`font-medium ${isActive ? 'font-semibold !text-blue-500' : '!text-neutral-400'}`}>
-        {title}
-      </Text>
-
-      {isActive && (
-        <Animated.View
-          entering={FadeIn.springify()}
-          className="absolute -bottom-[2px] h-0.5 w-full rounded-full bg-blue-500"
-        />
-      )}
-    </AnimatedPressable>
-  );
-});
 
 const renderTabContent = (props: RenderTabContentProps) => {
   const { activeTab, similarMovies, movieDetails, movieCast, gallery, comments } = props;

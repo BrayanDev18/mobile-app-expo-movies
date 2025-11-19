@@ -1,5 +1,5 @@
 import { Loader } from '@/components';
-import { useMoviesByCategory } from '@/hooks';
+import { useMovieProviders, useMoviesByCategory } from '@/hooks';
 import { MovieHorizontalList, MoviesHeader } from '@/screens/movie/components';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,11 +31,14 @@ const HomeScreen = () => {
   const { movies: topRatedMovies, isLoading: loadingTopRatedMovies } =
     useMoviesByCategory('top_rated');
 
+  const { movieProviders, isMovieProvidersLoading } = useMovieProviders();
+
   if (
     loadingUpcomingMovies ||
     loadingNowPlayingMovies ||
     loadingpPopularMovies ||
-    loadingTopRatedMovies
+    loadingTopRatedMovies ||
+    isMovieProvidersLoading
   )
     return <Loader />;
 
@@ -58,6 +61,8 @@ const HomeScreen = () => {
         <MoviesHeader movies={upcomingMovies} scrollX={scrollX} />
 
         <View className="gap-8 p-3">
+          {/* <MovieProviders movieProviders={movieProviders} /> */}
+
           <MovieHorizontalList title="Playing Today" movies={nowPlayingMovies} />
 
           <MovieHorizontalList title="Most watched" movies={popularMovies} />

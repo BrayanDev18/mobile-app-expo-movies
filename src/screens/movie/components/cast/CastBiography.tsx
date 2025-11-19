@@ -1,4 +1,4 @@
-import { ExpandableText, Screen } from '@/components';
+import { ExpandableText } from '@/components';
 import { Text } from '@/components/Text';
 import { CastDetailsProps, CastImageProfileProps } from '@/interfaces';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,7 +6,7 @@ import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { memo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, TouchableHighlight, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { CastGalleryModal } from './CastGalleryModal';
 
@@ -35,7 +35,7 @@ export const CastBiography = memo<CastBiographyProps>(({ cast, images }) => {
   };
 
   return (
-    <Screen>
+    <>
       <Animated.ScrollView
         entering={FadeInDown.delay(200).springify()}
         showsVerticalScrollIndicator={false}
@@ -83,7 +83,7 @@ export const CastBiography = memo<CastBiographyProps>(({ cast, images }) => {
         image={selectedImage as CastImageProfileProps}
         onHide={handleHideModal}
       />
-    </Screen>
+    </>
   );
 });
 
@@ -96,13 +96,14 @@ const CastGallery = (props: CastGalleryProps) => {
         <Text className="!text-lg font-bold">Gallery</Text>
 
         {images?.length > 1 ? (
-          <Pressable
-            className="p-2"
+          <TouchableHighlight
+            className="h-12 w-12 items-center justify-center rounded-full"
+            underlayColor="#404040"
             onPress={() =>
               router.push({ pathname: '/(root)/movie/cast/gallery', params: { id: castId } })
             }>
             <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </Pressable>
+          </TouchableHighlight>
         ) : null}
       </View>
 

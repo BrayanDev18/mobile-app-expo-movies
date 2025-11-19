@@ -130,3 +130,13 @@ export interface MovieByCategoryProps {
   backdrop_path: string;
   category: string;
 }
+
+export interface MovieProvidersResponse {
+  results: MovieProvidersProps[];
+}
+
+export interface MovieProvidersProps {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+}

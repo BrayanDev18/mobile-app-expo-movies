@@ -1,53 +1,75 @@
-import { Loader, Screen, Text } from '@/components';
+import { Loader, Screen, Tab, Text } from '@/components';
 import { useMovieCast } from '@/hooks';
 import { MovieCastProps } from '@/interfaces';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { memo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+interface RenderTabContentProps {
+  activeTab: string;
+  cast: MovieCastProps[];
+}
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const CastList = () => {
   const { id } = useLocalSearchParams();
-  const { bottom } = useSafeAreaInsets();
+  const [activeTab, setActiveTab] = useState<'actors' | 'producers' | 'directors'>('actors');
 
   const { movieCast, isMovieCastLoading } = useMovieCast(+id);
+
+  const tabContent = useMemo(
+    () =>
+      renderTabContent({
+        activeTab,
+        cast: movieCast as MovieCastProps[],
+      }),
+    [activeTab, movieCast]
+  );
 
   if (!movieCast?.length || isMovieCastLoading) return <Loader />;
 
   return (
     <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="gap-4 px-4">
-      <View className="mb-5 items-center justify-center pt-10">
-        <View className="flex-row gap-5">
-          <View className="items-center justify-center rounded-full bg-dark-300 px-5">
-            <Text className="">Actors</Text>
-          </View>
+      <View className="h-full gap-4 pt-12">
+        <View className="w-full flex-row gap-2">
+          <Tab
+            title="Actors"
+            isActive={activeTab === 'actors'}
+            onPress={() => setActiveTab('actors')}
+            adaptableWidth
+          />
 
-          <View className="items-center justify-center rounded-full bg-dark-300 px-5">
-            <Text className="">Producers</Text>
-          </View>
+          <Tab
+            title="Producers"
+            isActive={activeTab === 'producers'}
+            onPress={() => setActiveTab('producers')}
+            adaptableWidth
+          />
 
-          <View className="rounded-full bg-dark-300 px-5 py-2.5">
-            <Text className="">Directors</Text>
-          </View>
+          <Tab
+            title="directors"
+            isActive={activeTab === 'directors'}
+            onPress={() => setActiveTab('directors')}
+            adaptableWidth
+          />
         </View>
-      </View>
 
-      <View style={{ paddingBottom: bottom + 60 }} className="h-full">
-        <FlashList
-          data={movieCast}
-          scrollEventThrottle={16}
-          removeClippedSubviews
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item, i) => `${item.movie_id}-${i}`}
-          ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-          renderItem={({ item, index }) => <CastItem cast={item} index={index} />}
-        />
+        <View className="flex-1">
+          <FlashList
+            data={movieCast}
+            scrollEventThrottle={16}
+            removeClippedSubviews
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            renderItem={({ item, index }) => <CastItem cast={item} index={index} />}
+          />
+        </View>
       </View>
     </Screen>
   );
@@ -55,10 +77,14 @@ const CastList = () => {
 
 export default CastList;
 
+const renderTabContent = ({ activeTab, cast }: RenderTabContentProps) => {
+  return null;
+};
+
 const CastItem = memo(({ cast, index }: { cast: MovieCastProps; index: number }) => {
   return (
     <AnimatedPressable
-      entering={FadeInDown.delay(100 * index).springify()}
+      entering={FadeInDown.delay(70 * index).springify()}
       onPress={() => router.push(`/movie/cast/${cast.id}`)}
       className="flex-row items-center justify-between rounded-xl bg-neutral-800 p-2.5">
       <View className="flex-row items-center gap-x-3">

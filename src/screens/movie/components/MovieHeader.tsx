@@ -26,13 +26,13 @@ export const MovieHeader = ({ movie }: { movie: MovieDetailsProps }) => {
           borderRadius: 16,
           overflow: 'hidden',
           width: 230,
-          height: 340,
+          height: 350,
         }}>
         <Image
           source={{ uri: movie?.poster_path }}
           style={{ width: '100%', height: '100%' }}
           cachePolicy="memory-disk"
-          contentFit="cover"
+          contentFit="fill"
         />
       </View>
     </View>

@@ -6,6 +6,8 @@ export * from './MovieGalleryModal';
 export * from './MovieHeader';
 export * from './MovieHorizontalList';
 export * from './MovieInfo';
+export * from './MovieProviders';
 export * from './MoviesHeader';
 export * from './MovieSimilar';
 export * from './MovieTrailers';
+export * from './MovieWatchProviders';

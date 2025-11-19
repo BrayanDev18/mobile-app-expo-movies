@@ -4,7 +4,7 @@ import { formatDate } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useRef } from 'react';
-import { Pressable, View } from 'react-native';
+import { TouchableHighlight, View } from 'react-native';
 import YoutubePlayer, { type YoutubeIframeRef } from 'react-native-youtube-iframe';
 
 export const MovieTrailers = ({ videos }: { videos: MovieVideosProps[] }) => {
@@ -15,9 +15,13 @@ export const MovieTrailers = ({ videos }: { videos: MovieVideosProps[] }) => {
       <View className="flex-row items-center justify-between">
         <Text className="!text-lg font-bold">Trailers & Teasers</Text>
 
-        <Pressable className="p-2">
-          <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-        </Pressable>
+        {videos.length > 1 ? (
+          <TouchableHighlight
+            className="h-12 w-12 items-center justify-center rounded-full"
+            underlayColor="#404040">
+            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
+          </TouchableHighlight>
+        ) : null}
       </View>
 
       <FlashList

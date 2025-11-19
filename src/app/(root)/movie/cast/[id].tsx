@@ -1,29 +1,13 @@
-import { RowBack, Text } from '@/components';
+import { Loader, RowBack, Screen, Tab, Text } from '@/components';
 import { useCastDetails } from '@/hooks';
 import { CastCreditProps, CastDetailsProps, CastImagesResponse } from '@/interfaces';
 import { CastBiography, CastFilmography } from '@/screens/movie/components';
 import { Image, ImageBackground } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { memo, useState } from 'react';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
-import Animated, {
-  FadeIn,
-  FadeInDown,
-  SlideInLeft,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import { useMemo, useState } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { scheduleOnRN } from 'react-native-worklets';
-
-interface TabsProps {
-  title: string;
-  isActive: boolean;
-  onPress: () => void;
-  delay: number;
-}
 
 interface RenderTabContentProps {
   activeTab: string;
@@ -32,16 +16,34 @@ interface RenderTabContentProps {
   castCredits: CastCreditProps[];
 }
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
 const CastDescriptionScreen = () => {
-  const [activeTab, setActiveTab] = useState('castCredits');
+  const [activeTab, setActiveTab] = useState<'castCredits' | 'biography'>('castCredits');
 
   const { id } = useLocalSearchParams();
   const { height } = useWindowDimensions();
   const { top } = useSafeAreaInsets();
 
-  const { castDetails, castImages, castCredits } = useCastDetails(+id);
+  const {
+    castDetails,
+    castImages,
+    castCredits,
+    isCastCreditsLoading,
+    isCastDetailsLoading,
+    isCastImagesLoading,
+  } = useCastDetails(+id);
+
+  const tabContent = useMemo(
+    () =>
+      renderTabContent({
+        activeTab,
+        cast: castDetails as CastDetailsProps,
+        images: castImages as CastImagesResponse,
+        castCredits: castCredits as CastCreditProps[],
+      }),
+    [activeTab, castDetails, castImages, castCredits]
+  );
+
+  if (isCastCreditsLoading || isCastDetailsLoading || isCastImagesLoading) return <Loader />;
 
   return (
     <View className="flex-1 bg-neutral-900">
@@ -105,74 +107,28 @@ const CastDescriptionScreen = () => {
         </View>
       </View>
 
-      <View className="flex-1 gap-4 p-4">
-        <Animated.View
-          entering={FadeInDown.delay(100).springify()}
-          className="flex-row border-b-2 border-neutral-700">
+      <View className="flex-1 gap-4 px-4">
+        <View className="flex-row gap-2 rounded-full bg-neutral-800/50 p-1.5">
           <Tab
             title="Filmography"
-            isActive={activeTab === 'filmography'}
-            onPress={() => setActiveTab('filmography')}
-            delay={300}
+            isActive={activeTab === 'castCredits'}
+            onPress={() => setActiveTab('castCredits')}
           />
 
           <Tab
             title="Biography"
             isActive={activeTab === 'biography'}
             onPress={() => setActiveTab('biography')}
-            delay={200}
           />
-        </Animated.View>
-
-        <View className="flex-1">
-          {renderTabContent({
-            activeTab,
-            cast: castDetails as CastDetailsProps,
-            images: castImages as CastImagesResponse,
-            castCredits: castCredits as CastCreditProps[],
-          })}
         </View>
+
+        <Screen safeAreaEdges={['bottom']}>{tabContent}</Screen>
       </View>
     </View>
   );
 };
 
 export default CastDescriptionScreen;
-
-const Tab = memo(({ title, isActive, onPress, delay }: TabsProps) => {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePress = () => {
-    scale.value = withSpring(0.95, {}, () => {
-      scale.value = withSpring(1);
-    });
-    scheduleOnRN(onPress);
-  };
-
-  return (
-    <AnimatedPressable
-      entering={SlideInLeft.delay(delay).springify()}
-      style={animatedStyle}
-      onPress={handlePress}
-      className="flex-1 items-center justify-center py-3">
-      <Text
-        className={`font-medium ${isActive ? 'font-semibold !text-blue-500' : '!text-neutral-400'}`}>
-        {title}
-      </Text>
-
-      {isActive && (
-        <Animated.View
-          entering={FadeIn.springify()}
-          className="absolute -bottom-[2px] h-0.5 w-full rounded-full bg-blue-500"
-        />
-      )}
-    </AnimatedPressable>
-  );
-});
 
 const renderTabContent = ({ activeTab, cast, images, castCredits }: RenderTabContentProps) => {
   switch (activeTab) {

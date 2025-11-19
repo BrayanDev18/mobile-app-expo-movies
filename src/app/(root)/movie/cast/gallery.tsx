@@ -39,7 +39,7 @@ const CastGallery = () => {
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           keyExtractor={(item, index) => `cast-image-${item.file_path}-${index}`}
-          contentContainerClassName="p-2"
+          contentContainerClassName="p-3"
           renderItem={({ item: image, index }) => (
             <AnimatedPressable
               onPress={() => handleOpenModal(image)}

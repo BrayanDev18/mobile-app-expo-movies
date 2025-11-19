@@ -99,7 +99,7 @@ const ImageItem = memo((props: ImageItemProps) => {
         <AnimatedImage
           source={{ uri: image.poster_path }}
           style={{ width: '100%', height: '100%', borderRadius: 22 }}
-          contentFit="cover"
+          contentFit="fill"
           cachePolicy="memory-disk"
         />
 

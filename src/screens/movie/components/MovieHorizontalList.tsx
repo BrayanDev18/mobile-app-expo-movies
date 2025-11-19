@@ -17,7 +17,7 @@ interface MovieHorizontalListProps {
 }
 
 export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
-  const { title, width, height, movies, showSeeAll = true, loadNextPage } = props;
+  const { title, width, height, movies, loadNextPage } = props;
 
   const isLoading = useRef(false);
 
@@ -68,8 +68,8 @@ export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
               });
             }}
             movieImage={item.poster_path}
-            width={width || 140}
-            height={height || 210}
+            width={width || 155}
+            height={height || 220}
           />
         )}
       />

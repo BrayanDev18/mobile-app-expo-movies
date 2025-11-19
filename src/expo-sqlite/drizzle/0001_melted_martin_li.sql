@@ -1,5 +1,3 @@
-ALTER TABLE `cast_credits` RENAME COLUMN "profile_path" TO "poster_path";--> statement-breakpoint
-ALTER TABLE `cast_credits` ADD `backdrop_path` text;--> statement-breakpoint
 PRAGMA foreign_keys=OFF;--> statement-breakpoint
 CREATE TABLE `__new_movie_details` (
 	`id` integer PRIMARY KEY NOT NULL,
@@ -26,7 +24,7 @@ CREATE TABLE `__new_movie_details` (
 	`video` integer DEFAULT false,
 	`vote_average` real DEFAULT 0,
 	`vote_count` integer DEFAULT 0,
-	`last_updated` integer DEFAULT 1763053084 NOT NULL
+	`last_updated` integer DEFAULT 1763593413 NOT NULL
 );
 --> statement-breakpoint
 INSERT INTO `__new_movie_details`("id", "adult", "backdrop_path", "budget", "genres", "homepage", "imdb_id", "original_language", "original_title", "overview", "popularity", "poster_path", "production_companies", "production_countries", "release_date", "revenue", "runtime", "spoken_languages", "status", "tagline", "title", "video", "vote_average", "vote_count", "last_updated") SELECT "id", "adult", "backdrop_path", "budget", "genres", "homepage", "imdb_id", "original_language", "original_title", "overview", "popularity", "poster_path", "production_companies", "production_countries", "release_date", "revenue", "runtime", "spoken_languages", "status", "tagline", "title", "video", "vote_average", "vote_count", "last_updated" FROM `movie_details`;--> statement-breakpoint
@@ -42,13 +40,22 @@ CREATE TABLE `__new_movie_videos` (
 	`movie_id` integer NOT NULL,
 	`official` integer DEFAULT false,
 	`published_at` integer,
-	`last_updated` integer DEFAULT 1763053084 NOT NULL,
+	`last_updated` integer DEFAULT 1763593413 NOT NULL,
 	FOREIGN KEY (`movie_id`) REFERENCES `movies`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 INSERT INTO `__new_movie_videos`("key", "name", "site", "type", "size", "movie_id", "official", "published_at", "last_updated") SELECT "key", "name", "site", "type", "size", "movie_id", "official", "published_at", "last_updated" FROM `movie_videos`;--> statement-breakpoint
 DROP TABLE `movie_videos`;--> statement-breakpoint
 ALTER TABLE `__new_movie_videos` RENAME TO `movie_videos`;--> statement-breakpoint
+CREATE TABLE `__new_movie_watch_providers` (
+	`movie_id` integer PRIMARY KEY NOT NULL,
+	`results` text NOT NULL,
+	FOREIGN KEY (`movie_id`) REFERENCES `movies`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+INSERT INTO `__new_movie_watch_providers`("movie_id", "results") SELECT "movie_id", "results" FROM `movie_watch_providers`;--> statement-breakpoint
+DROP TABLE `movie_watch_providers`;--> statement-breakpoint
+ALTER TABLE `__new_movie_watch_providers` RENAME TO `movie_watch_providers`;--> statement-breakpoint
 CREATE TABLE `__new_movies` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`title` text NOT NULL,
@@ -60,7 +67,7 @@ CREATE TABLE `__new_movies` (
 	`original_language` text,
 	`backdrop_path` text,
 	`category` text NOT NULL,
-	`last_updated` integer DEFAULT 1763053084 NOT NULL
+	`last_updated` integer DEFAULT 1763593413 NOT NULL
 );
 --> statement-breakpoint
 INSERT INTO `__new_movies`("id", "title", "overview", "adult", "poster_path", "release_date", "vote_average", "original_language", "backdrop_path", "category", "last_updated") SELECT "id", "title", "overview", "adult", "poster_path", "release_date", "vote_average", "original_language", "backdrop_path", "category", "last_updated" FROM `movies`;--> statement-breakpoint

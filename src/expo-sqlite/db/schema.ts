@@ -103,6 +103,13 @@ export const movieReviewsTable = sqliteTable('movie_reviews', {
     .notNull(),
 });
 
+export const movieWatchProvidersTable = sqliteTable('movie_watch_providers', {
+  movie_id: integer('movie_id')
+    .primaryKey()
+    .references(() => moviesTable.id),
+  results: text('results').notNull(),
+});
+
 //Cast
 export const castDetailsTable = sqliteTable('cast_details', {
   id: integer('id').primaryKey().default(0),
@@ -153,4 +160,11 @@ export const castImagesTable = sqliteTable('cast_images', {
   cast_id: integer('cast_id')
     .references(() => movieCastTable.id)
     .notNull(),
+});
+
+//Movie providers
+export const movieProvidersTable = sqliteTable('movie_providers', {
+  provider_id: integer('provider_id'),
+  logo_path: text('logo_path'),
+  provider_name: text('provider_name'),
 });
