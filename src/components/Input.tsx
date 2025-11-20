@@ -37,20 +37,16 @@ export const Input: React.FC<InputProps> = ({
       rules={required ? { required: { value: true, message: 'Required field' } } : {}}
       render={({ field: { onChange, onBlur, value } }) => (
         <View className="gap-1.5">
-          {label ? (
-            <Text className="text-base font-semibold !text-neutral-500 dark:!text-neutral-400">
-              {label}
-            </Text>
-          ) : null}
+          {label ? <Text className="text-base font-semibold text-neutral-400">{label}</Text> : null}
 
           <View
             className={cn(
               className,
-              `flex-row items-center gap-3 rounded-2xl border-2 bg-neutral-100 px-4 dark:bg-neutral-900 ${
-                error ? 'border-red-400' : isFocused ? 'border-brand-600' : 'border-transparent'
+              `flex-row items-center gap-3 rounded-2xl border-2 bg-neutral-800 px-4 ${
+                error ? 'border-red-400' : isFocused ? 'border-cyan-600' : 'border-transparent'
               }`
             )}>
-            {iconName ? <Icon name={iconName} color="#facc15" size={28} /> : null}
+            {iconName ? <Icon name={iconName} color="gray" size={20} /> : null}
 
             <TextInput
               {...props}
@@ -62,7 +58,7 @@ export const Input: React.FC<InputProps> = ({
                 onBlur();
               }}
               secureTextEntry={isPassword && !showPassword}
-              className="h-14 flex-1 text-neutral-900 dark:text-neutral-200"
+              className="h-12 flex-1 text-neutral-200"
               placeholderTextColor="#9ca3af"
             />
 
@@ -76,8 +72,6 @@ export const Input: React.FC<InputProps> = ({
               </Pressable>
             )}
           </View>
-
-          {/* {error && <Text className='text-xs !text-red-400'>{error}</Text>} */}
         </View>
       )}
     />

@@ -1,24 +1,22 @@
-import { Loader, RowBack, Screen, Tab, Text } from '@/components';
+import {
+  CustomTabs,
+  Loader,
+  RowBack,
+  Screen,
+  TabsList,
+  TabsPanel,
+  TabsTrigger,
+  Text,
+} from '@/components';
 import { useCastDetails } from '@/hooks';
-import { CastCreditProps, CastDetailsProps, CastImagesResponse } from '@/interfaces';
 import { CastBiography, CastFilmography } from '@/screens/movie/components';
 import { Image, ImageBackground } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface RenderTabContentProps {
-  activeTab: string;
-  cast: CastDetailsProps;
-  images: CastImagesResponse;
-  castCredits: CastCreditProps[];
-}
-
 const CastDescriptionScreen = () => {
-  const [activeTab, setActiveTab] = useState<'castCredits' | 'biography'>('castCredits');
-
   const { id } = useLocalSearchParams();
   const { height } = useWindowDimensions();
   const { top } = useSafeAreaInsets();
@@ -31,17 +29,6 @@ const CastDescriptionScreen = () => {
     isCastDetailsLoading,
     isCastImagesLoading,
   } = useCastDetails(+id);
-
-  const tabContent = useMemo(
-    () =>
-      renderTabContent({
-        activeTab,
-        cast: castDetails as CastDetailsProps,
-        images: castImages as CastImagesResponse,
-        castCredits: castCredits as CastCreditProps[],
-      }),
-    [activeTab, castDetails, castImages, castCredits]
-  );
 
   if (isCastCreditsLoading || isCastDetailsLoading || isCastImagesLoading) return <Loader />;
 
@@ -107,36 +94,26 @@ const CastDescriptionScreen = () => {
         </View>
       </View>
 
-      <View className="flex-1 gap-4 px-4">
-        <View className="flex-row gap-2 rounded-full bg-neutral-800/50 p-1.5">
-          <Tab
-            title="Filmography"
-            isActive={activeTab === 'castCredits'}
-            onPress={() => setActiveTab('castCredits')}
-          />
+      <CustomTabs defaultValue="castCredits">
+        <View className="flex-1 gap-4 px-4">
+          <TabsList>
+            <TabsTrigger value="castCredits">Filmography</TabsTrigger>
+            <TabsTrigger value="biography">Biography</TabsTrigger>
+          </TabsList>
 
-          <Tab
-            title="Biography"
-            isActive={activeTab === 'biography'}
-            onPress={() => setActiveTab('biography')}
-          />
+          <Screen safeAreaEdges={['bottom']}>
+            <TabsPanel value="castCredits">
+              <CastFilmography filmography={castCredits} />
+            </TabsPanel>
+
+            <TabsPanel value="biography">
+              <CastBiography cast={castDetails} images={castImages?.profiles} />
+            </TabsPanel>
+          </Screen>
         </View>
-
-        <Screen safeAreaEdges={['bottom']}>{tabContent}</Screen>
-      </View>
+      </CustomTabs>
     </View>
   );
 };
 
 export default CastDescriptionScreen;
-
-const renderTabContent = ({ activeTab, cast, images, castCredits }: RenderTabContentProps) => {
-  switch (activeTab) {
-    case 'biography':
-      return <CastBiography cast={cast} images={images?.profiles} />;
-    case 'castCredits':
-      return <CastFilmography filmography={castCredits} />;
-    default:
-      return null;
-  }
-};

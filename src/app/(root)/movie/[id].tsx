@@ -1,4 +1,4 @@
-import { Loader, Screen, Tab } from '@/components';
+import { CustomTabs, Loader, Screen, TabsList, TabsPanel, TabsTrigger } from '@/components';
 import {
   useMovieCast,
   useMovieDetails,
@@ -8,14 +8,7 @@ import {
   useMovieWatchProviders,
   useSimilarMovies,
 } from '@/hooks';
-import {
-  MovieCastProps,
-  MovieDetailsProps,
-  MovieImagesProps,
-  MovieReviewProps,
-  MovieVideosProps,
-  SimilarMoviesProps,
-} from '@/interfaces';
+import { MovieVideosProps } from '@/interfaces';
 import {
   MovieAbout,
   MovieComments,
@@ -25,19 +18,7 @@ import {
   MovieTrailers,
 } from '@/screens/movie/components';
 import { useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-
-interface RenderTabContentProps {
-  activeTab: string;
-  similarMovies: SimilarMoviesProps[];
-  movieDetails: MovieDetailsProps;
-  movieCast: MovieCastProps[];
-  gallery: MovieImagesProps[];
-  comments: MovieReviewProps[];
-  watchProviders: string;
-}
 
 const MovieDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
@@ -50,32 +31,8 @@ const MovieDescriptionScreen = () => {
   const { movieReviews, isMovieReviewsLoading } = useMovieReview(+id);
   const { movieWatchProviders, isMovieWatchProviders } = useMovieWatchProviders(+id);
 
-  const [activeTab, setActiveTab] = useState<'similar' | 'about' | 'comments'>('similar');
-
   const filteredVideos = movieVideos?.filter(
     (video: MovieVideosProps) => video.type === 'Trailer' || video.type === 'Teaser'
-  );
-
-  const tabContent = useMemo(
-    () =>
-      renderTabContent({
-        activeTab,
-        similarMovies: similarMovies as SimilarMoviesProps[],
-        movieDetails: movieDetails as MovieDetailsProps,
-        movieCast: movieCast as MovieCastProps[],
-        gallery: movieImages as MovieImagesProps[],
-        comments: movieReviews as MovieReviewProps[],
-        watchProviders: movieWatchProviders as string,
-      }),
-    [
-      activeTab,
-      similarMovies,
-      movieDetails,
-      movieCast,
-      movieImages,
-      movieReviews,
-      movieWatchProviders,
-    ]
   );
 
   if (
@@ -103,31 +60,34 @@ const MovieDescriptionScreen = () => {
 
           <MovieTrailers videos={filteredVideos as MovieVideosProps[]} />
 
-          <View className="flex-1 gap-4">
-            <Animated.View
-              entering={FadeInDown.delay(100).springify()}
-              className="flex-row gap-2 rounded-full bg-neutral-800/50 p-1.5">
-              <Tab
-                title="Similar"
-                isActive={activeTab === 'similar'}
-                onPress={() => setActiveTab('similar')}
-              />
+          <CustomTabs defaultValue="similar">
+            <View className="flex-1 gap-4">
+              <TabsList>
+                <TabsTrigger value="similar">Similar</TabsTrigger>
+                <TabsTrigger value="about">About</TabsTrigger>
+                <TabsTrigger value="comments">Reviews</TabsTrigger>
+              </TabsList>
 
-              <Tab
-                title="About"
-                isActive={activeTab === 'about'}
-                onPress={() => setActiveTab('about')}
-              />
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <TabsPanel value="similar">
+                  <MovieSimilar similarMovies={similarMovies} />
+                </TabsPanel>
 
-              <Tab
-                title="Reviews"
-                isActive={activeTab === 'comments'}
-                onPress={() => setActiveTab('comments')}
-              />
-            </Animated.View>
+                <TabsPanel value="about">
+                  <MovieAbout
+                    movieDetails={movieDetails}
+                    movieCast={movieCast}
+                    gallery={movieImages}
+                    providers={movieWatchProviders as string}
+                  />
+                </TabsPanel>
 
-            <ScrollView showsVerticalScrollIndicator={false}>{tabContent}</ScrollView>
-          </View>
+                <TabsPanel value="comments">
+                  <MovieComments comments={movieReviews} />
+                </TabsPanel>
+              </ScrollView>
+            </View>
+          </CustomTabs>
         </View>
       </View>
     </Screen>
@@ -135,26 +95,3 @@ const MovieDescriptionScreen = () => {
 };
 
 export default MovieDescriptionScreen;
-
-const renderTabContent = (props: RenderTabContentProps) => {
-  const { activeTab, similarMovies, movieDetails, movieCast, gallery, comments, watchProviders } =
-    props;
-
-  switch (activeTab) {
-    case 'similar':
-      return <MovieSimilar similarMovies={similarMovies} />;
-    case 'about':
-      return (
-        <MovieAbout
-          movieDetails={movieDetails}
-          movieCast={movieCast}
-          gallery={gallery}
-          providers={watchProviders}
-        />
-      );
-    case 'comments':
-      return <MovieComments comments={comments} />;
-    default:
-      return null;
-  }
-};
