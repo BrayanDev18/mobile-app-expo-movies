@@ -1,16 +1,16 @@
-import { CastImageProfileProps } from '@/interfaces';
+import { MovieImagesProps } from '@/interfaces';
 import { ImageZoom } from '@tudp/rn-image-zoom';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Modal } from 'react-native-reanimated-modal';
 
-interface MovieGalleryModalProps {
+interface ImagePreviewModalProps {
   visible: boolean;
   onHide: () => void;
-  image: CastImageProfileProps;
+  image: MovieImagesProps;
 }
 
-export const CastGalleryModal = (props: MovieGalleryModalProps) => {
+export const ImagePreviewModal = (props: ImagePreviewModalProps) => {
   const { visible, onHide, image } = props;
 
   return (
@@ -25,7 +25,7 @@ export const CastGalleryModal = (props: MovieGalleryModalProps) => {
       onBackdropPress={onHide}>
       <View className="flex-1 items-center justify-center">
         <ImageZoom
-          uri={image?.file_path}
+          uri={image?.file_path as string}
           minScale={1}
           maxScale={5}
           loadingColor="#06b6d4"

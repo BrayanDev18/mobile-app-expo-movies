@@ -1,57 +1,81 @@
-import { Text } from '@/components';
-import { MovieCastProps, MovieDetailsProps, MovieImagesProps } from '@/interfaces';
+import { ImagePreviewModal, Text } from '@/components';
+import {
+  MovieCastProps,
+  MovieDetailsProps,
+  MovieImagesProps,
+  MovieProvidersProps,
+} from '@/interfaces';
 import { formatPrice } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { TouchableHighlight, View } from 'react-native';
+import { useState } from 'react';
+import { Linking, Pressable, TouchableHighlight, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface AboutSectionProps {
   movieDetails: MovieDetailsProps;
   movieCast: MovieCastProps[];
   gallery: MovieImagesProps[];
+  providers: string;
 }
 
-export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionProps) => (
+export const MovieAbout = ({ movieDetails, movieCast, gallery, providers }: AboutSectionProps) => (
   <Animated.View entering={FadeInDown.delay(200).springify()} className="gap-6">
+    <MovieDetails movie={movieDetails} />
+
+    <MovieCastAndCrew movieId={movieDetails.id} cast={movieCast} />
+
+    {gallery?.length ? <MovieGallery movieId={movieDetails.id} gallery={gallery} /> : null}
+
+    <MovieWatchProviders providers={providers} />
+  </Animated.View>
+);
+
+const MovieDetails = ({ movie }: { movie: MovieDetailsProps }) => {
+  return (
     <View className="gap-3">
       <Text className="gap-2 !text-neutral-400">
         Languages:{' '}
-        {movieDetails?.spoken_languages.map((language, index) => (
+        {movie?.spoken_languages.map((language, index) => (
           <Text key={index}>
             {language.name}
 
-            {index === movieDetails.spoken_languages.length - 1 ? '' : ', '}
+            {index === movie.spoken_languages.length - 1 ? '' : ', '}
           </Text>
         ))}
       </Text>
 
       <Text className="gap-2 !text-neutral-400">
         Production companies:{' '}
-        {movieDetails?.production_companies.map((company, index) => (
+        {movie?.production_companies.map((company, index) => (
           <Text key={index}>
             {company.name}
 
-            {index === movieDetails.production_companies.length - 1 ? '' : ','}
+            {index === movie.production_companies.length - 1 ? '' : ','}
           </Text>
         ))}
       </Text>
 
       <Text className="!text-neutral-400">
-        Original title: <Text>{movieDetails?.original_title}</Text>
+        Original title: <Text>{movie?.original_title}</Text>
       </Text>
 
       <Text className="!text-neutral-400">
-        Budget: <Text>{formatPrice(movieDetails?.budget)}</Text>
+        Budget: <Text>{formatPrice(movie?.budget)}</Text>
       </Text>
 
       <Text className="!text-neutral-400">
-        Revenue: <Text>{formatPrice(movieDetails?.revenue)}</Text>
+        Revenue: <Text>{formatPrice(movie?.revenue)}</Text>
       </Text>
     </View>
+  );
+};
 
+const MovieCastAndCrew = ({ movieId, cast }: { movieId: number; cast: MovieCastProps[] }) => {
+  return (
     <View className="gap-3">
       <View className="flex-row items-center justify-between">
         <Text className="!text-lg font-bold">Cast & Crew</Text>
@@ -62,7 +86,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
           onPress={() =>
             router.push({
               pathname: '/(root)/movie/cast/castList',
-              params: { id: movieDetails.id },
+              params: { id: movieId },
             })
           }>
           <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
@@ -72,12 +96,12 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
       <FlashList
         horizontal
         showsHorizontalScrollIndicator={false}
-        data={movieCast?.slice(0, 8)}
+        data={cast?.slice(0, 8)}
         scrollEventThrottle={16}
         keyExtractor={(item, i) => `${item.movie_id}-${i}`}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         renderItem={({ item: cast }) => (
-          <View className="w-34 flex-row items-center gap-3">
+          <View className="w-[200px] flex-row items-center gap-3">
             <View className="relative">
               <Image
                 source={{ uri: cast.profile_path as string }}
@@ -86,7 +110,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
               />
             </View>
 
-            <View className="gap-1">
+            <View className="flex-1 gap-1">
               <Text numberOfLines={2} className="!text-md font-medium">
                 {cast.name}
               </Text>
@@ -99,8 +123,23 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
         )}
       />
     </View>
+  );
+};
 
-    {gallery?.length ? (
+const MovieGallery = ({ movieId, gallery }: { movieId: number; gallery: MovieImagesProps[] }) => {
+  const [openModalGallery, setOpenModalGallery] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
+
+  const handleOpenModal = (image: MovieImagesProps) => {
+    setSelectedImage(image);
+    setOpenModalGallery(true);
+  };
+
+  const handleHideModal = () => {
+    setOpenModalGallery(false);
+  };
+  return (
+    <>
       <View className="gap-3">
         <View className="flex-row items-center justify-between">
           <Text className="!text-lg font-bold">Gallery</Text>
@@ -110,7 +149,7 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
               className="h-12 w-12 items-center justify-center rounded-full"
               underlayColor="#404040"
               onPress={() =>
-                router.push({ pathname: '/(root)/movie/gallery', params: { id: movieDetails.id } })
+                router.push({ pathname: '/(root)/movie/gallery', params: { id: movieId } })
               }>
               <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
             </TouchableHighlight>
@@ -125,7 +164,9 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
           keyExtractor={(item, i) => `${item.movie_id}-${i}`}
           ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
           renderItem={({ item: image }) => (
-            <View className="flex-row items-center gap-3">
+            <Pressable
+              onPress={() => handleOpenModal(image)}
+              className="flex-row items-center gap-3">
               <Image
                 source={{ uri: image.file_path as string }}
                 style={{
@@ -136,10 +177,83 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery }: AboutSectionPro
                 cachePolicy="memory-disk"
                 contentFit="cover"
               />
-            </View>
+            </Pressable>
           )}
         />
       </View>
-    ) : null}
-  </Animated.View>
-);
+
+      <ImagePreviewModal
+        visible={openModalGallery}
+        image={selectedImage as MovieImagesProps}
+        onHide={handleHideModal}
+      />
+    </>
+  );
+};
+
+const MovieWatchProviders = ({ providers }: { providers: any }) => {
+  if (!providers) return null;
+
+  const { flatrate, rent, buy, link } = providers;
+
+  const groups = [
+    { title: 'Streaming', data: flatrate },
+    { title: 'Alquiler', data: rent },
+    { title: 'Compra', data: buy },
+  ];
+
+  return (
+    <View className="gap-3">
+      <Text className="!text-lg font-bold">Watch providers:</Text>
+
+      <View className="w-full gap-4">
+        {groups.map((group, index) => {
+          if (!group.data) return null;
+
+          return (
+            <View key={index} className="gap-3">
+              <Text className="text-sm font-medium !text-neutral-400">{group.title}</Text>
+
+              <View className="flex-row flex-wrap gap-3 px-2">
+                {group.data.map((provider: MovieProvidersProps, index: number) => (
+                  <View
+                    key={index}
+                    className="w-[125px] overflow-hidden rounded-2xl border border-white/10">
+                    <BlurView intensity={50} tint="dark">
+                      <View className="flex-row items-center justify-between gap-3 p-1.5">
+                        <View className="rounded-xl bg-white/10 p-1">
+                          <Image
+                            source={{
+                              uri: `https://image.tmdb.org/t/p/original${provider.logo_path}`,
+                            }}
+                            style={{
+                              width: 35,
+                              height: 35,
+                              borderRadius: 6,
+                            }}
+                            contentFit="fill"
+                            cachePolicy="memory-disk"
+                          />
+                        </View>
+
+                        <Text className="flex-1 text-[13px] font-semibold" numberOfLines={2}>
+                          {provider.provider_name}
+                        </Text>
+                      </View>
+                    </BlurView>
+                  </View>
+                ))}
+              </View>
+            </View>
+          );
+        })}
+
+        {link && (
+          <Pressable onPress={() => Linking.openURL(link)}>
+            <Text className="mt-2 text-sm text-blue-400 underline">Ver más detalles</Text>
+          </Pressable>
+        )}
+      </View>
+    </View>
+  );
+};

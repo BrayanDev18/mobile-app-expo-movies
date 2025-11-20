@@ -46,7 +46,7 @@ export const CastBiography = memo<CastBiographyProps>(({ cast, images }) => {
             <Text key={index} className="!text-neutral-400">
               {name}
 
-              {index == cast.also_known_as.length - 1 ? '' : ', '}
+              {index === cast.also_known_as.length - 1 ? '' : ', '}
             </Text>
           ))}
         </Text>

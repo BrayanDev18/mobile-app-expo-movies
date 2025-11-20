@@ -23,7 +23,6 @@ import {
   MovieInfo,
   MovieSimilar,
   MovieTrailers,
-  MovieWatchProviders,
 } from '@/screens/movie/components';
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -37,6 +36,7 @@ interface RenderTabContentProps {
   movieCast: MovieCastProps[];
   gallery: MovieImagesProps[];
   comments: MovieReviewProps[];
+  watchProviders: string;
 }
 
 const MovieDescriptionScreen = () => {
@@ -50,7 +50,7 @@ const MovieDescriptionScreen = () => {
   const { movieReviews, isMovieReviewsLoading } = useMovieReview(+id);
   const { movieWatchProviders, isMovieWatchProviders } = useMovieWatchProviders(+id);
 
-  const [activeTab, setActiveTab] = useState('More Like This');
+  const [activeTab, setActiveTab] = useState<'similar' | 'about' | 'comments'>('similar');
 
   const filteredVideos = movieVideos?.filter(
     (video: MovieVideosProps) => video.type === 'Trailer' || video.type === 'Teaser'
@@ -65,8 +65,17 @@ const MovieDescriptionScreen = () => {
         movieCast: movieCast as MovieCastProps[],
         gallery: movieImages as MovieImagesProps[],
         comments: movieReviews as MovieReviewProps[],
+        watchProviders: movieWatchProviders as string,
       }),
-    [activeTab, similarMovies, movieDetails, movieCast, movieImages, movieReviews]
+    [
+      activeTab,
+      similarMovies,
+      movieDetails,
+      movieCast,
+      movieImages,
+      movieReviews,
+      movieWatchProviders,
+    ]
   );
 
   if (
@@ -92,8 +101,6 @@ const MovieDescriptionScreen = () => {
         <View className="gap-6 px-4">
           <MovieInfo movie={movieDetails} />
 
-          <MovieWatchProviders providers={movieWatchProviders} />
-
           <MovieTrailers videos={filteredVideos as MovieVideosProps[]} />
 
           <View className="flex-1 gap-4">
@@ -101,21 +108,21 @@ const MovieDescriptionScreen = () => {
               entering={FadeInDown.delay(100).springify()}
               className="flex-row gap-2 rounded-full bg-neutral-800/50 p-1.5">
               <Tab
-                title="More Like This"
-                isActive={activeTab === 'More Like This'}
-                onPress={() => setActiveTab('More Like This')}
+                title="Similar"
+                isActive={activeTab === 'similar'}
+                onPress={() => setActiveTab('similar')}
               />
 
               <Tab
                 title="About"
-                isActive={activeTab === 'About'}
-                onPress={() => setActiveTab('About')}
+                isActive={activeTab === 'about'}
+                onPress={() => setActiveTab('about')}
               />
 
               <Tab
-                title="Comments"
-                isActive={activeTab === 'Comments'}
-                onPress={() => setActiveTab('Comments')}
+                title="Reviews"
+                isActive={activeTab === 'comments'}
+                onPress={() => setActiveTab('comments')}
               />
             </Animated.View>
 
@@ -130,14 +137,22 @@ const MovieDescriptionScreen = () => {
 export default MovieDescriptionScreen;
 
 const renderTabContent = (props: RenderTabContentProps) => {
-  const { activeTab, similarMovies, movieDetails, movieCast, gallery, comments } = props;
+  const { activeTab, similarMovies, movieDetails, movieCast, gallery, comments, watchProviders } =
+    props;
 
   switch (activeTab) {
-    case 'More Like This':
+    case 'similar':
       return <MovieSimilar similarMovies={similarMovies} />;
-    case 'About':
-      return <MovieAbout movieDetails={movieDetails} movieCast={movieCast} gallery={gallery} />;
-    case 'Comments':
+    case 'about':
+      return (
+        <MovieAbout
+          movieDetails={movieDetails}
+          movieCast={movieCast}
+          gallery={gallery}
+          providers={watchProviders}
+        />
+      );
+    case 'comments':
       return <MovieComments comments={comments} />;
     default:
       return null;

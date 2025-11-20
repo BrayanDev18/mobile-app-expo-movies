@@ -10,4 +10,3 @@ export * from './MovieProviders';
 export * from './MoviesHeader';
 export * from './MovieSimilar';
 export * from './MovieTrailers';
-export * from './MovieWatchProviders';

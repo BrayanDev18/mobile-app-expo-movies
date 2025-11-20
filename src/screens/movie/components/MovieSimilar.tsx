@@ -30,11 +30,11 @@ export const MovieSimilar = ({ similarMovies }: { similarMovies: SimilarMoviesPr
               source={{ uri: movie.poster_path as string }}
               style={{
                 width: '100%',
-                height: 190,
+                height: 180,
                 borderTopRightRadius: 10,
                 borderTopLeftRadius: 10,
               }}
-              contentFit="fill"
+              contentFit="cover"
               cachePolicy="memory-disk"
             />
 
