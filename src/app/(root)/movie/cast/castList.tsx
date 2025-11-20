@@ -5,14 +5,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { memo, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-
-interface RenderTabContentProps {
-  activeTab: string;
-  cast: MovieCastProps[];
-}
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -22,20 +17,18 @@ const CastList = () => {
 
   const { movieCast, isMovieCastLoading } = useMovieCast(+id);
 
-  const tabContent = useMemo(
-    () =>
-      renderTabContent({
-        activeTab,
-        cast: movieCast as MovieCastProps[],
-      }),
-    [activeTab, movieCast]
+  const renderItem = useCallback(
+    ({ item, index }: { item: MovieCastProps; index: number }) => (
+      <CastItem cast={item} index={index} />
+    ),
+    []
   );
 
-  if (!movieCast?.length || isMovieCastLoading) return <Loader />;
+  if (isMovieCastLoading) return <Loader />;
 
   return (
     <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="gap-4 px-4">
-      <View className="h-full gap-4 pt-12">
+      <View className="h-full gap-4 pt-14">
         <View className="w-full flex-row gap-2">
           <Tab
             title="Actors"
@@ -64,10 +57,10 @@ const CastList = () => {
             data={movieCast}
             scrollEventThrottle={16}
             removeClippedSubviews
+            renderItem={renderItem}
             showsVerticalScrollIndicator={false}
-            keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+            keyExtractor={(item) => `${item.id}`}
             ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            renderItem={({ item, index }) => <CastItem cast={item} index={index} />}
           />
         </View>
       </View>
@@ -77,14 +70,10 @@ const CastList = () => {
 
 export default CastList;
 
-const renderTabContent = ({ activeTab, cast }: RenderTabContentProps) => {
-  return null;
-};
-
-const CastItem = memo(({ cast, index }: { cast: MovieCastProps; index: number }) => {
+const CastItem = ({ cast, index }: { cast: MovieCastProps; index: number }) => {
   return (
     <AnimatedPressable
-      entering={FadeInDown.delay(70 * index).springify()}
+      entering={FadeInDown.delay(50 * index).springify()}
       onPress={() => router.push(`/movie/cast/${cast.id}`)}
       className="flex-row items-center justify-between rounded-xl bg-neutral-800 p-2.5">
       <View className="flex-row items-center gap-x-3">
@@ -104,4 +93,4 @@ const CastItem = memo(({ cast, index }: { cast: MovieCastProps; index: number })
       <Ionicons name="chevron-forward-outline" color="#757575" size={22} />
     </AnimatedPressable>
   );
-});
+};

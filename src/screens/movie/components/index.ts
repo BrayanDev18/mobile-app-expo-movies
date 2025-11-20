@@ -2,7 +2,6 @@ export * from './cast';
 export * from './MovieAbout';
 export * from './MovieCard';
 export * from './MovieComments';
-export * from './MovieGalleryModal';
 export * from './MovieHeader';
 export * from './MovieHorizontalList';
 export * from './MovieInfo';

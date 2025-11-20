@@ -1,14 +1,13 @@
-import { ExpandableText } from '@/components';
+import { ExpandableText, ImagePreviewModal } from '@/components';
 import { Text } from '@/components/Text';
 import { CastDetailsProps, CastImageProfileProps } from '@/interfaces';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { memo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, TouchableHighlight, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { CastGalleryModal } from './CastGalleryModal';
 
 interface CastBiographyProps {
   cast: CastDetailsProps;
@@ -21,7 +20,7 @@ interface CastGalleryProps {
   castId: number;
 }
 
-export const CastBiography = memo<CastBiographyProps>(({ cast, images }) => {
+export const CastBiography = ({ cast, images }: CastBiographyProps) => {
   const [openModalGallery, setOpenModalGallery] = useState(false);
   const [selectedImage, setSelectedImage] = useState<CastImageProfileProps>();
 
@@ -37,7 +36,7 @@ export const CastBiography = memo<CastBiographyProps>(({ cast, images }) => {
   return (
     <>
       <Animated.ScrollView
-        entering={FadeInDown.delay(200).springify()}
+        entering={FadeInDown.springify()}
         showsVerticalScrollIndicator={false}
         contentContainerClassName="gap-5">
         <Text className="gap-2 !text-md">
@@ -78,17 +77,37 @@ export const CastBiography = memo<CastBiographyProps>(({ cast, images }) => {
         ) : null}
       </Animated.ScrollView>
 
-      <CastGalleryModal
+      <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as CastImageProfileProps}
+        image={selectedImage as any}
         onHide={handleHideModal}
       />
     </>
   );
-});
+};
 
 const CastGallery = (props: CastGalleryProps) => {
   const { images, handleOpenModal, castId } = props;
+
+  const renderItem = useCallback(
+    ({ item: image }: { item: CastImageProfileProps }) => {
+      return (
+        <Pressable onPress={() => handleOpenModal(image)} className="flex-row items-center gap-3">
+          <Image
+            source={{ uri: image.file_path }}
+            style={{
+              width: 160,
+              aspectRatio: image.aspect_ratio,
+              borderRadius: 12,
+            }}
+            cachePolicy="memory-disk"
+            contentFit="cover"
+          />
+        </Pressable>
+      );
+    },
+    [handleOpenModal]
+  );
 
   return (
     <View className="gap-3">
@@ -114,20 +133,7 @@ const CastGallery = (props: CastGalleryProps) => {
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item, index) => `cast-image-${item.file_path}-${index}`}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-        renderItem={({ item: image }) => (
-          <Pressable onPress={() => handleOpenModal(image)} className="flex-row items-center gap-3">
-            <Image
-              source={{ uri: image.file_path }}
-              style={{
-                width: 160,
-                aspectRatio: image.aspect_ratio,
-                borderRadius: 12,
-              }}
-              cachePolicy="memory-disk"
-              contentFit="cover"
-            />
-          </Pressable>
-        )}
+        renderItem={renderItem}
       />
     </View>
   );

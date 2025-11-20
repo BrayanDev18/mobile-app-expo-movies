@@ -108,7 +108,11 @@ const ImageItem = memo((props: ImageItemProps) => {
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient} />
 
         <View style={styles.infoContainer}>
-          <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
+          <BlurView
+            intensity={80}
+            tint="systemChromeMaterialDark"
+            experimentalBlurMethod="dimezisBlurView"
+            style={styles.blurContainer}>
             <Text className="text-center !text-[16px] font-bold" numberOfLines={2}>
               {image.title}
             </Text>
@@ -116,7 +120,7 @@ const ImageItem = memo((props: ImageItemProps) => {
             <View className="flex-row items-center justify-center gap-2">
               <View className="h-1.5 w-1.5 rounded-full bg-red-500" />
 
-              <Text className="!text-[12px] !text-neutral-400">
+              <Text className="!text-md !text-neutral-400">
                 {formatDate(image.release_date as string)}
               </Text>
             </View>
@@ -152,7 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     padding: 10,
-    gap: 6,
+    gap: 4,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
 });

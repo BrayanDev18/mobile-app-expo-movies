@@ -18,21 +18,14 @@ const edgeInsetMap: Record<string, Edge> = {
 
 export type SafeAreaInsetsStyle<
   Property extends 'padding' | 'margin' = 'padding',
-  Edges extends Array<ExtendedEdge> = ExtendedEdge[],
+  Edges extends ExtendedEdge[] = ExtendedEdge[],
 > = {
   [K in Edges[number] as `${Property}${Capitalize<K>}`]: number;
 };
 
-/**
- * A hook that can be used to create a safe-area-aware style object that can be passed directly to a View.
- * @see [Documentation and Examples]{@link https://docs.infinite.red/ignite-cli/boilerplate/app/utils/useSafeAreaInsetsStyle.ts/}
- * @param {ExtendedEdge[]} safeAreaEdges - The edges to apply the safe area insets to.
- * @param {"padding" | "margin"} property - The property to apply the safe area insets to.
- * @returns {SafeAreaInsetsStyle<Property, Edges>} - The style object with the safe area insets applied.
- */
 export function useSafeAreaInsetsStyle<
   Property extends 'padding' | 'margin' = 'padding',
-  Edges extends Array<ExtendedEdge> = [],
+  Edges extends ExtendedEdge[] = [],
 >(
   safeAreaEdges: Edges = [] as unknown as Edges,
   property: Property = 'padding' as Property

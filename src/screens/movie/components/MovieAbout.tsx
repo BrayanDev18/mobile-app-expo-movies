@@ -214,13 +214,13 @@ const MovieWatchProviders = ({ providers }: { providers: any }) => {
             <View key={index} className="gap-3">
               <Text className="text-sm font-medium !text-neutral-400">{group.title}</Text>
 
-              <View className="flex-row flex-wrap gap-3 px-2">
-                {group.data.map((provider: MovieProvidersProps, index: number) => (
+              <View className="flex-row flex-wrap gap-2 px-2">
+                {group.data.slice(0, 3).map((provider: MovieProvidersProps, index: number) => (
                   <View
                     key={index}
-                    className="w-[125px] overflow-hidden rounded-2xl border border-white/10">
+                    className="w-[32%] overflow-hidden rounded-2xl border border-white/10">
                     <BlurView intensity={50} tint="dark">
-                      <View className="flex-row items-center justify-between gap-3 p-1.5">
+                      <View className="flex-row items-center justify-between gap-2 p-1.5">
                         <View className="rounded-xl bg-white/10 p-1">
                           <Image
                             source={{
@@ -236,7 +236,7 @@ const MovieWatchProviders = ({ providers }: { providers: any }) => {
                           />
                         </View>
 
-                        <Text className="flex-1 text-[13px] font-semibold" numberOfLines={2}>
+                        <Text className="flex-1 text-[12px] font-medium" numberOfLines={2}>
                           {provider.provider_name}
                         </Text>
                       </View>
@@ -248,11 +248,11 @@ const MovieWatchProviders = ({ providers }: { providers: any }) => {
           );
         })}
 
-        {link && (
-          <Pressable onPress={() => Linking.openURL(link)}>
-            <Text className="mt-2 text-sm text-blue-400 underline">Ver más detalles</Text>
+        {link ? (
+          <Pressable onPress={() => Linking.openURL(link)} className="w-40">
+            <Text className="text-sm !text-blue-400 underline">Ver más detalles</Text>
           </Pressable>
-        )}
+        ) : null}
       </View>
     </View>
   );

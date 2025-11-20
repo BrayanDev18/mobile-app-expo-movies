@@ -22,8 +22,9 @@ export const MovieCard = (props: MovieCardProps) => {
   return (
     <Pressable style={{ width }} className={`relative px-2 ${className} gap-2`} onPress={onPress}>
       <BlurView
-        intensity={50}
-        tint="dark"
+        intensity={80}
+        tint="systemChromeMaterialDark"
+        experimentalBlurMethod="dimezisBlurView"
         style={{
           width,
           borderRadius: 12,
@@ -59,12 +60,12 @@ export const MovieCard = (props: MovieCardProps) => {
           </BlurView>
         </View>
 
-        <View className="gap-0.5 p-2">
+        <View className="gap-0.5 p-2.5">
           <Text numberOfLines={1} className="!text-md font-medium">
             {title}
           </Text>
 
-          <Text numberOfLines={1} className="text-[14px] !text-neutral-400">
+          <Text numberOfLines={1} className="text-[13px] !text-neutral-400">
             {year}
           </Text>
         </View>
