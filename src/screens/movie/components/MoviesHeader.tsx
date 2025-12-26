@@ -14,7 +14,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface MoviesHeaderProps {
   movies: MovieByCategoryProps[];
@@ -37,8 +36,6 @@ const SPACING = 20;
 export const MoviesHeader = (props: MoviesHeaderProps) => {
   const { movies, scrollX } = props;
 
-  const { top } = useSafeAreaInsets();
-
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollX.value = e.contentOffset.x / (IMAGE_WIDTH + SPACING);
   });
@@ -49,7 +46,7 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
       horizontal
       snapToInterval={IMAGE_WIDTH + SPACING}
       decelerationRate="fast"
-      style={{ flexGrow: 0, paddingTop: top + 24 }}
+      style={{ flexGrow: 0 }}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
         gap: SPACING,

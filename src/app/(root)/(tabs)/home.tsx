@@ -1,8 +1,10 @@
-import { Loader } from '@/components';
+import { Loader, Tab } from '@/components';
 import { useMovieProviders, useMoviesByCategory } from '@/hooks';
-import { MovieHorizontalList, MovieProviders, MoviesHeader } from '@/screens/movie/components';
+import { MovieHorizontalList, MoviesHeader } from '@/screens/movie/components';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { memo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -17,7 +19,7 @@ const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 const HomeScreen = () => {
   const scrollX = useSharedValue(0);
-  const { bottom } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
 
   const { movies: upcomingMovies, isLoading: loadingUpcomingMovies } =
     useMoviesByCategory('upcoming');
@@ -57,11 +59,52 @@ const HomeScreen = () => {
         style={[StyleSheet.absoluteFillObject, { height: '100%' }]}
       />
 
+      <View style={{ paddingTop: top + 15 }} className="w-full flex-row gap-2 px-4 pb-6">
+        <BlurView
+          intensity={80}
+          tint="dark"
+          experimentalBlurMethod="dimezisBlurView"
+          className="overflow-hidden rounded-full">
+          <Tab
+            title="Movies"
+            isActive={false}
+            onPress={() => router.push('/(root)/(tabs)/home')}
+            adaptableWidth
+          />
+        </BlurView>
+
+        <BlurView
+          intensity={80}
+          tint="dark"
+          experimentalBlurMethod="dimezisBlurView"
+          className="overflow-hidden rounded-full">
+          <Tab
+            title="Series"
+            isActive={false}
+            onPress={() => router.push('/(root)/series/home')}
+            adaptableWidth
+          />
+        </BlurView>
+
+        <BlurView
+          intensity={80}
+          tint="dark"
+          experimentalBlurMethod="dimezisBlurView"
+          className="overflow-hidden rounded-full">
+          <Tab
+            title="Tv shows"
+            isActive={false}
+            onPress={() => router.push('/(root)/tv/home')}
+            adaptableWidth
+          />
+        </BlurView>
+      </View>
+
       <ScrollView contentContainerClassName="gap-8">
         <MoviesHeader movies={upcomingMovies} scrollX={scrollX} />
 
         <View style={{ paddingBottom: bottom + 80 }} className="gap-8 p-3">
-          <MovieProviders movieProviders={movieProviders} />
+          {/* <MovieProviders movieProviders={movieProviders} /> */}
 
           <MovieHorizontalList title="Playing Today" movies={nowPlayingMovies} />
 
