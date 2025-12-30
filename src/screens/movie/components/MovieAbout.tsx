@@ -2,7 +2,8 @@ import { ImagePreviewModal, Text } from '@/components';
 import {
   MovieCastProps,
   MovieDetailsProps,
-  MovieImagesProps,
+  MovieImages,
+  MovieImagesResponse,
   MovieProvidersProps,
 } from '@/interfaces';
 import { formatPrice } from '@/utils';
@@ -18,7 +19,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 interface AboutSectionProps {
   movieDetails: MovieDetailsProps;
   movieCast: MovieCastProps[];
-  gallery: MovieImagesProps[];
+  gallery: MovieImagesResponse;
   providers: string;
 }
 
@@ -28,7 +29,9 @@ export const MovieAbout = ({ movieDetails, movieCast, gallery, providers }: Abou
 
     <MovieCastAndCrew movieId={movieDetails.id} cast={movieCast} />
 
-    {gallery?.length ? <MovieGallery movieId={movieDetails.id} gallery={gallery} /> : null}
+    {gallery.backdrops.length || gallery.logos.length || gallery.posters.length ? (
+      <MovieGallery movieId={movieDetails.id} gallery={gallery} />
+    ) : null}
 
     <MovieWatchProviders providers={providers} />
   </Animated.View>
@@ -39,36 +42,36 @@ const MovieDetails = ({ movie }: { movie: MovieDetailsProps }) => {
     <View className="gap-3">
       <Text className="gap-2 !text-neutral-400">
         Languages:{' '}
-        {movie?.spoken_languages.map((language, index) => (
+        {movie?.spokenLanguages.map((language, index) => (
           <Text key={index}>
             {language.name}
 
-            {index === movie.spoken_languages.length - 1 ? '' : ', '}
+            {index === movie.spokenLanguages.length - 1 ? '' : ', '}
           </Text>
         ))}
       </Text>
 
       <Text className="gap-2 !text-neutral-400">
         Production companies:{' '}
-        {movie?.production_companies.map((company, index) => (
+        {movie?.productionCompanies.map((company, index) => (
           <Text key={index}>
             {company.name}
 
-            {index === movie.production_companies.length - 1 ? '' : ','}
+            {index === movie.productionCompanies.length - 1 ? '' : ','}
           </Text>
         ))}
       </Text>
 
       <Text className="!text-neutral-400">
-        Original title: <Text>{movie?.original_title}</Text>
+        Original title: <Text>{movie?.originalTitle}</Text>
       </Text>
 
       <Text className="!text-neutral-400">
-        Budget: <Text>{formatPrice(movie?.budget)}</Text>
+        Budget: <Text>{formatPrice(movie?.budget as number)}</Text>
       </Text>
 
       <Text className="!text-neutral-400">
-        Revenue: <Text>{formatPrice(movie?.revenue)}</Text>
+        Revenue: <Text>{formatPrice(movie?.revenue as number)}</Text>
       </Text>
     </View>
   );
@@ -98,13 +101,13 @@ const MovieCastAndCrew = ({ movieId, cast }: { movieId: number; cast: MovieCastP
         showsHorizontalScrollIndicator={false}
         data={cast?.slice(0, 8)}
         scrollEventThrottle={16}
-        keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+        keyExtractor={(item, i) => item.id.toString()}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         renderItem={({ item: cast }) => (
           <View className="w-[200px] flex-row items-center gap-3">
             <View className="relative">
               <Image
-                source={{ uri: cast.profile_path as string }}
+                source={{ uri: cast.avatar as string }}
                 style={{ width: 65, height: 65, borderRadius: 12 }}
                 contentFit="cover"
               />
@@ -126,66 +129,75 @@ const MovieCastAndCrew = ({ movieId, cast }: { movieId: number; cast: MovieCastP
   );
 };
 
-const MovieGallery = ({ movieId, gallery }: { movieId: number; gallery: MovieImagesProps[] }) => {
+export const MovieGallery = ({
+  movieId,
+  gallery,
+}: {
+  movieId: number;
+  gallery: MovieImagesResponse;
+}) => {
   const [openModalGallery, setOpenModalGallery] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
+  const [selectedImage, setSelectedImage] = useState<MovieImages | null>(null);
 
-  const handleOpenModal = (image: MovieImagesProps) => {
+  const previewImages = [...(gallery.backdrops ?? []), ...(gallery.posters ?? [])].slice(0, 5);
+
+  const totalImages = gallery.backdrops.length + gallery.logos.length + gallery.posters.length;
+
+  const handleOpenModal = (image: MovieImages) => {
     setSelectedImage(image);
     setOpenModalGallery(true);
   };
 
-  const handleHideModal = () => {
-    setOpenModalGallery(false);
-  };
   return (
     <>
       <View className="gap-3">
         <View className="flex-row items-center justify-between">
           <Text className="!text-lg font-bold">Gallery</Text>
 
-          {gallery?.length > 1 ? (
+          {totalImages > 1 && (
             <TouchableHighlight
               className="h-12 w-12 items-center justify-center rounded-full"
               underlayColor="#404040"
               onPress={() =>
-                router.push({ pathname: '/(root)/movie/gallery', params: { id: movieId } })
+                router.push({
+                  pathname: '/(root)/movie/gallery',
+                  params: { id: movieId },
+                })
               }>
               <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
             </TouchableHighlight>
-          ) : null}
+          )}
         </View>
 
-        <FlashList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={gallery.slice(0, 5)}
-          scrollEventThrottle={16}
-          keyExtractor={(item, i) => `${item.movie_id}-${i}`}
-          ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-          renderItem={({ item: image }) => (
-            <Pressable
-              onPress={() => handleOpenModal(image)}
-              className="flex-row items-center gap-3">
-              <Image
-                source={{ uri: image.file_path as string }}
-                style={{
-                  width: 280,
-                  borderRadius: 12,
-                  aspectRatio: image.aspect_ratio || 0,
-                }}
-                cachePolicy="memory-disk"
-                contentFit="cover"
-              />
-            </Pressable>
-          )}
-        />
+        {previewImages.length > 0 && (
+          <FlashList
+            horizontal
+            data={previewImages}
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => `${movieId}-${index}`}
+            ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+            renderItem={({ item }) => (
+              <Pressable onPress={() => handleOpenModal(item)}>
+                <Image
+                  source={{ uri: item.url as string }}
+                  style={{
+                    width: 280,
+                    aspectRatio: item.aspectRatio || 1.78,
+                    borderRadius: 12,
+                  }}
+                  cachePolicy="memory-disk"
+                  contentFit="cover"
+                />
+              </Pressable>
+            )}
+          />
+        )}
       </View>
 
       <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as MovieImagesProps}
-        onHide={handleHideModal}
+        image={selectedImage}
+        onHide={() => setOpenModalGallery(false)}
       />
     </>
   );

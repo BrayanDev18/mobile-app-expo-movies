@@ -1,5 +1,5 @@
 import { Text } from '@/components';
-import { SimilarMoviesProps } from '@/interfaces';
+import { MovieProps } from '@/interfaces';
 import { formatSpecialDate } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { BlurView } from 'expo-blur';
@@ -9,9 +9,9 @@ import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-export const MovieSimilar = ({ similarMovies }: { similarMovies: SimilarMoviesProps[] }) => {
+export const MovieSimilar = ({ similarMovies }: { similarMovies: MovieProps[] }) => {
   const renderItem = useCallback(
-    ({ item: movie }: { item: SimilarMoviesProps }) => <SimiliarMovieItem movie={movie} />,
+    ({ item: movie }: { item: MovieProps }) => <SimiliarMovieItem movie={movie} />,
     []
   );
 
@@ -30,7 +30,7 @@ export const MovieSimilar = ({ similarMovies }: { similarMovies: SimilarMoviesPr
   );
 };
 
-const SimiliarMovieItem = ({ movie }: { movie: SimilarMoviesProps }) => {
+const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
   return (
     <Pressable onPress={() => router.push(`/movie/${movie.id}`)} className="m-1 flex-1 gap-2">
       <BlurView
@@ -43,7 +43,7 @@ const SimiliarMovieItem = ({ movie }: { movie: SimilarMoviesProps }) => {
           overflow: 'hidden',
         }}>
         <Image
-          source={{ uri: movie.poster_path as string }}
+          source={{ uri: movie.poster as string }}
           style={{
             width: '100%',
             height: 180,
@@ -59,7 +59,9 @@ const SimiliarMovieItem = ({ movie }: { movie: SimilarMoviesProps }) => {
             {movie.title}
           </Text>
 
-          <Text className="!text-neutral-400">{formatSpecialDate(movie.release_date as any)}</Text>
+          <Text className="!text-neutral-400">
+            {formatSpecialDate(movie.releaseDate as string)}
+          </Text>
         </View>
       </BlurView>
     </Pressable>

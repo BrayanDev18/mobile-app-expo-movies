@@ -1,6 +1,5 @@
 import { Text } from '@/components';
-import { MovieByCategoryProps } from '@/interfaces';
-import { formatDate } from '@/utils';
+import { MovieProps } from '@/interfaces';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
@@ -9,49 +8,47 @@ import { MovieCard } from './MovieCard';
 
 interface MovieHorizontalListProps {
   title?: string;
-  width?: number;
-  height?: number;
-  movies: MovieByCategoryProps[];
+  movies: MovieProps[];
+  variant?: 'poster' | 'backdrop';
+  cardWidth?: number;
+  cardHeight?: number;
   showSeeAll?: boolean;
-  loadNextPage?: () => void;
 }
 
 export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
-  const { title, width, height, movies } = props;
+  const { title, movies, variant = 'poster', cardWidth, cardHeight } = props;
 
   const renderItem = useCallback(
-    ({ item }: { item: MovieByCategoryProps }) => (
+    ({ item }: { item: MovieProps }) => (
       <MovieCard
-        id={item.id}
-        rating={item.vote_average}
-        title={item.title}
-        year={formatDate(item.release_date)}
-        onPress={() => {
+        rating={item.rating}
+        movie={item}
+        variant={variant}
+        width={cardWidth}
+        height={cardHeight}
+        onPress={() =>
           router.push({
             pathname: '/(root)/movie/[id]',
-            params: { id: item.id, category: item.category },
-          });
-        }}
-        movieImage={item.poster_path}
-        width={width || 160}
-        height={height || 220}
+            params: { id: item.id },
+          })
+        }
       />
     ),
-    [height, width]
+    [variant, cardWidth, cardHeight]
   );
 
   return (
     <View className="gap-3">
-      <View className="flex-row justify-between px-1">
-        {title ? <Text className="!text-[18px] font-semibold">{title}</Text> : null}
-      </View>
+      {title && (
+        <View className="flex-row justify-between px-1">
+          <Text className="!text-[18px] font-semibold">{title}</Text>
+        </View>
+      )}
 
       <FlashList
         horizontal
         data={movies}
         keyExtractor={(item) => `${item.id}`}
-        scrollEventThrottle={16}
-        removeClippedSubviews
         showsHorizontalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
         renderItem={renderItem}

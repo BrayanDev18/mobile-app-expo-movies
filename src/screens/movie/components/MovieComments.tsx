@@ -1,9 +1,10 @@
 import { Text } from '@/components';
 import { MovieReviewProps } from '@/interfaces';
-import { formatDate, randomAvatar } from '@/utils';
+import { formatDate, getAvatarColor, randomAvatar } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
+import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -29,20 +30,38 @@ export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) =>
 );
 
 const CommentItem = ({ review }: { review: MovieReviewProps }) => {
+  const avatarColor = useMemo(() => getAvatarColor(review.author ?? 'Undefined'), [review.author]);
+
   return (
     <View className="flex-1 gap-4 rounded-2xl border border-white/10 p-4">
       <View className="flex-row items-start justify-between gap-2">
         <View className="flex-1 flex-row items-center gap-3">
-          <Image
-            source={{
-              uri: review?.author_details?.avatar_path
-                ? `${IMAGE_BASE}/${review?.author_details?.avatar_path}`
-                : randomAvatar(),
-            }}
-            style={{ width: 50, height: 50, borderRadius: 24 }}
-            contentFit="cover"
-            cachePolicy="memory-disk"
-          />
+          {review?.author_details?.avatar_path ? (
+            <Image
+              source={{
+                uri: review?.author_details?.avatar_path
+                  ? `${IMAGE_BASE}/${review?.author_details?.avatar_path}`
+                  : randomAvatar(),
+              }}
+              style={{ width: 50, height: 50, borderRadius: 24 }}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
+          ) : (
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: avatarColor + '30',
+              }}
+              className="items-center justify-center">
+              <Text style={{ color: avatarColor }} className="text-lg font-semibold">
+                {review.author?.[0]?.toUpperCase()}
+                {review.author?.[1]?.toUpperCase()}
+              </Text>
+            </View>
+          )}
 
           <View className="flex-1 gap-1">
             <Text numberOfLines={1} className="!text-lg font-semibold">

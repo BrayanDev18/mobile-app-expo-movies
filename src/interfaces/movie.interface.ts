@@ -1,3 +1,14 @@
+export interface MovieProps {
+  id: number;
+  title: string;
+  overview: string;
+  poster: string;
+  backdrop: string | null;
+  rating: number;
+  releaseDate: string;
+  category?: string;
+}
+
 export interface SimilarMoviesResponse {
   results: SimilarMoviesProps[];
 }
@@ -42,15 +53,21 @@ export interface MovieReviewProps {
 
 export interface MovieImagesResponse {
   backdrops: MovieImagesProps[];
+  logos: MovieImagesProps[];
+  posters: MovieImagesProps[];
+}
+
+export interface MovieImages {
+  aspect_ratio: number | null;
+  file_path: string | null;
 }
 
 export interface MovieImagesProps {
-  aspect_ratio: number | null;
-  file_path: string | null;
-  movie_id: number;
+  aspectRatio: number | null;
+  url: string | null;
 }
 
-export interface MovieDetailsProps {
+export interface MovieDetails {
   adult: boolean;
   backdrop_path: string;
   budget: number;
@@ -77,6 +94,33 @@ export interface MovieDetailsProps {
   vote_count: number;
 }
 
+export interface MovieDetailsProps {
+  id: number;
+  title: string;
+  originalTitle?: string;
+  tagline?: string;
+  overview: string;
+  poster: string | null;
+  backdrop: string | null;
+  releaseDate?: string;
+  runtime?: number;
+  rating: number;
+  voteCount: number;
+  popularity?: number;
+  genres: GenreProps[];
+  status?: string;
+  budget?: number;
+  revenue?: number;
+  homepage?: string;
+  imdbId?: string;
+  productionCompanies: ProductionCompanyProps[];
+  productionCountries: ProductionCountryProps[];
+  spokenLanguages: SpokenLanguageProps[];
+  isAdult?: boolean;
+  hasVideo?: boolean;
+  originalLanguage?: string;
+}
+
 export interface GenreProps {
   id: number;
   name: string;
@@ -100,16 +144,18 @@ export interface SpokenLanguageProps {
   name: string;
 }
 
-export interface MovieCastResponse {
-  cast: MovieCastProps[];
-}
-
 export interface MovieCastProps {
   id: number;
   name: string | null;
   character: string | null;
+  avatar: string | null;
+}
+
+export interface MovieCast {
+  id: number;
+  name: string | null;
+  character: string | null;
   profile_path: string | null;
-  movie_id: number;
 }
 
 export interface MoviesByCategoryResponse {
@@ -121,6 +167,7 @@ export interface MoviesByCategoryResponse {
 export interface MovieByCategoryProps {
   id: number;
   title: string;
+  original_title?: string;
   overview: string;
   adult: boolean;
   poster_path: string;
@@ -133,6 +180,12 @@ export interface MovieByCategoryProps {
 
 export interface MovieProvidersResponse {
   results: MovieProvidersProps[];
+}
+
+export interface ProviderProps {
+  _id: number;
+  logo: string;
+  name: string;
 }
 
 export interface MovieProvidersProps {

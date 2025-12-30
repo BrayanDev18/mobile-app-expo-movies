@@ -1,17 +1,21 @@
-import { IMAGE_BASE_URL } from '@/constants';
+import { IMAGE_BASE_URL, MovieApiRoutes } from '@/constants';
 import { MovieByCategoryProps, MovieProps } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 
-export const useSimilarMovies = (movieId: number) => {
-  const { data: similarMovies, isLoading: isSimilarMoviesLoading } = useQuery({
-    queryKey: ['movieSimilar', movieId],
+export const useGetTrendingAll = () => {
+  const { data: trendingAll = [], isLoading } = useQuery({
+    queryKey: ['trending-all'],
     queryFn: async () => {
       const {
-        data: { results: similarMovies },
-      } = await moviesApi.get(`/movie/${movieId}/similar`);
+        data: { results: trendingAll },
+      } = await moviesApi.get(MovieApiRoutes.trendingAll('day'));
 
-      const mappedSimilarMovies = similarMovies.map((movie: MovieByCategoryProps) => ({
+      if (!trendingAll || trendingAll.length === 0) {
+        return [];
+      }
+
+      const newTrendingAllArray = trendingAll.map((movie: MovieByCategoryProps) => ({
         id: movie.id,
         title: movie.title ?? movie.original_title,
         overview: movie.overview,
@@ -21,12 +25,12 @@ export const useSimilarMovies = (movieId: number) => {
         releaseDate: movie.release_date,
       }));
 
-      return mappedSimilarMovies;
+      return newTrendingAllArray;
     },
   });
 
   return {
-    similarMovies: similarMovies as MovieProps[],
-    isSimilarMoviesLoading,
+    trendingAll: trendingAll as MovieProps[],
+    isLoading,
   };
 };

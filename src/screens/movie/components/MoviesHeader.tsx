@@ -1,5 +1,5 @@
 import { Text } from '@/components';
-import { MovieByCategoryProps } from '@/interfaces';
+import { MovieProps } from '@/interfaces';
 import { formatDate } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
@@ -16,12 +16,12 @@ import Animated, {
 } from 'react-native-reanimated';
 
 interface MoviesHeaderProps {
-  movies: MovieByCategoryProps[];
+  movies: MovieProps[];
   scrollX: SharedValue<number>;
 }
 
 interface ImageItemProps {
-  image: MovieByCategoryProps;
+  image: MovieProps;
   index: number;
   scrollX: SharedValue<number>;
 }
@@ -94,7 +94,7 @@ const ImageItem = memo((props: ImageItemProps) => {
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
       <Animated.View className="flex-1" style={[imageStyle]}>
         <AnimatedImage
-          source={{ uri: image.poster_path }}
+          source={{ uri: image.poster as string }}
           style={{ width: '100%', height: '100%', borderRadius: 22 }}
           contentFit="fill"
           cachePolicy="memory-disk"
@@ -118,7 +118,7 @@ const ImageItem = memo((props: ImageItemProps) => {
               <View className="h-1.5 w-1.5 rounded-full bg-red-500" />
 
               <Text className="!text-md !text-neutral-400">
-                {formatDate(image.release_date as string)}
+                {formatDate(image.releaseDate as string)}
               </Text>
             </View>
           </BlurView>

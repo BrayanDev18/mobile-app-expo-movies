@@ -4,8 +4,39 @@ import { MovieImagesProps } from '@/interfaces';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Pressable } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { Pressable, View } from 'react-native';
+
+const splitIntoColumns = (data: MovieImagesProps[], columns = 2) => {
+  const cols = Array.from({ length: columns }, () => ({
+    items: [] as MovieImagesProps[],
+    height: 0,
+  }));
+
+  data.forEach((item) => {
+    const aspectRatio = item.aspectRatio ?? 1;
+
+    const estimatedHeight = 1 / aspectRatio;
+
+    const shortestColumn = cols.reduce((prev, curr) => (curr.height < prev.height ? curr : prev));
+
+    shortestColumn.items.push(item);
+    shortestColumn.height += estimatedHeight;
+  });
+
+  return cols.map((col) => col.items);
+};
+
+const shuffleArray = <T,>(array: T[]) => {
+  const shuffled = [...array];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+};
 
 const MovieGallery = () => {
   const { id } = useLocalSearchParams();
@@ -14,24 +45,30 @@ const MovieGallery = () => {
 
   const { movieImages, isMovieImagesLoading } = useMovieImages(+id);
 
+  const previewImages = useMemo(() => {
+    const images = [...(movieImages?.backdrops ?? []), ...(movieImages?.posters ?? [])];
+
+    return shuffleArray(images);
+  }, [movieImages]);
+
+  const columns = splitIntoColumns(previewImages, 2);
+
   const handleOpenModal = (image: MovieImagesProps) => {
     setSelectedImage(image);
     setVisible(true);
   };
 
   const renderItem = useCallback(
-    ({ item: image }: { item: MovieImagesProps }) => (
-      <Pressable
-        onPress={() => handleOpenModal(image)}
-        className="flex-1 items-center justify-center p-1">
+    ({ item }: { item: MovieImagesProps }) => (
+      <Pressable onPress={() => handleOpenModal(item)} className="m-1.5">
         <Image
-          source={{ uri: `https://image.tmdb.org/t/p/w500${image.file_path}` }}
+          source={{ uri: item.url as string }}
           style={{
             width: '100%',
-            borderRadius: 12,
-            aspectRatio: image.aspect_ratio as number,
+            aspectRatio: item.aspectRatio ?? 1,
+            borderRadius: 10,
           }}
-          contentFit="fill"
+          contentFit="cover"
         />
       </Pressable>
     ),
@@ -42,16 +79,17 @@ const MovieGallery = () => {
 
   return (
     <Screen preset="auto" safeAreaEdges={['top', 'bottom']} canGoBack>
-      <FlashList
-        showsHorizontalScrollIndicator={false}
-        data={movieImages}
-        numColumns={2}
-        scrollEventThrottle={16}
-        removeClippedSubviews
-        keyExtractor={(item, i) => `${item.movie_id}-${i}`}
-        contentContainerClassName="px-4 pt-14"
-        renderItem={renderItem}
-      />
+      <View className="flex-row px-2 pt-12">
+        {columns.map((column, columnIndex) => (
+          <FlashList
+            key={columnIndex}
+            data={column}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 1, paddingTop: columnIndex === 1 ? 15 : 0 }}
+          />
+        ))}
+      </View>
 
       <ImagePreviewModal
         image={selectedImage as MovieImagesProps}

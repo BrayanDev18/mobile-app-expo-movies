@@ -17,7 +17,7 @@ export const MovieInfo = ({ movie }: { movie: MovieDetailsProps }) => {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="flex-row items-center gap-2">
-          {!movie?.adult && (
+          {!movie?.isAdult && (
             <View className="rounded-full bg-red-500/60 px-2 py-1">
               <Text className="font-semibold">18+</Text>
             </View>

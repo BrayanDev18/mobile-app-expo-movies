@@ -1,3 +1,4 @@
+export * from './AvatarColors';
 export * from './cn';
 export * from './formatDate';
 export * from './formatMovie';

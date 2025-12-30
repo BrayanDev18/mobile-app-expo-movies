@@ -1,8 +1,9 @@
 import { Button, Text } from '@/components';
-import { useMoviesByCategory } from '@/hooks';
-import { MovieByCategoryProps } from '@/interfaces';
+import { useGetTrendingAll } from '@/hooks';
+import { MovieProps } from '@/interfaces';
 import { Marquee } from '@animatereactnative/marquee';
 import { Stagger } from '@animatereactnative/stagger';
+import {} from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -38,9 +39,9 @@ const MainIndex = () => {
   const offset = useSharedValue(0);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const { movies } = useMoviesByCategory('now_playing');
+  const { trendingAll } = useGetTrendingAll();
 
-  const images = movies?.map((movie: MovieByCategoryProps) => movie.poster_path) as string[];
+  const images = trendingAll?.map((movie: MovieProps) => movie.poster) as string[];
 
   useAnimatedReaction(
     () => {
@@ -96,7 +97,7 @@ const MainIndex = () => {
             bring cinema to life. 🍿✨
           </Text>
 
-          <Button title="Log In" onPress={() => router.push('/(root)/(tabs)/home')} />
+          <Button title="Get started" onPress={() => router.push('/(root)/(tabs)/home')} />
         </View>
       </Stagger>
     </View>

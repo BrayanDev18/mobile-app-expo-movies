@@ -1,54 +1,29 @@
-import { MovieDetailsProps } from '@/interfaces';
+import { IMAGE_BASE_URL } from '@/constants';
+import { MovieDetails, MovieDetailsProps } from '@/interfaces';
 
-const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
-
-export const parseJSON = <T>(value: unknown, fallback: T): T => {
-  if (!value) return fallback;
-
-  try {
-    return typeof value === 'string' ? JSON.parse(value) : (value as T);
-  } catch {
-    return fallback;
-  }
-};
-
-export const formatImagePaths = (movie: any) => ({
-  ...movie,
-  backdrop_path: movie.backdrop_path ? `${IMAGE_BASE}${movie.backdrop_path}` : null,
-  poster_path: movie.poster_path ? `${IMAGE_BASE}${movie.poster_path}` : null,
-});
-
-export const parseLocalMovie = (local: MovieDetailsProps) => ({
-  ...formatImagePaths(local),
-  genres: parseJSON(local.genres, []),
-  production_companies: parseJSON(local.production_companies, []),
-  production_countries: parseJSON(local.production_countries, []),
-  spoken_languages: parseJSON(local.spoken_languages, []),
-});
-
-export const mapMovieToDb = (data: MovieDetailsProps) => ({
+export const mapMovieToDb = (data: MovieDetails): MovieDetailsProps => ({
   id: data.id,
-  adult: data.adult,
-  backdrop_path: data.backdrop_path,
-  budget: data.budget,
-  genres: JSON.stringify(data.genres || []),
-  homepage: data.homepage,
-  imdb_id: data.imdb_id,
-  original_language: data.original_language,
-  original_title: data.original_title,
-  overview: data.overview,
-  popularity: data.popularity,
-  poster_path: data.poster_path,
-  production_companies: JSON.stringify(data.production_companies || []),
-  production_countries: JSON.stringify(data.production_countries || []),
-  release_date: data.release_date,
-  revenue: data.revenue,
-  runtime: data.runtime,
-  spoken_languages: JSON.stringify(data.spoken_languages || []),
-  status: data.status,
-  tagline: data.tagline,
   title: data.title,
-  video: data.video,
-  vote_average: data.vote_average,
-  vote_count: data.vote_count,
+  originalTitle: data.original_title,
+  tagline: data.tagline,
+  overview: data.overview,
+  poster: `${IMAGE_BASE_URL}/${data.poster_path}`,
+  backdrop: `${IMAGE_BASE_URL}/${data.backdrop_path}`,
+  releaseDate: data.release_date,
+  runtime: data.runtime,
+  rating: data.vote_average,
+  voteCount: data.vote_count,
+  popularity: data.popularity,
+  genres: data.genres ?? [],
+  status: data.status,
+  budget: data.budget,
+  revenue: data.revenue,
+  homepage: data.homepage,
+  imdbId: data.imdb_id,
+  productionCompanies: data.production_companies ?? [],
+  productionCountries: data.production_countries ?? [],
+  spokenLanguages: data.spoken_languages ?? [],
+  isAdult: data.adult,
+  hasVideo: data.video,
+  originalLanguage: data.original_language,
 });

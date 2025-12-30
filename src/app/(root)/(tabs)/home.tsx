@@ -1,6 +1,7 @@
 import { Loader, Tab } from '@/components';
 import { useMovieProviders, useMoviesByCategory } from '@/hooks';
-import { MovieHorizontalList, MoviesHeader } from '@/screens/movie/components';
+import { MovieProps } from '@/interfaces';
+import { MovieHorizontalList, MovieProviders, MoviesHeader } from '@/screens/movie/components';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -47,7 +48,7 @@ const HomeScreen = () => {
   return (
     <>
       <View style={StyleSheet.absoluteFillObject}>
-        {upcomingMovies?.map((image, index) => (
+        {nowPlayingMovies?.map((image, index) => (
           <BackdropImage key={index} image={image} index={index} scrollX={scrollX} />
         ))}
       </View>
@@ -101,16 +102,23 @@ const HomeScreen = () => {
       </View>
 
       <ScrollView contentContainerClassName="gap-8">
-        <MoviesHeader movies={upcomingMovies} scrollX={scrollX} />
+        <MoviesHeader movies={nowPlayingMovies} scrollX={scrollX} />
 
         <View style={{ paddingBottom: bottom + 80 }} className="gap-8 p-3">
-          {/* <MovieProviders movieProviders={movieProviders} /> */}
+          <MovieProviders movieProviders={movieProviders} />
 
-          <MovieHorizontalList title="Playing Today" movies={nowPlayingMovies} />
+          <MovieHorizontalList title="Now in Theaters" movies={nowPlayingMovies} />
 
-          <MovieHorizontalList title="Most watched" movies={popularMovies} />
+          <MovieHorizontalList title="Popular Right Now" movies={popularMovies} />
 
-          <MovieHorizontalList title="Best of the Best" movies={topRatedMovies} />
+          <MovieHorizontalList title="Top Rated Movies" movies={topRatedMovies} />
+
+          <MovieHorizontalList
+            title="Coming Soon"
+            movies={upcomingMovies}
+            variant="backdrop"
+            cardWidth={310}
+          />
         </View>
       </ScrollView>
     </>
@@ -120,7 +128,15 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const BackdropImage = memo(
-  ({ image, index, scrollX }: { image: any; index: number; scrollX: SharedValue<number> }) => {
+  ({
+    image,
+    index,
+    scrollX,
+  }: {
+    image: MovieProps;
+    index: number;
+    scrollX: SharedValue<number>;
+  }) => {
     const styles = useAnimatedStyle(() => {
       return {
         opacity: interpolate(scrollX.value, [index - 1, index, index + 1], [0, 1, 0]),
@@ -129,7 +145,7 @@ const BackdropImage = memo(
 
     return (
       <AnimatedImage
-        source={{ uri: image.poster_path }}
+        source={{ uri: image.poster }}
         blurRadius={50}
         style={[StyleSheet.absoluteFillObject, styles]}
         cachePolicy="memory-disk"

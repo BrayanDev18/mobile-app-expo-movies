@@ -1,14 +1,13 @@
-import { MovieDetailsProps } from '@/interfaces';
 import { Image } from 'expo-image';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
-export const MovieHeader = ({ movie }: { movie: MovieDetailsProps }) => {
+export const MovieHeader = ({ poster }: { poster: string }) => {
   const { height } = useWindowDimensions();
 
   return (
     <View style={{ height: height * 0.55 }} className="relative items-center justify-center">
       <Image
-        source={{ uri: movie?.poster_path }}
+        source={{ uri: poster }}
         style={StyleSheet.absoluteFillObject}
         contentPosition="top center"
         cachePolicy="memory-disk"
@@ -29,7 +28,7 @@ export const MovieHeader = ({ movie }: { movie: MovieDetailsProps }) => {
           height: 350,
         }}>
         <Image
-          source={{ uri: movie?.poster_path }}
+          source={{ uri: poster }}
           style={{ width: '100%', height: '100%' }}
           cachePolicy="memory-disk"
           contentFit="fill"

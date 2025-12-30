@@ -8,7 +8,7 @@ import {
   useMovieWatchProviders,
   useSimilarMovies,
 } from '@/hooks';
-import { MovieVideosProps } from '@/interfaces';
+import { MovieImagesResponse, MovieVideosProps } from '@/interfaces';
 import {
   MovieAbout,
   MovieComments,
@@ -48,7 +48,7 @@ const MovieDescriptionScreen = () => {
 
   return (
     <Screen canGoBack preset="scroll" safeAreaEdges={['bottom']}>
-      <MovieHeader movie={movieDetails} />
+      <MovieHeader poster={movieDetails.poster as string} />
 
       <View className="-mt-12 rounded-t-3xl bg-neutral-900 backdrop-blur-xl">
         <View className="items-center py-3">
@@ -77,7 +77,7 @@ const MovieDescriptionScreen = () => {
                   <MovieAbout
                     movieDetails={movieDetails}
                     movieCast={movieCast}
-                    gallery={movieImages}
+                    gallery={movieImages as MovieImagesResponse}
                     providers={movieWatchProviders as string}
                   />
                 </TabsPanel>
