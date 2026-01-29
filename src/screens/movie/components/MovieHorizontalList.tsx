@@ -50,7 +50,7 @@ export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
         data={movies}
         keyExtractor={(item) => `${item.id}`}
         showsHorizontalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+        ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
         renderItem={renderItem}
       />
     </View>

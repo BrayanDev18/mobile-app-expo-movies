@@ -1,6 +1,6 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { formatDate } from '@/utils';
+import { cn, formatDate } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { Star } from 'lucide-react-native';
@@ -28,59 +28,54 @@ export const MovieCard = (props: MovieCardProps) => {
   return (
     <Pressable
       style={{ width: cardWidth }}
-      className={`relative ${className} gap-2`}
+      className={cn(className, 'relative rounded-bl-2xl rounded-br-2xl bg-neutral-950/30')}
       onPress={onPress}>
-      <BlurView
-        intensity={80}
-        tint="systemChromeMaterialDark"
-        style={{ borderRadius: 12, overflow: 'hidden' }}>
-        <View>
-          <Image
-            source={{ uri: movieImage as string }}
+      <View>
+        <Image
+          source={{ uri: movieImage as string }}
+          style={{
+            width: cardWidth,
+            height: cardHeight,
+            aspectRatio: isBackdrop ? 1.78 : undefined,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+          contentFit="cover"
+        />
+
+        {movie.rating !== undefined && !isBackdrop && (
+          <BlurView
+            tint="dark"
+            intensity={70}
             style={{
-              width: cardWidth,
-              height: cardHeight,
-              aspectRatio: isBackdrop ? 1.78 : undefined,
-              borderTopLeftRadius: 10,
-              borderTopRightRadius: 10,
-            }}
-            contentFit="cover"
-          />
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              paddingVertical: 5,
+              paddingHorizontal: 10,
+              borderRadius: 50,
+              flexDirection: 'row',
+              alignItems: 'center',
+              overflow: 'hidden',
+              gap: 4,
+            }}>
+            <Star color="yellow" size={12} fill="yellow" />
+            <Text className="!text-xs">{movie.rating.toFixed(1)}</Text>
+          </BlurView>
+        )}
+      </View>
 
-          {movie.rating !== undefined && !isBackdrop && (
-            <BlurView
-              tint="dark"
-              intensity={70}
-              style={{
-                position: 'absolute',
-                top: 6,
-                right: 6,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                borderRadius: 50,
-                flexDirection: 'row',
-                alignItems: 'center',
-                overflow: 'hidden',
-                gap: 4,
-              }}>
-              <Star color="yellow" size={12} fill="yellow" />
-              <Text className="!text-xs">{movie.rating.toFixed(1)}</Text>
-            </BlurView>
-          )}
-        </View>
+      <View className="gap-0.5 p-2.5">
+        <Text numberOfLines={1} className="!text-md font-medium">
+          {movie.title}
+        </Text>
 
-        <View className="gap-0.5 p-2.5">
-          <Text numberOfLines={1} className="!text-md font-medium">
-            {movie.title}
+        {movie.releaseDate && (
+          <Text numberOfLines={1} className="text-[13px] !text-neutral-400">
+            {formatDate(movie.releaseDate)}
           </Text>
-
-          {movie.releaseDate && (
-            <Text numberOfLines={1} className="text-[13px] !text-neutral-400">
-              {formatDate(movie.releaseDate)}
-            </Text>
-          )}
-        </View>
-      </BlurView>
+        )}
+      </View>
     </Pressable>
   );
 };

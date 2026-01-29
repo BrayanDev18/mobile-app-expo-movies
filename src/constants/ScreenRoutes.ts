@@ -6,16 +6,10 @@ const rootRoutes = '(root)' as const;
 export const ScreenRoutes = {
   index: '/',
   welcome: `${authRoutes}/welcome`,
-  signIn: `${authRoutes}/sign-in`,
-  singUp: `${authRoutes}/sign-up`,
-  conversations: `${rootRoutes}/(home-tabs)/conversations`,
-  conversation: `${rootRoutes}/conversation/[conversationId]`,
-  newChat: `${rootRoutes}/new-chat`,
-  newGroup: `${rootRoutes}/new-group`,
-  newContact: `${rootRoutes}/new-contact`,
-  countriesList: `${rootRoutes}/countries-list`,
+  home: `${rootRoutes}/(tabs)/home`,
 
-  editProfile: `${rootRoutes}/edit-profile`,
+  //movie
+  videos: `${rootRoutes}/movie/videos`,
 } as const;
 
 type NavigateMethod = 'push' | 'replace' | 'back' | 'dismissAll' | 'dismissTo';

@@ -1,4 +1,4 @@
-import { CustomTabs, Loader, Screen, TabsList, TabsPanel, TabsTrigger } from '@/components';
+import { Loader, Screen } from '@/components';
 import {
   useMovieCast,
   useMovieDetails,
@@ -8,17 +8,19 @@ import {
   useMovieWatchProviders,
   useSimilarMovies,
 } from '@/hooks';
-import { MovieImagesResponse, MovieVideosProps } from '@/interfaces';
+import { MovieVideosProps } from '@/interfaces';
 import {
-  MovieAbout,
+  MovieCastAndCrew,
   MovieComments,
+  MovieGallery,
   MovieHeader,
   MovieInfo,
   MovieSimilar,
   MovieTrailers,
+  MovieWatchProviders,
 } from '@/screens/movie/components';
 import { useLocalSearchParams } from 'expo-router';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 
 const MovieDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
@@ -58,36 +60,21 @@ const MovieDescriptionScreen = () => {
         <View className="gap-6 px-4">
           <MovieInfo movie={movieDetails} />
 
-          <MovieTrailers videos={filteredVideos as MovieVideosProps[]} />
+          <MovieTrailers videos={filteredVideos} />
 
-          <CustomTabs defaultValue="similar">
-            <View className="flex-1 gap-4">
-              <TabsList>
-                <TabsTrigger value="similar">Similar</TabsTrigger>
-                <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="comments">Reviews</TabsTrigger>
-              </TabsList>
+          <MovieCastAndCrew movieId={movieDetails.id} cast={movieCast} />
 
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <TabsPanel value="similar">
-                  <MovieSimilar similarMovies={similarMovies} />
-                </TabsPanel>
+          <MovieWatchProviders providers={movieWatchProviders} />
 
-                <TabsPanel value="about">
-                  <MovieAbout
-                    movieDetails={movieDetails}
-                    movieCast={movieCast}
-                    gallery={movieImages as MovieImagesResponse}
-                    providers={movieWatchProviders as string}
-                  />
-                </TabsPanel>
+          <MovieComments comments={movieReviews} />
 
-                <TabsPanel value="comments">
-                  <MovieComments comments={movieReviews} />
-                </TabsPanel>
-              </ScrollView>
-            </View>
-          </CustomTabs>
+          <MovieSimilar movieId={movieDetails.id} similarMovies={similarMovies} />
+
+          {movieImages?.backdrops.length ||
+          movieImages?.logos.length ||
+          movieImages?.posters.length ? (
+            <MovieGallery movieId={movieDetails.id} gallery={movieImages} />
+          ) : null}
         </View>
       </View>
     </Screen>

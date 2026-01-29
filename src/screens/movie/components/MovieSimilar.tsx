@@ -1,69 +1,82 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
 import { formatSpecialDate } from '@/utils';
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Pressable, TouchableHighlight, View } from 'react-native';
 
-export const MovieSimilar = ({ similarMovies }: { similarMovies: MovieProps[] }) => {
+export const MovieSimilar = ({
+  movieId,
+  similarMovies,
+}: {
+  movieId: number;
+  similarMovies: MovieProps[];
+}) => {
   const renderItem = useCallback(
     ({ item: movie }: { item: MovieProps }) => <SimiliarMovieItem movie={movie} />,
     []
   );
 
   return (
-    <Animated.View className="h-full" entering={FadeInDown.springify()}>
+    <View className="gap-1">
+      <View className="flex-row items-center justify-between">
+        <Text className="!text-lg font-bold">Similar movies</Text>
+
+        {similarMovies.length > 5 ? (
+          <TouchableHighlight
+            onPress={() =>
+              router.push({
+                pathname: '/movie/similar',
+                params: { id: movieId },
+              })
+            }
+            className="h-12 w-12 items-center justify-center rounded-full"
+            underlayColor="#404040">
+            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
+          </TouchableHighlight>
+        ) : null}
+      </View>
+
       <FlashList
-        numColumns={3}
-        data={similarMovies}
-        renderItem={renderItem}
+        horizontal
+        data={similarMovies.slice(0, 5)}
         scrollEventThrottle={16}
-        removeClippedSubviews
-        showsVerticalScrollIndicator={false}
-        keyExtractor={(item, i) => `${item.id}`}
+        showsHorizontalScrollIndicator={false}
+        keyExtractor={(item, i) => `${item.id}-${i}`}
+        ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
+        renderItem={renderItem}
       />
-    </Animated.View>
+    </View>
   );
 };
 
 const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
   return (
-    <Pressable onPress={() => router.push(`/movie/${movie.id}`)} className="m-1 flex-1 gap-2">
-      <BlurView
-        intensity={80}
-        tint="systemChromeMaterialDark"
-        experimentalBlurMethod="dimezisBlurView"
+    <Pressable
+      onPress={() => router.push(`/movie/${movie.id}`)}
+      className="w-[168px] gap-2 rounded-bl-2xl rounded-br-2xl bg-neutral-950/30">
+      <Image
+        source={{ uri: movie.poster as string }}
         style={{
-          flex: 1,
-          borderRadius: 12,
-          overflow: 'hidden',
-        }}>
-        <Image
-          source={{ uri: movie.poster as string }}
-          style={{
-            width: '100%',
-            height: 180,
-            borderTopRightRadius: 10,
-            borderTopLeftRadius: 10,
-          }}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-        />
+          width: '100%',
+          height: 205,
+          borderTopRightRadius: 10,
+          borderTopLeftRadius: 10,
+        }}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+      />
 
-        <View className="gap-1 p-1.5">
-          <Text numberOfLines={1} className="!text-md font-medium leading-tight">
-            {movie.title}
-          </Text>
+      <View className="gap-1 p-2">
+        <Text numberOfLines={1} className="!text-md font-semibold">
+          {movie.title}
+        </Text>
 
-          <Text className="!text-neutral-400">
-            {formatSpecialDate(movie.releaseDate as string)}
-          </Text>
-        </View>
-      </BlurView>
+        <Text className="!text-neutral-400">{formatSpecialDate(movie.releaseDate as string)}</Text>
+      </View>
     </Pressable>
   );
 };

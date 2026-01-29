@@ -6,6 +6,7 @@ export * from './Input';
 export * from './Loader';
 export * from './RowBack';
 export * from './Screen';
+export * from './SectionHeader';
 export * from './SwipeTabs';
 export * from './Tabs';
 export * from './Text';

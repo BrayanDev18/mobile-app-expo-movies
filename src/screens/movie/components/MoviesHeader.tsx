@@ -5,7 +5,6 @@ import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { memo } from 'react';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -62,7 +61,7 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
   );
 };
 
-const ImageItem = memo((props: ImageItemProps) => {
+const ImageItem = (props: ImageItemProps) => {
   const { image, index, scrollX } = props;
 
   const imageStyle = useAnimatedStyle(() => {
@@ -126,7 +125,7 @@ const ImageItem = memo((props: ImageItemProps) => {
       </Animated.View>
     </Pressable>
   );
-});
+};
 
 const styles = StyleSheet.create({
   overlay: {

@@ -6,7 +6,6 @@ import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { memo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   interpolate,
@@ -15,6 +14,12 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+interface BackdropImageProps {
+  image: MovieProps;
+  index: number;
+  scrollX: SharedValue<number>;
+}
 
 const AnimatedImage = Animated.createAnimatedComponent(Image);
 
@@ -60,53 +65,12 @@ const HomeScreen = () => {
         style={[StyleSheet.absoluteFillObject, { height: '100%' }]}
       />
 
-      <View style={{ paddingTop: top + 15 }} className="w-full flex-row gap-2 px-4 pb-6">
-        <BlurView
-          intensity={80}
-          tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
-          className="overflow-hidden rounded-full">
-          <Tab
-            title="Movies"
-            isActive={false}
-            onPress={() => router.push('/(root)/(tabs)/home')}
-            adaptableWidth
-          />
-        </BlurView>
+      <HomeTabs top={top} />
 
-        <BlurView
-          intensity={80}
-          tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
-          className="overflow-hidden rounded-full">
-          <Tab
-            title="Series"
-            isActive={false}
-            onPress={() => router.push('/(root)/series/home')}
-            adaptableWidth
-          />
-        </BlurView>
-
-        <BlurView
-          intensity={80}
-          tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
-          className="overflow-hidden rounded-full">
-          <Tab
-            title="Tv shows"
-            isActive={false}
-            onPress={() => router.push('/(root)/tv/home')}
-            adaptableWidth
-          />
-        </BlurView>
-      </View>
-
-      <ScrollView contentContainerClassName="gap-8">
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-8">
         <MoviesHeader movies={nowPlayingMovies} scrollX={scrollX} />
 
         <View style={{ paddingBottom: bottom + 80 }} className="gap-8 p-3">
-          <MovieProviders movieProviders={movieProviders} />
-
           <MovieHorizontalList title="Now in Theaters" movies={nowPlayingMovies} />
 
           <MovieHorizontalList title="Popular Right Now" movies={popularMovies} />
@@ -119,6 +83,8 @@ const HomeScreen = () => {
             variant="backdrop"
             cardWidth={310}
           />
+
+          <MovieProviders movieProviders={movieProviders} />
         </View>
       </ScrollView>
     </>
@@ -127,29 +93,63 @@ const HomeScreen = () => {
 
 export default HomeScreen;
 
-const BackdropImage = memo(
-  ({
-    image,
-    index,
-    scrollX,
-  }: {
-    image: MovieProps;
-    index: number;
-    scrollX: SharedValue<number>;
-  }) => {
-    const styles = useAnimatedStyle(() => {
-      return {
-        opacity: interpolate(scrollX.value, [index - 1, index, index + 1], [0, 1, 0]),
-      };
-    });
+const BackdropImage = (props: BackdropImageProps) => {
+  const { image, index, scrollX } = props;
 
-    return (
-      <AnimatedImage
-        source={{ uri: image.poster }}
-        blurRadius={50}
-        style={[StyleSheet.absoluteFillObject, styles]}
-        cachePolicy="memory-disk"
+  const styles = useAnimatedStyle(() => {
+    return {
+      opacity: interpolate(scrollX.value, [index - 1, index, index + 1], [0, 1, 0]),
+    };
+  });
+
+  return (
+    <AnimatedImage
+      source={{ uri: image.poster }}
+      blurRadius={50}
+      style={[StyleSheet.absoluteFillObject, styles]}
+    />
+  );
+};
+
+const HomeTabs = ({ top }: { top: number }) => (
+  <View style={{ paddingTop: top + 15 }} className="w-full flex-row gap-2 px-4 pb-6">
+    <BlurView
+      intensity={80}
+      tint="dark"
+      experimentalBlurMethod="dimezisBlurView"
+      className="overflow-hidden rounded-full">
+      <Tab
+        title="Movies"
+        isActive={false}
+        onPress={() => router.push('/(root)/(tabs)/home')}
+        adaptableWidth
       />
-    );
-  }
+    </BlurView>
+
+    <BlurView
+      intensity={80}
+      tint="dark"
+      experimentalBlurMethod="dimezisBlurView"
+      className="overflow-hidden rounded-full">
+      <Tab
+        title="Series"
+        isActive={false}
+        onPress={() => router.push('/(root)/series/home')}
+        adaptableWidth
+      />
+    </BlurView>
+
+    <BlurView
+      intensity={80}
+      tint="dark"
+      experimentalBlurMethod="dimezisBlurView"
+      className="overflow-hidden rounded-full">
+      <Tab
+        title="Tv shows"
+        isActive={false}
+        onPress={() => router.push('/(root)/tv/home')}
+        adaptableWidth
+      />
+    </BlurView>
+  </View>
 );

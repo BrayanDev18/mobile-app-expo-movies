@@ -1,11 +1,11 @@
 import { Button, Text } from '@/components';
+import { navigate } from '@/constants';
 import { useGetTrendingAll } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { Marquee } from '@animatereactnative/marquee';
 import { Stagger } from '@animatereactnative/stagger';
 import {} from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -97,7 +97,7 @@ const MainIndex = () => {
             bring cinema to life. 🍿✨
           </Text>
 
-          <Button title="Get started" onPress={() => router.push('/(root)/(tabs)/home')} />
+          <Button title="Get started" onPress={() => navigate('home')} />
         </View>
       </Stagger>
     </View>
