@@ -78,7 +78,7 @@ const CastItem = ({ cast, index }: { cast: MovieCastProps; index: number }) => {
       className="flex-row items-center justify-between rounded-xl bg-neutral-800 p-2.5">
       <View className="flex-row items-center gap-x-3">
         <Image
-          source={{ uri: cast.profile_path as string }}
+          source={{ uri: cast?.avatar }}
           style={{ width: 62, height: 62, borderRadius: 8 }}
           cachePolicy="memory-disk"
         />

@@ -60,7 +60,7 @@ export const MovieGallery = ({
                   source={{ uri: item.url as string }}
                   style={{
                     width: 280,
-                    aspectRatio: item.aspectRatio || 1.78,
+                    aspectRatio: 1.78,
                     borderRadius: 12,
                   }}
                   cachePolicy="memory-disk"

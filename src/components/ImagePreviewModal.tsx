@@ -25,11 +25,11 @@ export const ImagePreviewModal = (props: ImagePreviewModalProps) => {
       onBackdropPress={onHide}>
       <View className="flex-1 items-center justify-center">
         <ImageZoom
-          uri={image?.file_path as string}
+          uri={image?.url as string}
           minScale={1}
           maxScale={5}
           loadingColor="#06b6d4"
-          style={{ width: '100%', aspectRatio: image?.aspect_ratio as number }}
+          style={{ width: '100%', aspectRatio: image?.aspectRatio as number }}
         />
       </View>
     </Modal>

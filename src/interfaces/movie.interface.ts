@@ -146,9 +146,9 @@ export interface SpokenLanguageProps {
 
 export interface MovieCastProps {
   id: number;
-  name: string | null;
-  character: string | null;
-  avatar: string | null;
+  name: string;
+  character: string;
+  avatar: string;
 }
 
 export interface MovieCast {
