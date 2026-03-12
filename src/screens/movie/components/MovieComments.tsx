@@ -1,48 +1,72 @@
 import { Text } from '@/components';
+import { IMAGE_BASE_URL } from '@/constants';
 import { MovieReviewProps } from '@/interfaces';
-import { formatDate, randomAvatar } from '@/utils';
+import { formatDate, getAvatarColor, randomAvatar } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-
-const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+import { useMemo } from 'react';
+import { TouchableHighlight, View } from 'react-native';
 
 export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) => (
-  <Animated.View entering={FadeInDown.delay(200).springify()}>
+  <View className="gap-3">
+    <View className="flex-row items-center justify-between">
+      <Text className="!text-lg font-bold">Reviews</Text>
+
+      {comments?.length > 5 ? (
+        <TouchableHighlight
+          className="h-12 w-12 items-center justify-center rounded-full"
+          underlayColor="#404040">
+          <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
+        </TouchableHighlight>
+      ) : null}
+    </View>
+
     <FlashList
+      horizontal
       showsHorizontalScrollIndicator={false}
-      data={comments?.slice(0, 10)}
+      data={comments?.slice(0, 5)}
       scrollEventThrottle={16}
       keyExtractor={(item, i) => `${item.id}-${i}`}
-      ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+      ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
       renderItem={({ item: review }) => <CommentItem review={review} />}
     />
-
-    {comments.length ? (
-      <Pressable className="items-center py-3">
-        <Text className="font-medium text-blue-500">Show all comments ▼</Text>
-      </Pressable>
-    ) : null}
-  </Animated.View>
+  </View>
 );
 
 const CommentItem = ({ review }: { review: MovieReviewProps }) => {
+  const avatarColor = useMemo(() => getAvatarColor(review.author ?? 'Undefined'), [review.author]);
+
   return (
-    <View className="flex-1 gap-4 rounded-2xl border border-white/10 p-4">
+    <View className="w-[300px] gap-4 rounded-2xl border border-white/10 p-4">
       <View className="flex-row items-start justify-between gap-2">
         <View className="flex-1 flex-row items-center gap-3">
-          <Image
-            source={{
-              uri: review?.author_details?.avatar_path
-                ? `${IMAGE_BASE}/${review?.author_details?.avatar_path}`
-                : randomAvatar(),
-            }}
-            style={{ width: 50, height: 50, borderRadius: 24 }}
-            contentFit="cover"
-            cachePolicy="memory-disk"
-          />
+          {review?.author_details?.avatar_path ? (
+            <Image
+              source={{
+                uri: review?.author_details?.avatar_path
+                  ? `${IMAGE_BASE_URL}/${review?.author_details?.avatar_path}`
+                  : randomAvatar(),
+              }}
+              style={{ width: 50, height: 50, borderRadius: 24 }}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
+          ) : (
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: avatarColor + '30',
+              }}
+              className="items-center justify-center">
+              <Text style={{ color: avatarColor }} className="text-lg font-semibold">
+                {review.author?.[0]?.toUpperCase()}
+                {review.author?.[1]?.toUpperCase()}
+              </Text>
+            </View>
+          )}
 
           <View className="flex-1 gap-1">
             <Text numberOfLines={1} className="!text-lg font-semibold">

@@ -24,6 +24,12 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
   const [openModalGallery, setOpenModalGallery] = useState(false);
   const [selectedImage, setSelectedImage] = useState<CastImageProfileProps>();
 
+  let aliases = cast.also_known_as;
+
+  if (typeof aliases === 'string') {
+    aliases = JSON.parse(aliases);
+  }
+
   const handleOpenModal = (image: CastImageProfileProps) => {
     setSelectedImage(image);
     setOpenModalGallery(true);
@@ -41,11 +47,11 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
         contentContainerClassName="gap-5">
         <Text className="gap-2 !text-md">
           Nicknames:{' '}
-          {cast?.also_known_as.map((name, index) => (
+          {aliases?.map((name, index) => (
             <Text key={index} className="!text-neutral-400">
               {name}
 
-              {index === cast.also_known_as.length - 1 ? '' : ', '}
+              {index === aliases?.length - 1 ? '' : ', '}
             </Text>
           ))}
         </Text>

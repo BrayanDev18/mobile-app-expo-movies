@@ -1,7 +1,8 @@
 export * from './cast';
-export * from './MovieAbout';
 export * from './MovieCard';
+export * from './MovieCastAndCrew';
 export * from './MovieComments';
+export * from './MovieGallery';
 export * from './MovieHeader';
 export * from './MovieHorizontalList';
 export * from './MovieInfo';
@@ -9,3 +10,4 @@ export * from './MovieProviders';
 export * from './MoviesHeader';
 export * from './MovieSimilar';
 export * from './MovieTrailers';
+export * from './MovieWatchProviders';

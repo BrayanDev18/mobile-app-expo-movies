@@ -1,11 +1,10 @@
 import { Text } from '@/components';
-import { MovieByCategoryProps } from '@/interfaces';
+import { MovieProps } from '@/interfaces';
 import { formatDate } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { memo } from 'react';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -14,17 +13,18 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface MoviesHeaderProps {
-  movies: MovieByCategoryProps[];
+  movies: MovieProps[];
   scrollX: SharedValue<number>;
+  onItemPress?: (item: MovieProps) => void;
 }
 
 interface ImageItemProps {
-  image: MovieByCategoryProps;
+  image: MovieProps;
   index: number;
   scrollX: SharedValue<number>;
+  onItemPress?: (item: MovieProps) => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -35,9 +35,7 @@ const IMAGE_HEIGHT = IMAGE_WIDTH * 1.5;
 const SPACING = 20;
 
 export const MoviesHeader = (props: MoviesHeaderProps) => {
-  const { movies, scrollX } = props;
-
-  const { top } = useSafeAreaInsets();
+  const { movies, scrollX, onItemPress } = props;
 
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollX.value = e.contentOffset.x / (IMAGE_WIDTH + SPACING);
@@ -49,7 +47,7 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
       horizontal
       snapToInterval={IMAGE_WIDTH + SPACING}
       decelerationRate="fast"
-      style={{ flexGrow: 0, paddingTop: top + 24 }}
+      style={{ flexGrow: 0 }}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{
         gap: SPACING,
@@ -57,7 +55,7 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
       }}
       data={movies}
       renderItem={({ item, index }) => (
-        <ImageItem key={index} image={item} index={index} scrollX={scrollX} />
+        <ImageItem key={index} image={item} index={index} scrollX={scrollX} onItemPress={onItemPress} />
       )}
       onScroll={onScroll}
       scrollEventThrottle={16}
@@ -65,8 +63,8 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
   );
 };
 
-const ImageItem = memo((props: ImageItemProps) => {
-  const { image, index, scrollX } = props;
+const ImageItem = (props: ImageItemProps) => {
+  const { image, index, scrollX, onItemPress } = props;
 
   const imageStyle = useAnimatedStyle(() => {
     const inputRange = [index - 1, index, index + 1];
@@ -93,11 +91,15 @@ const ImageItem = memo((props: ImageItemProps) => {
 
   return (
     <Pressable
-      onPress={() => router.push({ pathname: '/(root)/movie/[id]', params: { id: image.id } })}
+      onPress={() =>
+        onItemPress
+          ? onItemPress(image)
+          : router.push({ pathname: '/(root)/movie/[id]', params: { id: image.id } })
+      }
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
       <Animated.View className="flex-1" style={[imageStyle]}>
         <AnimatedImage
-          source={{ uri: image.poster_path }}
+          source={{ uri: image.poster as string }}
           style={{ width: '100%', height: '100%', borderRadius: 22 }}
           contentFit="fill"
           cachePolicy="memory-disk"
@@ -108,11 +110,7 @@ const ImageItem = memo((props: ImageItemProps) => {
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient} />
 
         <View style={styles.infoContainer}>
-          <BlurView
-            intensity={80}
-            tint="systemChromeMaterialDark"
-            experimentalBlurMethod="dimezisBlurView"
-            style={styles.blurContainer}>
+          <BlurView intensity={80} tint="systemChromeMaterialDark" style={styles.blurContainer}>
             <Text className="text-center !text-[16px] font-bold" numberOfLines={2}>
               {image.title}
             </Text>
@@ -121,7 +119,7 @@ const ImageItem = memo((props: ImageItemProps) => {
               <View className="h-1.5 w-1.5 rounded-full bg-red-500" />
 
               <Text className="!text-md !text-neutral-400">
-                {formatDate(image.release_date as string)}
+                {formatDate(image.releaseDate as string)}
               </Text>
             </View>
           </BlurView>
@@ -129,7 +127,7 @@ const ImageItem = memo((props: ImageItemProps) => {
       </Animated.View>
     </Pressable>
   );
-});
+};
 
 const styles = StyleSheet.create({
   overlay: {

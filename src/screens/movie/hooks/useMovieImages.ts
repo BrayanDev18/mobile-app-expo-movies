@@ -1,49 +1,36 @@
-import { movieImagesTable, moviesDb } from '@/expo-sqlite/db';
-import { MovieImagesProps, MovieImagesResponse } from '@/interfaces';
+import { IMAGE_BASE_URL } from '@/constants';
+import { MovieImages, MovieImagesProps } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
-import { eq } from 'drizzle-orm';
 
-const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
+import * as Localization from 'expo-localization';
+
+const mapImages = (images: MovieImages[] = []): MovieImagesProps[] =>
+  images.map((image) => ({
+    url: `${IMAGE_BASE_URL}${image.file_path}`,
+    aspectRatio: image.aspect_ratio,
+  }));
 
 export const useMovieImages = (movieId: number) => {
+  const language = Localization.getLocales()[0]?.languageCode ?? 'en';
+
   const { data: movieImages, isLoading: isMovieImagesLoading } = useQuery({
     queryKey: ['movieImages', movieId],
     queryFn: async () => {
-      const movieImagesFromLocal = await moviesDb
-        .select()
-        .from(movieImagesTable)
-        .where(eq(movieImagesTable.movie_id, movieId));
-
-      if (movieImagesFromLocal.length > 0) {
-        console.log(`💾 Loaded movie similar ${movieId} from local DB`);
-        return movieImagesFromLocal;
-      }
-
-      const {
-        data: { backdrops: movieImagesFromApi },
-      } = await moviesApi.get<MovieImagesResponse>(`/movie/${movieId}/images`, {
-        params: {
-          language: 'en',
-        },
+      const { data } = await moviesApi.get(`/movie/${movieId}/images`, {
+        params: { language },
       });
 
-      const mappedImages = movieImagesFromApi.map((image) => ({
-        file_path: `${IMAGE_BASE}/${image.file_path}`,
-        aspect_ratio: image.aspect_ratio,
-        movie_id: movieId,
-      }));
-
-      for (const image of mappedImages) {
-        await moviesDb.insert(movieImagesTable).values(image);
-      }
-
-      return mappedImages;
+      return {
+        backdrops: mapImages(data.backdrops),
+        logos: mapImages(data.logos),
+        posters: mapImages(data.posters),
+      };
     },
   });
 
   return {
-    movieImages: movieImages as MovieImagesProps[],
+    movieImages: movieImages,
     isMovieImagesLoading,
   };
 };

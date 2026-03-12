@@ -1,75 +1,81 @@
 import { Text } from '@/components';
+import { MovieProps } from '@/interfaces';
+import { cn, formatDate } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { Star } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 
 interface MovieCardProps {
-  id: number;
-  movieImage: string;
-  width: number;
   onPress?: () => void;
-  height: number;
+  variant?: 'poster' | 'backdrop';
+  width?: number;
+  height?: number;
   rating?: number;
   className?: string;
-  title: string;
-  year?: string;
+  movie: MovieProps;
 }
 
 export const MovieCard = (props: MovieCardProps) => {
-  const { movieImage, width, rating, title, onPress, height, className, year } = props;
+  const { onPress, variant = 'poster', width, height, movie, className } = props;
+
+  const isBackdrop = variant === 'backdrop';
+
+  const cardWidth = width ?? (isBackdrop ? 300 : 170);
+  const cardHeight = height ?? (isBackdrop ? undefined : 220);
+  const movieImage = variant === 'backdrop' ? movie.backdrop : movie.poster;
 
   return (
-    <Pressable style={{ width }} className={`relative px-2 ${className} gap-2`} onPress={onPress}>
-      <BlurView
-        intensity={80}
-        tint="systemChromeMaterialDark"
-        experimentalBlurMethod="dimezisBlurView"
-        style={{
-          width,
-          borderRadius: 12,
-          overflow: 'hidden',
-        }}>
-        <View className="relative w-full">
-          <Image
-            source={{ uri: movieImage }}
-            style={{ width, height, borderTopRightRadius: 10, borderTopLeftRadius: 10 }}
-            cachePolicy="memory-disk"
-            contentFit="cover"
-          />
+    <Pressable
+      style={{ width: cardWidth }}
+      className={cn(className, 'relative rounded-bl-2xl rounded-br-2xl bg-neutral-950/30')}
+      onPress={onPress}>
+      <View>
+        <Image
+          source={{ uri: movieImage as string }}
+          style={{
+            width: cardWidth,
+            height: cardHeight,
+            aspectRatio: isBackdrop ? 1.78 : undefined,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+          contentFit="cover"
+        />
 
+        {movie.rating !== undefined && !isBackdrop && (
           <BlurView
             tint="dark"
             intensity={70}
             style={{
               position: 'absolute',
+              top: 6,
+              right: 6,
               paddingVertical: 5,
-              paddingHorizontal: 12,
+              paddingHorizontal: 10,
               borderRadius: 50,
-              overflow: 'hidden',
-              alignContent: 'flex-end',
-              alignSelf: 'flex-end',
               flexDirection: 'row',
               alignItems: 'center',
-              margin: 5,
+              overflow: 'hidden',
               gap: 4,
             }}>
             <Star color="yellow" size={12} fill="yellow" />
-
-            <Text className="!text-xs font-light">{rating}</Text>
+            <Text className="!text-xs">{movie.rating.toFixed(1)}</Text>
           </BlurView>
-        </View>
+        )}
+      </View>
 
-        <View className="gap-0.5 p-2.5">
-          <Text numberOfLines={1} className="!text-md font-medium">
-            {title}
-          </Text>
+      <View className="gap-0.5 p-2.5">
+        <Text numberOfLines={1} className="!text-md font-medium">
+          {movie.title}
+        </Text>
 
+        {movie.releaseDate && (
           <Text numberOfLines={1} className="text-[13px] !text-neutral-400">
-            {year}
+            {formatDate(movie.releaseDate)}
           </Text>
-        </View>
-      </BlurView>
+        )}
+      </View>
     </Pressable>
   );
 };

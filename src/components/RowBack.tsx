@@ -19,7 +19,6 @@ export const RowBack = ({ onPress = () => router.back() }) => {
         <BlurView
           tint="light"
           intensity={40}
-          experimentalBlurMethod="dimezisBlurView"
           style={{
             alignItems: 'center',
             justifyContent: 'center',

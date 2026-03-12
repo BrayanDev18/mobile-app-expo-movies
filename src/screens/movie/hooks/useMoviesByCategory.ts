@@ -1,57 +1,39 @@
-import { moviesDb, moviesTable } from '@/expo-sqlite/db';
-import { MovieByCategoryProps } from '@/interfaces';
+import { IMAGE_BASE_URL, MovieApiRoutes } from '@/constants';
+import { MovieByCategoryProps, MovieProps } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
-import { eq } from 'drizzle-orm';
 
 export const useMoviesByCategory = (category: string) => {
-  const { data: movies = [], isLoading } = useQuery({
+  const { data: movies = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['movies', category],
     queryFn: async () => {
-      const moviesFromLocal = await moviesDb
-        .select()
-        .from(moviesTable)
-        .where(eq(moviesTable.category, category));
-
-      if (moviesFromLocal.length > 0) {
-        console.log(`💾 Loaded ${category} from local DB`);
-        return moviesFromLocal;
-      }
-
       const {
-        data: { results: moviesFromApi },
-      } = await moviesApi.get(`/movie/${category}`);
+        data: { results: apiMovies },
+      } = await moviesApi.get(MovieApiRoutes.moviesByCategory(category));
 
-      if (!moviesFromApi || moviesFromApi.length === 0) {
+      if (!apiMovies || apiMovies.length === 0) {
         return [];
       }
 
-      const newMoviesArray = moviesFromApi.map((movie: MovieByCategoryProps) => ({
+      const newMoviesArray = apiMovies.map((movie: MovieByCategoryProps) => ({
         id: movie.id,
-        adult: movie.adult,
-        title: movie.title,
+        title: movie.title ?? movie.original_title,
         overview: movie.overview,
-        release_date: movie.release_date,
-        original_language: movie.original_language,
-        vote_average: movie.vote_average,
-        poster_path: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-        backdrop_path: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+        poster: movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : null,
+        backdrop: movie.backdrop_path ? `${IMAGE_BASE_URL}${movie.backdrop_path}` : null,
+        rating: movie.vote_average,
+        releaseDate: movie.release_date,
         category,
       }));
-
-      for (const movie of newMoviesArray) {
-        await moviesDb.insert(moviesTable).values(movie).onConflictDoUpdate({
-          target: moviesTable.id,
-          set: movie,
-        });
-      }
 
       return newMoviesArray;
     },
   });
 
   return {
-    movies: movies as MovieByCategoryProps[],
+    movies: movies as MovieProps[],
     isLoading,
+    isError,
+    refetch,
   };
 };

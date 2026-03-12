@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "mobileappexpomovies",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.mobile-app-expo-movies"
@@ -19,8 +18,6 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.mobileappexpomovies"
     },
     "web": {
@@ -41,7 +38,11 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-font",
+      "expo-sqlite",
+      "expo-web-browser",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,5 +1,4 @@
 import { cn } from '@/utils';
-import { memo } from 'react';
 import { Pressable } from 'react-native';
 import Animated, {
   interpolateColor,
@@ -18,7 +17,7 @@ interface TabsProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export const Tab = memo((props: TabsProps) => {
+export const Tab = (props: TabsProps) => {
   const { title, isActive, onPress, className, adaptableWidth } = props;
 
   const progress = useDerivedValue(() => {
@@ -55,4 +54,4 @@ export const Tab = memo((props: TabsProps) => {
       </Animated.Text>
     </AnimatedPressable>
   );
-});
+};

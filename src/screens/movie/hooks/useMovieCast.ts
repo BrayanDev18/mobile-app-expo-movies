@@ -1,50 +1,40 @@
-import { movieCastTable, moviesDb } from '@/expo-sqlite/db';
-import { MovieCastProps, MovieCastResponse } from '@/interfaces';
+import { IMAGE_BASE_URL } from '@/constants';
+import { MovieCast, MovieCastProps, MovieCrew, MovieCrewProps } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
-import { eq } from 'drizzle-orm';
-
-const IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 export const useMovieCast = (movieId: number) => {
-  const { data: movieCast, isLoading: isMovieCastLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['movieCast', movieId],
     queryFn: async () => {
-      const castFromLocal = await moviesDb
-        .select()
-        .from(movieCastTable)
-        .where(eq(movieCastTable.movie_id, movieId));
-
-      if (castFromLocal.length > 0) {
-        console.log(`💾 Loaded movie similar ${movieId} from local DB`);
-        return castFromLocal;
-      }
-
       const {
-        data: { cast: movieCastFromApi },
-      } = await moviesApi.get<MovieCastResponse>(`/movie/${movieId}/credits`);
+        data: { cast: castFromApi, crew: crewFromApi },
+      } = await moviesApi.get(`/movie/${movieId}/credits`);
 
-      const mappedCast = movieCastFromApi.map((cast) => ({
-        id: cast.id,
-        name: cast.name,
-        character: cast.character,
-        profile_path: `${IMAGE_BASE}/${cast.profile_path}`,
-        movie_id: movieId,
+      const mappedCast: MovieCastProps[] = (castFromApi ?? []).map((c: MovieCast) => ({
+        id: c.id,
+        name: c.name ?? '',
+        character: c.character ?? '',
+        avatar: c.profile_path ? `${IMAGE_BASE_URL}${c.profile_path}` : null,
       }));
 
-      for (const cast of mappedCast) {
-        await moviesDb.insert(movieCastTable).values(cast).onConflictDoUpdate({
-          target: movieCastTable.id,
-          set: cast,
-        });
-      }
+      const mappedCrew: MovieCrewProps[] = (crewFromApi ?? []).map((c: MovieCrew) => ({
+        id: c.id,
+        name: c.name ?? '',
+        job: c.job ?? '',
+        department: c.department ?? '',
+        avatar: c.profile_path ? `${IMAGE_BASE_URL}${c.profile_path}` : null,
+      }));
 
-      return mappedCast;
+      return { cast: mappedCast, crew: mappedCrew };
     },
   });
 
   return {
-    movieCast: movieCast as MovieCastProps[],
-    isMovieCastLoading,
+    movieCast: (data?.cast ?? []) as MovieCastProps[],
+    movieCrew: (data?.crew ?? []) as MovieCrewProps[],
+    isMovieCastLoading: isLoading,
+    isError,
+    refetch,
   };
 };
