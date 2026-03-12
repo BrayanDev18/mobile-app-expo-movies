@@ -28,7 +28,7 @@ const MovieDescriptionScreen = () => {
   const { movieDetails, isMovieDetailsLoading } = useMovieDetails(+id);
   const { movieVideos, isMovieVideosLoading } = useMovieVideos(+id);
   const { similarMovies, isSimilarMoviesLoading } = useSimilarMovies(+id);
-  const { movieCast, isMovieCastLoading } = useMovieCast(+id);
+  const { movieCast, movieCrew, isMovieCastLoading } = useMovieCast(+id);
   const { movieImages, isMovieImagesLoading } = useMovieImages(+id);
   const { movieReviews, isMovieReviewsLoading } = useMovieReview(+id);
   const { movieWatchProviders, isMovieWatchProviders } = useMovieWatchProviders(+id);
@@ -62,7 +62,7 @@ const MovieDescriptionScreen = () => {
 
           <MovieTrailers videos={filteredVideos} />
 
-          <MovieCastAndCrew movieId={movieDetails.id} cast={movieCast} />
+          <MovieCastAndCrew movieId={movieDetails.id} cast={movieCast} movieCrew={movieCrew} />
 
           <MovieWatchProviders providers={movieWatchProviders} />
 

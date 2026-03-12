@@ -4,7 +4,7 @@ import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 
 export const useMovieProviders = () => {
-  const { data: movieProviders, isLoading: isMovieProvidersLoading } = useQuery({
+  const { data: movieProviders, isLoading: isMovieProvidersLoading, isError, refetch } = useQuery({
     queryKey: ['movieProviders'],
     queryFn: async () => {
       const {
@@ -24,5 +24,7 @@ export const useMovieProviders = () => {
   return {
     movieProviders: movieProviders as ProviderProps[],
     isMovieProvidersLoading,
+    isError,
+    refetch,
   };
 };

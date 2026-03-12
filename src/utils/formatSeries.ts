@@ -1,0 +1,33 @@
+import { IMAGE_BASE_URL } from '@/constants';
+import { SeriesDetailsProps, TvSeriesDetails } from '@/interfaces';
+
+export const mapSeriesToDb = (data: TvSeriesDetails): SeriesDetailsProps => ({
+  id: data.id,
+  title: data.name,
+  originalTitle: data.original_name,
+  tagline: data.tagline,
+  overview: data.overview,
+  poster: data.poster_path ? `${IMAGE_BASE_URL}/${data.poster_path}` : null,
+  backdrop: data.backdrop_path ? `${IMAGE_BASE_URL}/${data.backdrop_path}` : null,
+  firstAirDate: data.first_air_date,
+  lastAirDate: data.last_air_date,
+  numberOfSeasons: data.number_of_seasons,
+  numberOfEpisodes: data.number_of_episodes,
+  episodeRunTime: data.episode_run_time ?? [],
+  rating: data.vote_average,
+  voteCount: data.vote_count,
+  popularity: data.popularity,
+  genres: data.genres ?? [],
+  status: data.status,
+  homepage: data.homepage,
+  inProduction: data.in_production,
+  networks: data.networks ?? [],
+  createdBy: data.created_by ?? [],
+  seasons: data.seasons ?? [],
+  productionCompanies: data.production_companies ?? [],
+  productionCountries: data.production_countries ?? [],
+  spokenLanguages: data.spoken_languages ?? [],
+  isAdult: data.adult,
+  originalLanguage: data.original_language,
+  type: data.type,
+});

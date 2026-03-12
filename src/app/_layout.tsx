@@ -8,6 +8,7 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import '../../global.css';
+import '../utils/cssInterop';
 
 const queryClient = new QueryClient({
   defaultOptions: {

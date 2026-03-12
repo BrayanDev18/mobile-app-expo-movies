@@ -13,10 +13,11 @@ interface MovieHorizontalListProps {
   cardWidth?: number;
   cardHeight?: number;
   showSeeAll?: boolean;
+  onItemPress?: (item: MovieProps) => void;
 }
 
 export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
-  const { title, movies, variant = 'poster', cardWidth, cardHeight } = props;
+  const { title, movies, variant = 'poster', cardWidth, cardHeight, onItemPress } = props;
 
   const renderItem = useCallback(
     ({ item }: { item: MovieProps }) => (
@@ -27,14 +28,16 @@ export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
         width={cardWidth}
         height={cardHeight}
         onPress={() =>
-          router.push({
-            pathname: '/(root)/movie/[id]',
-            params: { id: item.id },
-          })
+          onItemPress
+            ? onItemPress(item)
+            : router.push({
+                pathname: '/(root)/movie/[id]',
+                params: { id: item.id },
+              })
         }
       />
     ),
-    [variant, cardWidth, cardHeight]
+    [variant, cardWidth, cardHeight, onItemPress]
   );
 
   return (

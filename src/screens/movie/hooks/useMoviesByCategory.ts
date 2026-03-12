@@ -4,7 +4,7 @@ import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 
 export const useMoviesByCategory = (category: string) => {
-  const { data: movies = [], isLoading } = useQuery({
+  const { data: movies = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['movies', category],
     queryFn: async () => {
       const {
@@ -33,5 +33,7 @@ export const useMoviesByCategory = (category: string) => {
   return {
     movies: movies as MovieProps[],
     isLoading,
+    isError,
+    refetch,
   };
 };

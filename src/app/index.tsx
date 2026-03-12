@@ -1,136 +1,360 @@
-import { Button, Text } from '@/components';
+import { Icon, Text } from '@/components';
 import { navigate } from '@/constants';
 import { useGetTrendingAll } from '@/hooks';
 import { MovieProps } from '@/interfaces';
-import { Marquee } from '@animatereactnative/marquee';
-import { Stagger } from '@animatereactnative/stagger';
-import {} from '@shopify/flash-list';
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
-import { useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
+  FadeInDown,
   FadeInUp,
-  FadeOut,
   interpolate,
-  SharedValue,
-  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withTiming,
 } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface CarouselItemProps {
-  uri: string;
-  index: number;
-  images: string[];
-  offset: SharedValue<number>;
+const POSTER_WIDTH = 100;
+const POSTER_HEIGHT = 150;
+const POSTER_GAP = 8;
+const ITEM_HEIGHT = POSTER_HEIGHT + POSTER_GAP;
+const COLUMNS = 5;
+
+interface MosaicColumnProps {
+  posters: string[];
+  direction: 'up' | 'down';
+  speed: number;
+  columnIndex: number;
 }
 
-const { width } = Dimensions.get('window');
+const COLUMN_CONFIGS: { direction: 'up' | 'down'; speed: number }[] = [
+  { direction: 'up', speed: 0.3 },
+  { direction: 'down', speed: 0.5 },
+  { direction: 'up', speed: 0.4 },
+  { direction: 'down', speed: 0.35 },
+  { direction: 'up', speed: 0.45 },
+];
 
-const IMAGE_WIDTH = width * 0.6;
-const IMAGE_HEIGHT = IMAGE_WIDTH * 1.61;
-const SPACING = 16;
-const IMAGE_SIZE = IMAGE_WIDTH + SPACING;
+const MosaicPoster = ({ uri }: { uri: string }) => (
+  <View
+    style={{ width: POSTER_WIDTH, height: POSTER_HEIGHT, borderRadius: 12, overflow: 'hidden' }}>
+    <Image source={{ uri }} style={{ flex: 1 }} contentFit="fill" cachePolicy="memory-disk" />
+  </View>
+);
 
-const MainIndex = () => {
-  const offset = useSharedValue(0);
-  const [activeIndex, setActiveIndex] = useState(0);
+const MosaicColumn = (props: MosaicColumnProps) => {
+  const { posters, direction, speed, columnIndex } = props;
 
-  const { trendingAll } = useGetTrendingAll();
+  const translateY = useSharedValue(direction === 'up' ? 0 : -ITEM_HEIGHT * posters.length);
+  const totalDrift = ITEM_HEIGHT * posters.length;
 
-  const images = trendingAll?.map((movie: MovieProps) => movie.poster) as string[];
+  useEffect(() => {
+    const target = direction === 'up' ? -totalDrift : 0;
+    translateY.value = withRepeat(
+      withTiming(target, {
+        duration: 50000 / speed,
+        easing: Easing.linear,
+      }),
+      -1,
+      true
+    );
+  }, [direction, speed, totalDrift, translateY, posters.length]);
 
-  useAnimatedReaction(
-    () => {
-      if (!images.length) return 0;
-      const floatIndex = (offset.value + width / 2.5) / IMAGE_SIZE;
-      return Math.abs(Math.floor(floatIndex % images.length));
-    },
-    (value) => {
-      scheduleOnRN(setActiveIndex, value);
-    }
-  );
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const tripled = useMemo(() => [...posters, ...posters, ...posters], [posters]);
 
   return (
-    <View className="flex-1 items-center justify-center bg-neutral-900">
-      <View style={[StyleSheet.absoluteFillObject, { opacity: 0.5 }]}>
-        <Animated.Image
-          key={`image-${activeIndex}`}
-          source={{
-            uri: images[activeIndex] ?? 'https://m.media-amazon.com/images/I/91qmrdkBViL.jpg',
-          }}
-          style={{ flex: 1 }}
-          blurRadius={50}
-          entering={FadeIn.duration(1000)}
-          exiting={FadeOut.duration(1000)}
+    <Animated.View
+      style={[{ gap: POSTER_GAP }, animatedStyle]}
+      entering={FadeIn.delay(columnIndex * 150).duration(800)}>
+      {tripled.map((uri, i) => (
+        <MosaicPoster key={`${columnIndex}-${i}`} uri={uri} />
+      ))}
+    </Animated.View>
+  );
+};
+
+const SkeletonColumn = ({ columnIndex }: { columnIndex: number }) => {
+  const opacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    opacity.value = withRepeat(withTiming(0.6, { duration: 1000 }), -1, true);
+  }, [opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.View style={[{ gap: POSTER_GAP }, animatedStyle]}>
+      {Array.from({ length: 8 }).map((_, i) => (
+        <View
+          key={`skel-${columnIndex}-${i}`}
+          className="rounded-xl bg-neutral-800"
+          style={{ width: POSTER_WIDTH, height: POSTER_HEIGHT }}
         />
-      </View>
+      ))}
+    </Animated.View>
+  );
+};
 
-      <Marquee spacing={SPACING} speed={0.5} position={offset}>
+const MainIndex = () => {
+  const { bottom } = useSafeAreaInsets();
+  const { trendingAll } = useGetTrendingAll();
+
+  const validPosters = useMemo(
+    () => (trendingAll ?? []).filter((m: MovieProps) => m.poster),
+    [trendingAll]
+  );
+
+  const postersByColumn = useMemo(() => {
+    if (!validPosters.length) return [];
+    const columns: string[][] = Array.from({ length: COLUMNS }, () => []);
+    validPosters.forEach((movie: MovieProps, i: number) => {
+      columns[i % COLUMNS].push(movie.poster as string);
+    });
+    return columns;
+  }, [validPosters]);
+
+  const featuredMovie = validPosters[0];
+  const hasData = validPosters.length > 0;
+
+  return (
+    <View style={{ flex: 1, backgroundColor: '#0F1016' }}>
+      {featuredMovie && (
         <Animated.View
-          style={{ gap: SPACING }}
-          entering={FadeInUp.duration(800)
-            .easing(Easing.elastic(0.9))
-            .withInitialValues({
-              transform: [{ translateY: -IMAGE_HEIGHT / 2 }],
-            })}
-          className="flex-row">
-          {images.map((uri, index) => (
-            <CarouselItem key={index} index={index} uri={uri} offset={offset} images={images} />
-          ))}
+          entering={FadeIn.duration(800)}
+          style={[StyleSheet.absoluteFill, { opacity: 0.4 }]}>
+          <Image
+            source={{ uri: featuredMovie.poster }}
+            style={{ flex: 1 }}
+            blurRadius={60}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+          />
         </Animated.View>
-      </Marquee>
+      )}
 
-      <Stagger initialEnteringDelay={500} duration={500} stagger={100}>
-        <View className="mt-10 gap-3 px-10">
-          <View className="items-center">
-            <Text className="!text-xl font-light">Welcome to</Text>
+      <Animated.View
+        entering={FadeIn.duration(1200)}
+        accessibilityElementsHidden
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            alignItems: 'center',
+            justifyContent: 'center',
+            transform: [{ rotate: '-15deg' }, { scale: 1.4 }],
+          },
+        ]}>
+        <View style={{ flexDirection: 'row', gap: POSTER_GAP }}>
+          {hasData
+            ? postersByColumn.map((posters, i) => (
+                <MosaicColumn
+                  key={`col-${i}`}
+                  posters={posters}
+                  direction={COLUMN_CONFIGS[i].direction}
+                  speed={COLUMN_CONFIGS[i].speed}
+                  columnIndex={i}
+                />
+              ))
+            : Array.from({ length: COLUMNS }).map((_, i) => (
+                <SkeletonColumn key={`skel-col-${i}`} columnIndex={i} />
+              ))}
+        </View>
+      </Animated.View>
 
-            <Text className="!text-6xl font-bold">Flixora</Text>
+      <LinearGradient
+        colors={[
+          'transparent',
+          'rgba(0,0,0,0.2)',
+          'rgba(0,0,0,0.7)',
+          'rgba(0,0,0,0.95)',
+          '#0F1016',
+        ]}
+        locations={[0, 0.3, 0.55, 0.7, 1.0]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
+      <View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            justifyContent: 'flex-end',
+            paddingBottom: bottom + 40,
+          },
+        ]}>
+        <View className="items-center gap-5">
+          <View className="items-center gap-2">
+            <Animated.View
+              entering={FadeIn.delay(700).duration(600)}
+              style={{
+                width: 40,
+                height: 2,
+                backgroundColor: '#68BEF1',
+                borderRadius: 1,
+                marginBottom: 4,
+              }}
+            />
+
+            <Animated.View entering={FadeInDown.delay(800).springify().damping(30).stiffness(200)}>
+              <Text className="!text-5xl font-bold" style={{ letterSpacing: 6 }}>
+                FLIXORA
+              </Text>
+            </Animated.View>
+
+            <Animated.View entering={FadeInDown.delay(900).springify().damping(30).stiffness(200)}>
+              <Text
+                className="!text-md font-light !text-neutral-400"
+                style={{ letterSpacing: 3 }}>
+                YOUR CINEMA, REIMAGINED
+              </Text>
+            </Animated.View>
           </View>
 
-          <Text className="mb-4 text-center !text-xl leading-9 !text-neutral-200">
-            Discover trending movies, explore stunning posters, and dive into smooth animations that
-            bring cinema to life. 🍿✨
-          </Text>
+          <Animated.View entering={FadeInUp.delay(950).springify().damping(30).stiffness(200)}>
+            <View
+              style={{
+                borderRadius: 50,
+                overflow: 'hidden',
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.08)',
+              }}
+              accessibilityLabel={`${validPosters.length} movies trending today`}>
+              <BlurView
+                intensity={40}
+                tint="dark"
+                className="flex-row items-center gap-2.5 px-5 py-2.5">
+                <View
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: '#68BEF1',
+                  }}
+                />
+                <Icon name="TrendingUp" size={13} color="#68BEF1" />
 
-          <Button title="Get started" onPress={() => navigate('home')} />
+                <Text
+                  className="text-xs font-semibold !text-light-300"
+                  style={{ letterSpacing: 1.5 }}>
+                  {validPosters.length} TRENDING NOW
+                </Text>
+
+                <View
+                  style={{
+                    width: 1,
+                    height: 12,
+                    backgroundColor: 'rgba(255,255,255,0.15)',
+                    marginHorizontal: 2,
+                  }}
+                />
+                <View className="flex-row" style={{ marginLeft: -2 }}>
+                  {validPosters.slice(0, 3).map((movie: MovieProps, i: number) => (
+                    <View
+                      key={movie.id}
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 10,
+                        overflow: 'hidden',
+                        borderWidth: 1.5,
+                        borderColor: '#0F1016',
+                        marginLeft: i > 0 ? -6 : 0,
+                        zIndex: 3 - i,
+                      }}>
+                      <Image
+                        source={{ uri: movie.poster }}
+                        style={{ flex: 1 }}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                      />
+                    </View>
+                  ))}
+                </View>
+              </BlurView>
+            </View>
+          </Animated.View>
+
+          <Animated.View
+            entering={FadeInUp.delay(1100).springify().damping(30).stiffness(200)}
+            className="w-full px-8">
+            <ShimmerCTA onPress={() => navigate('home')} />
+          </Animated.View>
         </View>
-      </Stagger>
+      </View>
     </View>
   );
 };
 
-export default MainIndex;
+const ShimmerCTA = ({ onPress }: { onPress: () => void }) => {
+  const shimmer = useSharedValue(-1);
 
-const CarouselItem = (props: CarouselItemProps) => {
-  const { uri, index, offset, images } = props;
+  useEffect(() => {
+    shimmer.value = withRepeat(
+      withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      false
+    );
+  }, [shimmer]);
 
-  const imageStyles = useAnimatedStyle(() => {
-    const itemPosition = index * IMAGE_SIZE - width - IMAGE_SIZE / 2;
-    const totalSize = images.length * IMAGE_SIZE;
-    const range =
-      ((itemPosition - (offset.value + totalSize * 1000)) % totalSize) + width + IMAGE_SIZE / 2;
-
-    return {
-      transform: [
-        {
-          rotate: `${interpolate(
-            range,
-            [-IMAGE_SIZE, (width - IMAGE_SIZE) / 2, width],
-            [-3, 0, 3]
-          )}deg`,
-        },
-      ],
-    };
-  });
+  const shimmerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(shimmer.value, [-1, 1], [-200, 200]) }],
+  }));
 
   return (
-    <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, imageStyles]}>
-      <Image source={{ uri }} style={{ flex: 1, borderRadius: 16 }} cachePolicy="memory-disk" />
-    </Animated.View>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel="Get started — explore trending movies">
+      <LinearGradient
+        colors={['#68BEF1', '#2563EB']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={{
+          height: 52,
+          borderRadius: 50,
+          overflow: 'hidden',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              width: 80,
+              height: '100%',
+              opacity: 0.25,
+            },
+            shimmerStyle,
+          ]}>
+          <LinearGradient
+            colors={['transparent', 'rgba(255,255,255,0.6)', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
+
+        <View className="flex-row items-center gap-2">
+          <Text className="!text-md font-semibold" style={{ letterSpacing: 1 }}>
+            GET STARTED
+          </Text>
+
+          <Icon name="ArrowRight" size={18} color="white" />
+        </View>
+      </LinearGradient>
+    </Pressable>
   );
 };
+
+export default MainIndex;

@@ -92,7 +92,6 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({ state, descriptors, navigat
     <BlurView
       style={{ paddingBottom: bottom }}
       intensity={80}
-      experimentalBlurMethod="dimezisBlurView"
       tint="systemChromeMaterialDark"
       className="absolute bottom-0 left-0 right-0 z-50 flex-row justify-center gap-4 overflow-hidden rounded-t-3xl bg-neutral-800 p-3">
       {state.routes.map((route, index) => {
