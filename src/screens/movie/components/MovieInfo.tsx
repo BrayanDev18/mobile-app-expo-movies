@@ -2,11 +2,16 @@ import { ExpandableText, Text } from '@/components';
 import { MovieDetailsProps } from '@/interfaces';
 import { formatDuration } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
 import { Star } from 'lucide-react-native';
-import { ScrollView, View } from 'react-native';
+import { Linking, Pressable, ScrollView, View } from 'react-native';
 
-export const MovieInfo = ({ movie }: { movie: MovieDetailsProps }) => (
+interface MovieInfoProps {
+  movie: MovieDetailsProps;
+  certification?: string | null;
+  director?: string | null;
+}
+
+export const MovieInfo = ({ movie, certification, director }: MovieInfoProps) => (
   <View className="gap-8">
     <View className="gap-4">
       <View className="gap-1">
@@ -15,12 +20,16 @@ export const MovieInfo = ({ movie }: { movie: MovieDetailsProps }) => (
         </Text>
 
         {movie?.homepage ? (
-          <Link
-            href={movie?.homepage as any}
-            numberOfLines={1}
-            className="flex-1 !text-md text-blue-500 underline">
-            {movie?.homepage}
-          </Link>
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel="Open official website"
+            hitSlop={8}
+            className="flex-row items-center gap-1 self-start py-1"
+            onPress={() => Linking.openURL(movie.homepage as string)}>
+            <Ionicons name="globe-outline" size={14} color="#60A5FA" />
+
+            <Text className="!text-[13px] font-medium !text-blue-400">Official website</Text>
+          </Pressable>
         ) : null}
       </View>
 
@@ -30,6 +39,16 @@ export const MovieInfo = ({ movie }: { movie: MovieDetailsProps }) => (
 
           <Text className="text-sm font-medium text-white/60">{movie.rating.toFixed(1)}</Text>
         </View>
+
+        {movie.releaseDate ? (
+          <View className="flex-row items-center gap-1">
+            <Ionicons name="calendar-outline" size={15} color="rgba(255,255,255,0.6)" />
+
+            <Text className="text-sm font-medium text-white/60">
+              {movie.releaseDate.slice(0, 4)}
+            </Text>
+          </View>
+        ) : null}
 
         <View className="flex-row items-center gap-1">
           <Ionicons name="time-outline" size={16} color="rgba(255,255,255,0.6)" />
@@ -44,9 +63,9 @@ export const MovieInfo = ({ movie }: { movie: MovieDetailsProps }) => (
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerClassName="flex-row items-center gap-2">
-        {!movie?.isAdult && (
+        {certification && (
           <View className="rounded-full bg-red-500/60 px-2 py-1">
-            <Text className="font-semibold">18+</Text>
+            <Text className="text-xs font-semibold">{certification}</Text>
           </View>
         )}
 
@@ -58,6 +77,12 @@ export const MovieInfo = ({ movie }: { movie: MovieDetailsProps }) => (
           ))}
         </View>
       </ScrollView>
+
+      {director && (
+        <Text className="!text-[13px] !text-neutral-400">
+          Directed by <Text className="!text-[13px] font-semibold !text-neutral-200">{director}</Text>
+        </Text>
+      )}
     </View>
 
     <View className="gap-2">

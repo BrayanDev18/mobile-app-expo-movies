@@ -16,6 +16,13 @@ export interface CastDetailsProps {
   profile_path: string;
 }
 
+export interface PersonSocialLinkProps {
+  key: string;
+  icon: string;
+  label: string;
+  url: string;
+}
+
 export interface CastImagesRecord {
   cast_id: number;
   profiles: string;

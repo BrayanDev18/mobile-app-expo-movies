@@ -1,5 +1,5 @@
-import { IMAGE_BASE_URL } from '@/constants';
 import { MovieDetails, MovieDetailsProps } from '@/interfaces';
+import { tmdbImage } from './tmdbImage';
 
 export const mapMovieToDb = (data: MovieDetails): MovieDetailsProps => ({
   id: data.id,
@@ -7,8 +7,8 @@ export const mapMovieToDb = (data: MovieDetails): MovieDetailsProps => ({
   originalTitle: data.original_title,
   tagline: data.tagline,
   overview: data.overview,
-  poster: `${IMAGE_BASE_URL}/${data.poster_path}`,
-  backdrop: `${IMAGE_BASE_URL}/${data.backdrop_path}`,
+  poster: tmdbImage(data.poster_path),
+  backdrop: tmdbImage(data.backdrop_path),
   releaseDate: data.release_date,
   runtime: data.runtime,
   rating: data.vote_average,

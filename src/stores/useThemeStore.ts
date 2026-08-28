@@ -1,5 +1,5 @@
 import Storage from 'expo-sqlite/kv-store';
-import { colorScheme } from 'nativewind';
+import { Appearance } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -18,11 +18,11 @@ export const useThemeStore = create<ThemeStore>()(
       toggleTheme: () => {
         const newTheme = get().theme === 'light' ? 'dark' : 'light';
         set({ theme: newTheme });
-        colorScheme.set(newTheme);
+        Appearance.setColorScheme(newTheme);
       },
       setTheme: (theme) => {
         set({ theme });
-        colorScheme.set(theme);
+        Appearance.setColorScheme(theme);
       },
     }),
     {
@@ -32,11 +32,11 @@ export const useThemeStore = create<ThemeStore>()(
         return (state, error) => {
           if (error) {
             console.error('Error rehydrating theme:', error);
-            colorScheme.set('light');
+            Appearance.setColorScheme('light');
             return;
           }
           if (state?.theme) {
-            colorScheme.set(state.theme);
+            Appearance.setColorScheme(state.theme);
           }
         };
       },

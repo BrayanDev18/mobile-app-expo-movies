@@ -1,4 +1,4 @@
-import { useScrollToTop } from '@react-navigation/native';
+import { useScrollToTop } from 'expo-router/react-navigation';
 import { StatusBarProps } from 'expo-status-bar';
 import React, { useRef, useState } from 'react';
 import {

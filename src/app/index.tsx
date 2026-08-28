@@ -1,136 +1,121 @@
-import { Button, Text } from '@/components';
+import { Button, Icon, Text } from '@/components';
 import { navigate } from '@/constants';
-import { useGetTrendingAll } from '@/hooks';
-import { MovieProps } from '@/interfaces';
-import { Marquee } from '@animatereactnative/marquee';
-import { Stagger } from '@animatereactnative/stagger';
-import {} from '@shopify/flash-list';
+import { useTrending } from '@/hooks';
+import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
 import { Image } from 'expo-image';
-import { useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  FadeInUp,
-  FadeOut,
-  interpolate,
-  SharedValue,
-  useAnimatedReaction,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface CarouselItemProps {
-  uri: string;
-  index: number;
-  images: string[];
-  offset: SharedValue<number>;
-}
+const COLUMNS = 3;
 
-const { width } = Dimensions.get('window');
+const TILE_HEIGHTS = [210, 150, 180, 160, 220, 140];
 
-const IMAGE_WIDTH = width * 0.6;
-const IMAGE_HEIGHT = IMAGE_WIDTH * 1.61;
-const SPACING = 16;
-const IMAGE_SIZE = IMAGE_WIDTH + SPACING;
+const COLUMN_OFFSETS = [-60, -100, -70];
+
+const FEATURES = [
+  { icon: 'TrendingUp', label: 'Fresh trending picks, updated daily' },
+  { icon: 'Compass', label: 'Browse by genre, decade, or streaming service' },
+  { icon: 'Clapperboard', label: 'Trailers, cast, galleries, and where to watch' },
+] as const;
+
+const splitIntoColumns = (uris: string[]) => {
+  const cols = Array.from({ length: COLUMNS }, () => ({
+    items: [] as { uri: string; height: number }[],
+    height: 0,
+  }));
+
+  uris.forEach((uri, index) => {
+    const height = TILE_HEIGHTS[index % TILE_HEIGHTS.length];
+    const shortest = cols.reduce((prev, curr) => (curr.height < prev.height ? curr : prev));
+
+    shortest.items.push({ uri, height });
+    shortest.height += height;
+  });
+
+  return cols.map((col) => col.items);
+};
 
 const MainIndex = () => {
-  const offset = useSharedValue(0);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const { bottom } = useSafeAreaInsets();
+  const { trending } = useTrending('all', 'day');
 
-  const { trendingAll } = useGetTrendingAll();
+  const images = trending
+    .map((movie) => movie.poster)
+    .filter((poster): poster is string => !!poster)
+    .slice(0, 21);
 
-  const images = trendingAll?.map((movie: MovieProps) => movie.poster) as string[];
-
-  useAnimatedReaction(
-    () => {
-      if (!images.length) return 0;
-      const floatIndex = (offset.value + width / 2.5) / IMAGE_SIZE;
-      return Math.abs(Math.floor(floatIndex % images.length));
-    },
-    (value) => {
-      scheduleOnRN(setActiveIndex, value);
-    }
-  );
+  const columns = splitIntoColumns(images);
 
   return (
-    <View className="flex-1 items-center justify-center bg-neutral-900">
-      <View style={[StyleSheet.absoluteFillObject, { opacity: 0.5 }]}>
-        <Animated.Image
-          key={`image-${activeIndex}`}
-          source={{
-            uri: images[activeIndex] ?? 'https://m.media-amazon.com/images/I/91qmrdkBViL.jpg',
-          }}
-          style={{ flex: 1 }}
-          blurRadius={50}
-          entering={FadeIn.duration(1000)}
-          exiting={FadeOut.duration(1000)}
-        />
+    <View className="flex-1 bg-dark-700">
+      <View style={[StyleSheet.absoluteFill, { overflow: 'hidden' }]}>
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { transform: [{ rotate: '-8deg' }, { scale: 1.25 }] },
+          ]}
+          className="flex-row gap-2 px-2">
+          {columns.map((column, columnIndex) => (
+            <View
+              key={columnIndex}
+              style={{ flex: 1, gap: 8, marginTop: COLUMN_OFFSETS[columnIndex] }}>
+              {column.map((tile, tileIndex) => (
+                <Animated.View
+                  key={`${tile.uri}-${tileIndex}`}
+                  entering={FadeIn.delay((tileIndex * COLUMNS + columnIndex) * 60).duration(400)}>
+                  <Image
+                    source={{ uri: tmdbResize(tile.uri, 'w342') ?? undefined }}
+                    style={{ width: '100%', height: tile.height, borderRadius: 12 }}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    placeholder={IMAGE_PLACEHOLDER}
+                  />
+                </Animated.View>
+              ))}
+            </View>
+          ))}
+        </View>
       </View>
 
-      <Marquee spacing={SPACING} speed={0.5} position={offset}>
-        <Animated.View
-          style={{ gap: SPACING }}
-          entering={FadeInUp.duration(800)
-            .easing(Easing.elastic(0.9))
-            .withInitialValues({
-              transform: [{ translateY: -IMAGE_HEIGHT / 2 }],
-            })}
-          className="flex-row">
-          {images.map((uri, index) => (
-            <CarouselItem key={index} index={index} uri={uri} offset={offset} images={images} />
-          ))}
-        </Animated.View>
-      </Marquee>
+      <LinearGradient
+        colors={['rgba(6,6,6,0)', 'rgba(6,6,6,0.25)', 'rgba(6,6,6,0.9)', '#060606']}
+        locations={[0, 0.42, 0.72, 0.92]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <Stagger initialEnteringDelay={500} duration={500} stagger={100}>
-        <View className="mt-10 gap-3 px-10">
-          <View className="items-center">
-            <Text className="!text-xl font-light">Welcome to</Text>
+      <View style={{ paddingBottom: bottom + 24 }} className="flex-1 justify-end gap-6 px-6">
+        <Animated.View entering={FadeInDown.delay(350).duration(500)} className="gap-2">
+          <View className="h-1 w-10 rounded-full bg-blue-500" />
 
-            <Text className="!text-6xl font-bold">Flixora</Text>
-          </View>
-
-          <Text className="mb-4 text-center !text-xl leading-9 !text-neutral-200">
-            Discover trending movies, explore stunning posters, and dive into smooth animations that
-            bring cinema to life. 🍿✨
+          <Text className="font-black" style={{ fontSize: 56, lineHeight: 58, letterSpacing: -2 }}>
+            Flixora
           </Text>
 
-          <Button title="Get started" onPress={() => navigate('home')} />
-        </View>
-      </Stagger>
+          <Text className="!text-lg leading-7 !text-neutral-300">
+            Everything worth watching, in one place.
+          </Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(500).duration(500)} className="gap-3">
+          {FEATURES.map((feature) => (
+            <View key={feature.icon} className="flex-row items-center gap-3">
+              <Icon name={feature.icon} size={18} color="#60A5FA" />
+
+              <Text className="flex-1 !text-md !text-neutral-200">{feature.label}</Text>
+            </View>
+          ))}
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(650).duration(500)} className="gap-3">
+          <Button title="Get started" onPress={() => navigate('home', 'replace')} />
+
+          <Text className="text-center !text-[11px] !text-neutral-400">Powered by TMDB</Text>
+        </Animated.View>
+      </View>
     </View>
   );
 };
 
 export default MainIndex;
-
-const CarouselItem = (props: CarouselItemProps) => {
-  const { uri, index, offset, images } = props;
-
-  const imageStyles = useAnimatedStyle(() => {
-    const itemPosition = index * IMAGE_SIZE - width - IMAGE_SIZE / 2;
-    const totalSize = images.length * IMAGE_SIZE;
-    const range =
-      ((itemPosition - (offset.value + totalSize * 1000)) % totalSize) + width + IMAGE_SIZE / 2;
-
-    return {
-      transform: [
-        {
-          rotate: `${interpolate(
-            range,
-            [-IMAGE_SIZE, (width - IMAGE_SIZE) / 2, width],
-            [-3, 0, 3]
-          )}deg`,
-        },
-      ],
-    };
-  });
-
-  return (
-    <Animated.View style={[{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }, imageStyles]}>
-      <Image source={{ uri }} style={{ flex: 1, borderRadius: 16 }} cachePolicy="memory-disk" />
-    </Animated.View>
-  );
-};

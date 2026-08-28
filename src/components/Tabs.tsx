@@ -49,7 +49,7 @@ export const Tab = (props: TabsProps) => {
         adaptableWidth ? 'px-5' : 'flex-1',
         'h-10 items-center justify-center rounded-full px-4'
       )}>
-      <Animated.Text style={textStyle} className="text-base font-medium">
+      <Animated.Text style={textStyle} className="font-satoshi text-base font-medium">
         {title}
       </Animated.Text>
     </AnimatedPressable>

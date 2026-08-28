@@ -43,7 +43,7 @@ export const Input: React.FC<InputProps> = ({
             className={cn(
               className,
               `flex-row items-center gap-3 rounded-2xl border-2 bg-neutral-800 px-4 ${
-                error ? 'border-red-400' : isFocused ? 'border-cyan-600' : 'border-transparent'
+                error ? 'border-red-400' : isFocused ? 'border-blue-500' : 'border-transparent'
               }`
             )}>
             {iconName ? <Icon name={iconName} color="gray" size={20} /> : null}
@@ -58,7 +58,7 @@ export const Input: React.FC<InputProps> = ({
                 onBlur();
               }}
               secureTextEntry={isPassword && !showPassword}
-              className="h-12 flex-1 text-neutral-200"
+              className="h-12 flex-1 font-satoshi text-neutral-200"
               placeholderTextColor="#9ca3af"
             />
 

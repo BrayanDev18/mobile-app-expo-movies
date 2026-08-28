@@ -1,12 +1,39 @@
+export type MediaType = 'movie' | 'tv';
+export type TrendingWindow = 'day' | 'week';
+
 export interface MovieProps {
   id: number;
   title: string;
   overview: string;
-  poster: string;
+  poster: string | null;
   backdrop: string | null;
   rating: number;
   releaseDate: string;
   category?: string;
+  mediaType?: MediaType;
+}
+
+export interface TrendingResultProps {
+  id: number;
+  media_type: MediaType | 'person';
+  title?: string;
+  name?: string;
+  original_title?: string;
+  overview?: string;
+  poster_path?: string | null;
+  backdrop_path?: string | null;
+  profile_path?: string | null;
+  vote_average?: number;
+  release_date?: string;
+  first_air_date?: string;
+  known_for_department?: string;
+}
+
+export interface PersonProps {
+  id: number;
+  name: string;
+  avatar: string | null;
+  knownFor?: string;
 }
 
 export interface SimilarMoviesResponse {
@@ -158,6 +185,10 @@ export interface MovieCast {
   profile_path: string | null;
 }
 
+export interface MovieCrewProps extends MovieCastProps {
+  job: string;
+}
+
 export interface MoviesByCategoryResponse {
   results: MovieByCategoryProps[];
   total_pages: number;
@@ -178,6 +209,42 @@ export interface MovieByCategoryProps {
   category: string;
 }
 
+export interface WatchProvidersResponse {
+  results: WatchProviderProps[];
+}
+
+export interface WatchProviderProps {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+  display_priority?: number;
+  display_priorities?: Record<string, number>;
+}
+
+export interface StreamingProviderProps {
+  id: number;
+  name: string;
+  logo: string | null;
+}
+
+export interface CollectionDetailsResponse {
+  id: number;
+  name: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  parts: MovieByCategoryProps[];
+}
+
+export interface CollectionProps {
+  id: number;
+  name: string;
+  overview: string;
+  poster: string | null;
+  backdrop: string | null;
+  parts: MovieProps[];
+}
+
 export interface MovieProvidersResponse {
   results: MovieProvidersProps[];
 }
@@ -192,4 +259,11 @@ export interface MovieProvidersProps {
   provider_id: number;
   provider_name: string;
   logo_path: string;
+}
+
+export interface RegionWatchProvidersProps {
+  link?: string;
+  flatrate?: MovieProvidersProps[];
+  rent?: MovieProvidersProps[];
+  buy?: MovieProvidersProps[];
 }

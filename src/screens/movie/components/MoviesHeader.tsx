@@ -1,6 +1,6 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { formatDate } from '@/utils';
+import { formatDate, IMAGE_PLACEHOLDER } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -89,14 +89,19 @@ const ImageItem = (props: ImageItemProps) => {
 
   return (
     <Pressable
-      onPress={() => router.push({ pathname: '/(root)/movie/[id]', params: { id: image.id } })}
+      onPress={() => {
+        if (image.mediaType === 'tv') return;
+
+        router.push({ pathname: '/(root)/movie/[id]', params: { id: image.id } });
+      }}
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
-      <Animated.View className="flex-1" style={[imageStyle]}>
+      <Animated.View style={[{ flex: 1 }, imageStyle]}>
         <AnimatedImage
           source={{ uri: image.poster as string }}
           style={{ width: '100%', height: '100%', borderRadius: 22 }}
           contentFit="fill"
           cachePolicy="memory-disk"
+          placeholder={IMAGE_PLACEHOLDER}
         />
 
         <Animated.View style={[styles.overlay, overlayStyle]} />
@@ -107,7 +112,6 @@ const ImageItem = (props: ImageItemProps) => {
           <BlurView
             intensity={80}
             tint="systemChromeMaterialDark"
-            experimentalBlurMethod="dimezisBlurView"
             style={styles.blurContainer}>
             <Text className="text-center !text-[16px] font-bold" numberOfLines={2}>
               {image.title}
@@ -129,7 +133,7 @@ const ImageItem = (props: ImageItemProps) => {
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
     borderRadius: 22,
   },

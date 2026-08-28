@@ -1,5 +1,6 @@
 export * from './Button';
 export * from './ExpandableText';
+export * from './FloatingTabBar';
 export * from './Icon';
 export * from './ImagePreviewModal';
 export * from './Input';
@@ -7,6 +8,7 @@ export * from './Loader';
 export * from './RowBack';
 export * from './Screen';
 export * from './SectionHeader';
+export * from './Interop';
 export * from './SwipeTabs';
 export * from './Tabs';
 export * from './Text';

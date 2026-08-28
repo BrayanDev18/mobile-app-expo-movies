@@ -4,11 +4,11 @@ import * as Localization from 'expo-localization';
 
 interface MovieWatchProvidersProps {
   id: number;
-  results: string;
+  results: Record<string, any>;
 }
 
 const getProvidersByRegion = (results: MovieWatchProvidersProps['results'], region: string) => {
-  return results[region as any] ?? results.US ?? null;
+  return results[region] ?? results.US ?? null;
 };
 
 export const useMovieWatchProviders = (movieId: number) => {

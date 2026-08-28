@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  NativeSyntheticEvent,
+  TextLayoutEventData,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Text } from './Text';
 
 interface ExpandableTextProps {
@@ -12,28 +17,44 @@ export const ExpandableText = (props: ExpandableTextProps) => {
   const { children, numberOfLines = 2, textClassname = '' } = props;
 
   const [expanded, setExpanded] = useState(false);
-  const [height, setHeight] = useState(0);
+  const [showToggle, setShowToggle] = useState(false);
+  const [measured, setMeasured] = useState(false);
 
-  const toggleExpand = () => {
-    setExpanded((prev) => !prev);
-    setHeight(expanded ? 0 : 1);
+  useEffect(() => {
+    setExpanded(false);
+    setShowToggle(false);
+    setMeasured(false);
+  }, [children]);
+
+  const onMeasure = (event: NativeSyntheticEvent<TextLayoutEventData>) => {
+    setShowToggle(event.nativeEvent.lines.length > numberOfLines);
+    setMeasured(true);
   };
 
   return (
     <View className="w-full">
-      <View
-        style={{
-          height: height === 0 ? undefined : 'auto',
-          overflow: 'hidden',
-        }}>
-        <Text numberOfLines={expanded ? undefined : numberOfLines} className={textClassname}>
+      {!measured && (
+        <Text
+          className={textClassname}
+          style={{ position: 'absolute', opacity: 0, width: '100%' }}
+          onTextLayout={onMeasure}>
           {children}
         </Text>
-      </View>
+      )}
 
-      <TouchableOpacity onPress={toggleExpand} className="self-end">
-        <Text className="font-semibold !text-blue-500" tx={expanded ? 'Show less' : 'Show more'} />
-      </TouchableOpacity>
+      <Text numberOfLines={expanded ? undefined : numberOfLines} className={textClassname}>
+        {children}
+      </Text>
+
+      {showToggle && (
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={expanded ? 'Show less' : 'Show more'}
+          onPress={() => setExpanded((prev) => !prev)}
+          className="self-end">
+          <Text className="font-semibold !text-blue-500" tx={expanded ? 'Show less' : 'Show more'} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };

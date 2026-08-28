@@ -1,7 +1,7 @@
 import { Loader, Screen, Text } from '@/components';
 import { useSimilarMovies } from '@/hooks';
 import { MovieProps } from '@/interfaces';
-import { formatSpecialDate } from '@/utils';
+import { formatSpecialDate, IMAGE_PLACEHOLDER } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -51,6 +51,7 @@ const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
         }}
         contentFit="cover"
         cachePolicy="memory-disk"
+        placeholder={IMAGE_PLACEHOLDER}
       />
 
       <View className="gap-1 p-3">

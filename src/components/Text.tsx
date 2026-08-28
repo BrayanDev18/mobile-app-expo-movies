@@ -24,7 +24,7 @@ export function Text({
   const content = text || i18nText || children;
 
   return (
-    <RNText {...rest} style={$styleOverride} className={cn(className, 'text-sm text-white')}>
+    <RNText {...rest} style={$styleOverride} className={cn(className, 'font-satoshi text-sm text-white')}>
       {content}
     </RNText>
   );

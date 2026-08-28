@@ -1,3 +1,6 @@
 export * from '../screens/movie/hooks';
-export * from './useGetTrendingAll';
+export * from './useDebouncedValue';
 export * from './useSafeAreaInsetsStyle';
+export * from './useSearchMulti';
+export * from './useTrending';
+export * from './useTrendingPeople';

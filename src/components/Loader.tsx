@@ -1,7 +1,15 @@
-import { Animated, Easing, View } from 'react-native';
-import { Screen } from './Screen';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedProps,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
+import { Screen } from './Screen';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -11,23 +19,17 @@ const RADIUS = (SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export const Loader = () => {
-  const progressAnim = useRef(new Animated.Value(0)).current;
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    Animated.loop(
-      Animated.timing(progressAnim, {
-        toValue: 1,
-        duration: 2000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
+    progress.value = withRepeat(withTiming(1, { duration: 2000, easing: Easing.linear }), -1);
 
-  const strokeDashoffset = progressAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [CIRCUMFERENCE, 0],
-  });
+    return () => cancelAnimation(progress);
+  }, [progress]);
+
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: CIRCUMFERENCE * (1 - progress.value),
+  }));
 
   return (
     <Screen>
@@ -43,6 +45,7 @@ export const Loader = () => {
           />
 
           <AnimatedCircle
+            animatedProps={animatedProps}
             stroke="#FCBD11"
             fill="none"
             cx={SIZE / 2}
@@ -50,7 +53,6 @@ export const Loader = () => {
             r={RADIUS}
             strokeWidth={STROKE_WIDTH}
             strokeDasharray={`${CIRCUMFERENCE}, ${CIRCUMFERENCE}`}
-            strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
           />
         </Svg>

@@ -1,5 +1,6 @@
 import { ImagePreviewModal, Text } from '@/components';
 import { MovieImages, MovieImagesResponse } from '@/interfaces';
+import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
@@ -65,6 +66,7 @@ export const MovieGallery = ({
                   }}
                   cachePolicy="memory-disk"
                   contentFit="cover"
+                  placeholder={IMAGE_PLACEHOLDER}
                 />
               </Pressable>
             )}

@@ -1,26 +1,60 @@
 import { Loader, Screen, Tab, Text } from '@/components';
 import { useMovieCast } from '@/hooks';
 import { MovieCastProps } from '@/interfaces';
+import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useCallback, useMemo, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+type CastTab = 'actors' | 'producers' | 'directors' | 'writers';
+
+const TABS: { key: CastTab; label: string }[] = [
+  { key: 'actors', label: 'Actors' },
+  { key: 'directors', label: 'Directors' },
+  { key: 'producers', label: 'Producers' },
+  { key: 'writers', label: 'Writers' },
+];
+
+const WRITER_JOBS = ['Writer', 'Screenplay', 'Story', 'Novel', 'Author', 'Characters'];
+
+const uniqueById = <T extends { id: number }>(members: T[]): T[] => {
+  const seen = new Set<number>();
+
+  return members.filter((member) => {
+    if (seen.has(member.id)) return false;
+
+    seen.add(member.id);
+    return true;
+  });
+};
 
 const CastList = () => {
   const { id } = useLocalSearchParams();
-  const [activeTab, setActiveTab] = useState<'actors' | 'producers' | 'directors'>('actors');
+  const [activeTab, setActiveTab] = useState<CastTab>('actors');
 
-  const { movieCast, isMovieCastLoading } = useMovieCast(+id);
+  const { movieCast, movieCrew, isMovieCastLoading } = useMovieCast(+id);
+
+  const members = useMemo(() => {
+    if (activeTab === 'actors') return movieCast;
+
+    if (activeTab === 'directors') {
+      return uniqueById(movieCrew.filter((member) => member.job === 'Director'));
+    }
+
+    if (activeTab === 'writers') {
+      return uniqueById(movieCrew.filter((member) => WRITER_JOBS.includes(member.job)));
+    }
+
+    return uniqueById(movieCrew.filter((member) => member.job.includes('Producer')));
+  }, [activeTab, movieCast, movieCrew]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: MovieCastProps; index: number }) => (
-      <CastItem cast={item} index={index} />
-    ),
+    ({ item }: { item: MovieCastProps }) => <CastItem cast={item} />,
     []
   );
 
@@ -29,40 +63,45 @@ const CastList = () => {
   return (
     <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="gap-4 px-4">
       <View className="h-full gap-4 pt-14">
-        <View className="w-full flex-row gap-2">
-          <Tab
-            title="Actors"
-            isActive={activeTab === 'actors'}
-            onPress={() => setActiveTab('actors')}
-            adaptableWidth
-          />
+        <Text accessibilityRole="header" className="!text-2xl font-bold">
+          Cast & Crew
+        </Text>
 
-          <Tab
-            title="Producers"
-            isActive={activeTab === 'producers'}
-            onPress={() => setActiveTab('producers')}
-            adaptableWidth
-          />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="grow-0">
+          <View className="flex-row gap-2">
+            {TABS.map((tab) => (
+              <Tab
+                key={tab.key}
+                title={tab.label}
+                isActive={activeTab === tab.key}
+                adaptableWidth
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setActiveTab(tab.key);
+                }}
+              />
+            ))}
+          </View>
+        </ScrollView>
 
-          <Tab
-            title="directors"
-            isActive={activeTab === 'directors'}
-            onPress={() => setActiveTab('directors')}
-            adaptableWidth
-          />
-        </View>
-
-        <View className="flex-1">
+        <Animated.View key={activeTab} entering={FadeIn.duration(250)} className="flex-1">
           <FlashList
-            data={movieCast}
+            data={members}
             scrollEventThrottle={16}
             removeClippedSubviews
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => `${item.id}`}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
             ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+            ListEmptyComponent={
+              <View className="items-center gap-3 py-12">
+                <Ionicons name="people-outline" size={48} color="rgba(255,255,255,0.3)" />
+
+                <Text className="!text-neutral-400">Nothing listed here</Text>
+              </View>
+            }
           />
-        </View>
+        </Animated.View>
       </View>
     </Screen>
   );
@@ -70,27 +109,37 @@ const CastList = () => {
 
 export default CastList;
 
-const CastItem = ({ cast, index }: { cast: MovieCastProps; index: number }) => {
+const CastItem = ({ cast }: { cast: MovieCastProps }) => {
   return (
-    <AnimatedPressable
-      entering={FadeInDown.delay(50 * index).springify()}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`View details for ${cast.name}`}
       onPress={() => router.push(`/movie/cast/${cast.id}`)}
-      className="flex-row items-center justify-between rounded-xl bg-neutral-800 p-2.5">
-      <View className="flex-row items-center gap-x-3">
+      className="flex-row items-center justify-between rounded-2xl bg-neutral-800 p-2.5">
+      <View className="flex-1 flex-row items-center gap-x-3 pr-2">
         <Image
-          source={{ uri: cast?.avatar }}
+          source={{ uri: cast.avatar || undefined }}
           style={{ width: 62, height: 62, borderRadius: 8 }}
+          contentFit="cover"
           cachePolicy="memory-disk"
+          placeholder={IMAGE_PLACEHOLDER}
+          accessibilityLabel={`${cast.name} portrait`}
         />
 
-        <View className="gap-1.5">
-          <Text className="!text-lg font-medium">{cast.name}</Text>
+        <View className="flex-1 gap-1.5">
+          <Text numberOfLines={1} className="!text-lg font-medium">
+            {cast.name}
+          </Text>
 
-          <Text className="!text-[14.5px] font-normal !text-neutral-400">{cast.character}</Text>
+          {cast.character ? (
+            <Text numberOfLines={1} className="!text-[14.5px] font-normal !text-neutral-400">
+              {cast.character}
+            </Text>
+          ) : null}
         </View>
       </View>
 
       <Ionicons name="chevron-forward-outline" color="#757575" size={22} />
-    </AnimatedPressable>
+    </Pressable>
   );
 };

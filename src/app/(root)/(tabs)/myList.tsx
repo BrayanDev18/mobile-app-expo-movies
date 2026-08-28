@@ -1,233 +1,172 @@
-import { Screen, Text } from '@/components';
-import { View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { Button, Icon, Tab, Text } from '@/components';
+import { MediaType, MovieProps } from '@/interfaces';
+import { useMyListStore } from '@/stores';
+import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
+type ListFilter = 'all' | MediaType;
 
-const FILTERS = ['All', 'Movies', 'Series', 'Docs'];
-
-const MY_LIST = [
-  {
-    id: '1',
-    title: 'Interstellar',
-    meta: '2014 · Sci-Fi · 2h 49m',
-    score: '8.7',
-    progress: null,
-    thumb: '#0d1b2a',
-  },
-  {
-    id: '2',
-    title: 'Severance',
-    meta: '2024 · Thriller · S2 E5',
-    score: '9.0',
-    progress: 0.62,
-    thumb: '#1a1a2e',
-  },
-  {
-    id: '3',
-    title: 'The Brutalist',
-    meta: '2024 · Drama · 3h 35m',
-    score: '7.8',
-    progress: null,
-    thumb: '#1c1007',
-  },
-  {
-    id: '4',
-    title: 'True Detective',
-    meta: '2024 · Crime · S4 E3',
-    score: '7.9',
-    progress: 0.35,
-    thumb: '#1a0d1a',
-  },
-  {
-    id: '5',
-    title: 'Dune: Part Two',
-    meta: '2024 · Sci-Fi · 2h 47m',
-    score: '8.8',
-    progress: 1.0,
-    thumb: '#12100a',
-  },
-  {
-    id: '6',
-    title: 'Shogun',
-    meta: '2024 · Drama · S1 E8',
-    score: '9.0',
-    progress: 0.8,
-    thumb: '#0d1a12',
-  },
-  {
-    id: '7',
-    title: 'Ripley',
-    meta: '2024 · Thriller · S1',
-    score: '8.0',
-    progress: null,
-    thumb: '#1a1616',
-  },
+const FILTERS: { key: ListFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'movie', label: 'Movies' },
+  { key: 'tv', label: 'Series' },
 ];
 
-const STATS = [
-  { value: '7', label: 'Saved' },
-  { value: '3', label: 'Watching' },
-  { value: '1', label: 'Finished' },
-];
+const MyListRow = ({ movie, onRemove }: { movie: MovieProps; onRemove: () => void }) => {
+  const year = movie.releaseDate?.slice(0, 4);
+  const mediaLabel = movie.mediaType === 'tv' ? 'Series' : 'Movie';
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`View details for ${movie.title}`}
+      className="flex-row items-center py-3"
+      onPress={() => {
+        if (movie.mediaType === 'tv') return;
+
+        router.push({ pathname: '/(root)/movie/[id]', params: { id: movie.id } });
+      }}>
+      <Image
+        source={{ uri: tmdbResize(movie.poster, 'w92') ?? undefined }}
+        style={{ width: 52, height: 68, borderRadius: 12 }}
+        contentFit="cover"
+        cachePolicy="memory-disk"
+        placeholder={IMAGE_PLACEHOLDER}
+        accessibilityLabel={`${movie.title} poster`}
+      />
+
+      <View className="ml-4 flex-1">
+        <Text numberOfLines={1} className="!text-[15px] font-bold">
+          {movie.title}
+        </Text>
+
+        <Text numberOfLines={1} className="mt-0.5 !text-[11px] !text-neutral-400">
+          {[year, mediaLabel].filter(Boolean).join(' · ')}
+        </Text>
+      </View>
+
+      <Icon
+        name="BookmarkMinus"
+        size={20}
+        color="rgba(255,255,255,0.55)"
+        className="h-11 w-11 items-center justify-center"
+        onPress={onRemove}
+      />
+    </Pressable>
+  );
+};
 
 const MyListScreen = () => {
+  const { top, bottom } = useSafeAreaInsets();
+  const { saved, removeSaved } = useMyListStore();
+  const [filter, setFilter] = useState<ListFilter>('all');
+
+  const hasMovies = saved.some((item) => (item.mediaType ?? 'movie') === 'movie');
+  const hasSeries = saved.some((item) => item.mediaType === 'tv');
+  const showFilters = hasMovies && hasSeries;
+
+  const filtered =
+    filter === 'all' || !showFilters
+      ? saved
+      : saved.filter((item) => (item.mediaType ?? 'movie') === filter);
+
+  const backdrop = saved[0]?.poster;
+
+  const onRemove = (movie: MovieProps) => {
+    Haptics.selectionAsync();
+    removeSaved(movie);
+  };
+
   return (
-    <Screen safeAreaEdges={['top', 'bottom']}>
-      <View className="h-full pb-10">
+    <View className="flex-1 bg-neutral-900">
+      {backdrop && (
+        <Image
+          source={{ uri: tmdbResize(backdrop, 'w185') ?? undefined }}
+          blurRadius={50}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
+      {backdrop && (
+        <LinearGradient
+          colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.85)', 'rgba(6,6,6,0.98)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
+      {saved.length === 0 ? (
+        <View
+          style={{ paddingTop: top }}
+          className="flex-1 items-center justify-center gap-3 px-10">
+          <Icon name="Bookmark" size={48} color="rgba(255,255,255,0.3)" />
+
+          <Text className="!text-lg font-bold">Nothing saved yet</Text>
+
+          <Text className="text-center !text-neutral-400">
+            Tap the bookmark on any movie to keep it here.
+          </Text>
+
+          <View className="mt-3 w-full">
+            <Button title="Explore movies" onPress={() => router.push('/(root)/(tabs)/explore')} />
+          </View>
+        </View>
+      ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 48 }}>
-          <View className="px-6 pb-6 pt-4">
-            <Text
-              className="mb-1 !text-[11px] font-semibold text-[#999]"
-              style={{ letterSpacing: 3, textTransform: 'uppercase' }}>
-              Library
-            </Text>
-            <Text
-              className="!text-[34px] font-black"
-              style={{ lineHeight: 38, letterSpacing: -1.5 }}>
-              My List
-            </Text>
-          </View>
+          contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
+          <Animated.View entering={FadeIn.duration(300)}>
+            <View className="gap-1 px-4 pb-5">
+              <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
+                My List
+              </Text>
 
-          <View
-            className="mx-6 mb-6 flex-row overflow-hidden rounded-2xl"
-            style={{ backgroundColor: '#0D0D0D' }}>
-            {STATS.map((s, i) => (
-              <View
-                key={s.label}
-                className="flex-1 items-center py-4"
-                style={{
-                  borderRightWidth: i < STATS.length - 1 ? 1 : 0,
-                  borderRightColor: 'rgba(255,255,255,0.08)',
-                }}>
-                <Text className="!text-[22px] font-black text-white" style={{ letterSpacing: -1 }}>
-                  {s.value}
-                </Text>
-                <Text
-                  className="!text-[10px] font-semibold text-[#666]"
-                  style={{ letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
-                  {s.label}
-                </Text>
+              <Text className="!text-[13px] !text-neutral-400">
+                {saved.length} {saved.length === 1 ? 'title' : 'titles'} saved
+              </Text>
+            </View>
+
+            {showFilters && (
+              <View className="mb-6 flex-row gap-2 px-4">
+                {FILTERS.map((item) => (
+                  <Tab
+                    key={item.key}
+                    title={item.label}
+                    isActive={filter === item.key}
+                    adaptableWidth
+                    className="rounded-full border border-white/15"
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setFilter(item.key);
+                    }}
+                  />
+                ))}
               </View>
-            ))}
-          </View>
+            )}
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24, gap: 8 }}
-            className="mb-6">
-            {FILTERS.map((f, i) => (
-              <TouchableOpacity
-                key={f}
-                className="rounded-full px-5 py-2"
-                style={{
-                  backgroundColor: i === 0 ? '#0D0D0D' : 'transparent',
-                  borderWidth: i === 0 ? 0 : 1,
-                  borderColor: '#D8D7D3',
-                }}>
-                <Text
-                  className="!text-[13px] font-semibold"
-                  style={{ color: i === 0 ? '#fff' : '#666' }}>
-                  {f}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <View className="px-6">
-            {MY_LIST.map((item, i) => {
-              const isWatching = item.progress !== null && item.progress < 1;
-              const isFinished = item.progress === 1.0;
-
-              return (
-                <TouchableOpacity
-                  key={item.id}
-                  className="flex-row items-center py-4"
-                  style={{
-                    borderBottomWidth: i < MY_LIST.length - 1 ? 1 : 0,
-                    borderBottomColor: '#E5E4E0',
-                  }}>
-                  <View
-                    className="mr-4 overflow-hidden rounded-xl"
-                    style={{ width: 52, height: 68, backgroundColor: item.thumb }}>
-                    {isFinished && (
-                      <View
-                        className="absolute inset-0 items-center justify-center"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                        <Text
-                          className="!text-[10px] font-black text-white"
-                          style={{ letterSpacing: 0.5 }}>
-                          ✓
-                        </Text>
-                      </View>
-                    )}
-
-                    {isWatching && (
-                      <View
-                        className="absolute bottom-0 left-0 right-0"
-                        style={{ height: 2, backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                        <View
-                          style={{
-                            height: 2,
-                            width: `${(item.progress ?? 0) * 100}%`,
-                            backgroundColor: '#fff',
-                          }}
-                        />
-                      </View>
-                    )}
-                  </View>
-
-                  <View className="flex-1">
-                    <Text className="!text-[15px] font-bold" style={{ letterSpacing: -0.3 }}>
-                      {item.title}
-                    </Text>
-                    <Text className="mt-0.5 !text-[11px] text-[#999]">{item.meta}</Text>
-
-                    {(isWatching || isFinished) && (
-                      <View className="mt-1.5 self-start">
-                        <Text
-                          className="!text-[9px] font-bold"
-                          style={{
-                            letterSpacing: 1.2,
-                            textTransform: 'uppercase',
-                            // color: isFinished ? '#999' : '#0D0D0D',
-                          }}>
-                          {isFinished
-                            ? 'Watched'
-                            : `${Math.round((item.progress ?? 0) * 100)}% watched`}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <View className="items-end" style={{ gap: 5 }}>
-                    <Text className="!text-[13px] font-black">{item.score}</Text>
-                    <View className="flex-row" style={{ gap: 3 }}>
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <View
-                          key={s}
-                          style={{
-                            width: 4,
-                            height: 4,
-                            borderRadius: 2,
-                            backgroundColor:
-                              s <= Math.round((parseFloat(item.score) / 10) * 5)
-                                ? '#0D0D0D'
-                                : '#DDD',
-                          }}
-                        />
-                      ))}
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+            <View className="px-4">
+              {filtered.map((movie, index) => (
+                <Animated.View
+                  key={`${movie.mediaType ?? 'movie'}-${movie.id}`}
+                  exiting={FadeOut.duration(200)}
+                  layout={LinearTransition.springify().damping(30).stiffness(200)}
+                  className={index < filtered.length - 1 ? 'border-b border-white/10' : ''}>
+                  <MyListRow movie={movie} onRemove={() => onRemove(movie)} />
+                </Animated.View>
+              ))}
+            </View>
+          </Animated.View>
         </ScrollView>
-      </View>
-    </Screen>
+      )}
+    </View>
   );
 };
 

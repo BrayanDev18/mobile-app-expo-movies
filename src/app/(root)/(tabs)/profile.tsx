@@ -1,152 +1,324 @@
-import { Button, Screen, Text } from '@/components';
+import { Icon, Tab, Text } from '@/components';
 import { clearDatabase } from '@/expo-sqlite/db';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  useLanguageStore,
+  useMyListStore,
+  useProfileStore,
+  useRecentSearchesStore,
+  useViewedMoviesStore,
+} from '@/stores';
+import { getAvatarColor, tmdbResize } from '@/utils';
+import Constants from 'expo-constants';
+import * as Haptics from 'expo-haptics';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import * as LucideIcons from 'lucide-react-native';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const STATS = [
-  { value: '124', label: 'Watched' },
-  { value: '7', label: 'My List' },
-  { value: '340h', label: 'Total Time' },
+const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
 ];
 
-const MENU_ITEMS = [
-  { icon: '🎬', label: 'Watch History', meta: '124 titles' },
-  { icon: '⭐', label: 'Ratings & Reviews', meta: '38 rated' },
-  { icon: '🔔', label: 'Notifications', meta: 'On' },
-  { icon: '🌐', label: 'Language', meta: 'English' },
-  { icon: '📱', label: 'Playback Quality', meta: 'Auto' },
-];
+const confirmClear = (title: string, message: string, onConfirm: () => void) =>
+  Alert.alert(title, message, [
+    { text: 'Cancel', style: 'cancel' },
+    {
+      text: 'Clear',
+      style: 'destructive',
+      onPress: () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        onConfirm();
+      },
+    },
+  ]);
+
+const initialsOf = (name: string) =>
+  name
+    .split(' ')
+    .map((word) => word[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+
+const IdentityCard = () => {
+  const { name, setName } = useProfileStore();
+  const { saved } = useMyListStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(name);
+
+  const onSave = () => {
+    Haptics.selectionAsync();
+    setName(draft);
+    setIsEditing(false);
+  };
+
+  return (
+    <View
+      className="flex-row items-center gap-4 rounded-3xl border p-4"
+      style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
+      <View
+        className="items-center justify-center rounded-full"
+        style={{ width: 64, height: 64, backgroundColor: getAvatarColor(name) }}>
+        <Text className="!text-[22px] font-black">{initialsOf(name)}</Text>
+      </View>
+
+      <View className="flex-1">
+        {isEditing ? (
+          <TextInput
+            value={draft}
+            onChangeText={setDraft}
+            onSubmitEditing={onSave}
+            autoFocus
+            maxLength={24}
+            returnKeyType="done"
+            placeholder="Your name"
+            placeholderTextColor="#9ca3af"
+            className="h-10 rounded-xl bg-white/10 px-3 font-satoshi text-[16px] font-bold text-white"
+          />
+        ) : (
+          <>
+            <Text numberOfLines={1} className="!text-xl font-bold">
+              {name}
+            </Text>
+
+            <Text className="mt-0.5 !text-[12px] !text-neutral-400">
+              {saved.length} {saved.length === 1 ? 'title' : 'titles'} in My List
+            </Text>
+          </>
+        )}
+      </View>
+
+      <Icon
+        name={isEditing ? 'Check' : 'Pencil'}
+        size={18}
+        color="rgba(255,255,255,0.7)"
+        className="h-11 w-11 items-center justify-center rounded-full border border-white/15"
+        onPress={() => {
+          if (isEditing) {
+            onSave();
+          } else {
+            setDraft(name);
+            setIsEditing(true);
+          }
+        }}
+      />
+    </View>
+  );
+};
+
+const StatTile = ({ value, label }: { value: number; label: string }) => (
+  <View
+    className="flex-1 items-center gap-0.5 rounded-2xl border py-4"
+    style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
+    <Text className="!text-[22px] font-black" style={{ letterSpacing: -0.5 }}>
+      {value}
+    </Text>
+
+    <Text className="!text-[11px] !text-neutral-400">{label}</Text>
+  </View>
+);
+
+interface DataRowProps {
+  icon: keyof typeof LucideIcons;
+  label: string;
+  meta?: string;
+  onPress: () => void;
+  isLast?: boolean;
+}
+
+const DataRow = ({ icon, label, meta, onPress, isLast }: DataRowProps) => (
+  <Pressable
+    accessibilityRole="button"
+    accessibilityLabel={label}
+    onPress={onPress}
+    className={`flex-row items-center gap-3 py-4 ${isLast ? '' : 'border-b border-white/10'}`}>
+    <Icon name={icon} size={18} color="rgba(255,255,255,0.55)" />
+
+    <Text className="flex-1 !text-[15px] font-medium">{label}</Text>
+
+    {meta ? <Text className="!text-[12px] !text-neutral-400">{meta}</Text> : null}
+  </Pressable>
+);
 
 const ProfileScreen = () => {
+  const { top, bottom } = useSafeAreaInsets();
+  const { language, setLanguage } = useLanguageStore();
+  const { saved, clearSaved } = useMyListStore();
+  const { viewed, clearViewed } = useViewedMoviesStore();
+  const { searches, clearSearches } = useRecentSearchesStore();
+
+  const backdrop = saved[0]?.poster;
+  const recentViews = viewed.slice(0, 5);
+  const version = Constants.expoConfig?.version;
+
   return (
-    <Screen safeAreaEdges={['top']}>
-      <View className="h-full">
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 48 }}>
-          <View className="px-6 pb-6 pt-4">
-            <Text
-              className="mb-1 !text-[11px] font-semibold text-[#999]"
-              style={{ letterSpacing: 3, textTransform: 'uppercase' }}>
-              Account
-            </Text>
-            <Text
-              className="!text-[34px] font-black"
-              style={{ lineHeight: 38, letterSpacing: -1.5 }}>
-              My Profile
+    <View className="flex-1 bg-neutral-900">
+      {backdrop && (
+        <Image
+          source={{ uri: tmdbResize(backdrop, 'w185') ?? undefined }}
+          blurRadius={50}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
+      {backdrop && (
+        <LinearGradient
+          colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.85)', 'rgba(6,6,6,0.98)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
+        <Animated.View entering={FadeIn.duration(300)} className="px-4">
+          <View className="pb-6">
+            <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
+              Profile
             </Text>
           </View>
 
-          <View className="mb-6 flex-row items-center px-6" style={{ gap: 16 }}>
-            {/* Avatar */}
-            <View
-              className="items-center justify-center rounded-2xl"
-              style={{ width: 64, height: 64, backgroundColor: '#0D0D0D' }}>
-              <Text className="!text-[26px]">👤</Text>
+          <View className="gap-3 pb-8">
+            <IdentityCard />
+
+            <View className="flex-row gap-3">
+              <StatTile value={saved.length} label="Saved" />
+              <StatTile value={viewed.length} label="Viewed" />
+              <StatTile value={searches.length} label="Searches" />
             </View>
+          </View>
 
-            <View className="flex-1">
-              <Text className="!text-[20px] font-black" style={{ letterSpacing: -0.5 }}>
-                John Doe
-              </Text>
-              <Text className="mt-0.5 !text-[12px] text-[#999]">john@example.com</Text>
+          <View className="gap-3 pb-8">
+            <Text className="px-1 !text-[18px] font-semibold">Language</Text>
+
+            <View className="flex-row gap-2">
+              {LANGUAGES.map((item) => (
+                <Tab
+                  key={item.code}
+                  title={item.label}
+                  isActive={language.startsWith(item.code)}
+                  adaptableWidth
+                  className="rounded-full border border-white/15"
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setLanguage(item.code);
+                  }}
+                />
+              ))}
             </View>
-
-            <TouchableOpacity
-              className="rounded-full px-4 py-2"
-              style={{ borderWidth: 1, borderColor: '#D8D7D3' }}>
-              <Text className="!text-[12px] font-semibold text-[#666]">Edit</Text>
-            </TouchableOpacity>
           </View>
 
-          <View
-            className="mx-6 mb-8 flex-row overflow-hidden rounded-2xl"
-            style={{ backgroundColor: '#0D0D0D' }}>
-            {STATS.map((s, i) => (
-              <View
-                key={s.label}
-                className="flex-1 items-center py-4"
-                style={{
-                  borderRightWidth: i < STATS.length - 1 ? 1 : 0,
-                  borderRightColor: 'rgba(255,255,255,0.08)',
-                }}>
-                <Text className="!text-[22px] font-black text-white" style={{ letterSpacing: -1 }}>
-                  {s.value}
-                </Text>
-                <Text
-                  className="!text-[10px] font-semibold text-[#666]"
-                  style={{ letterSpacing: 1.5, textTransform: 'uppercase', marginTop: 2 }}>
-                  {s.label}
-                </Text>
+          {recentViews.length > 0 && (
+            <View className="gap-3 pb-8">
+              <Text className="px-1 !text-[18px] font-semibold">Recently viewed</Text>
+
+              <View>
+                {recentViews.map((item, index) => (
+                  <Pressable
+                    key={item.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`View details for ${item.title}`}
+                    className={`flex-row items-center gap-3 py-3.5 ${
+                      index < recentViews.length - 1 ? 'border-b border-white/10' : ''
+                    }`}
+                    onPress={() =>
+                      router.push({ pathname: '/(root)/movie/[id]', params: { id: item.id } })
+                    }>
+                    <Icon name="Clock" size={16} color="rgba(255,255,255,0.4)" />
+
+                    <Text numberOfLines={1} className="flex-1 !text-[15px] font-medium">
+                      {item.title}
+                    </Text>
+
+                    <Icon name="ChevronRight" size={16} color="rgba(255,255,255,0.4)" />
+                  </Pressable>
+                ))}
               </View>
-            ))}
+            </View>
+          )}
+
+          <View className="gap-3 pb-8">
+            <Text className="px-1 !text-[18px] font-semibold">Manage data</Text>
+
+            <View>
+              {searches.length > 0 && (
+                <DataRow
+                  icon="History"
+                  label="Clear search history"
+                  meta={`${searches.length}`}
+                  onPress={() =>
+                    confirmClear(
+                      'Clear search history',
+                      'Your recent searches will be removed.',
+                      clearSearches
+                    )
+                  }
+                />
+              )}
+
+              {viewed.length > 0 && (
+                <DataRow
+                  icon="EyeOff"
+                  label="Clear recently viewed"
+                  meta={`${viewed.length}`}
+                  onPress={() =>
+                    confirmClear(
+                      'Clear recently viewed',
+                      'Your viewing history will be removed.',
+                      clearViewed
+                    )
+                  }
+                />
+              )}
+
+              {saved.length > 0 && (
+                <DataRow
+                  icon="BookmarkX"
+                  label="Remove all saved titles"
+                  meta={`${saved.length}`}
+                  onPress={() =>
+                    confirmClear(
+                      'Remove all saved titles',
+                      'Everything in My List will be removed.',
+                      clearSaved
+                    )
+                  }
+                />
+              )}
+
+              <DataRow
+                icon="Trash2"
+                label="Clear database"
+                onPress={() =>
+                  confirmClear(
+                    'Clear database',
+                    'Removes all local data permanently.',
+                    clearDatabase
+                  )
+                }
+                isLast
+              />
+            </View>
           </View>
 
-          <View className="mb-8 px-6">
-            <Text
-              className="mb-4 !text-[11px] font-bold"
-              style={{ letterSpacing: 2, textTransform: 'uppercase' }}>
-              Settings
-            </Text>
+          <View className="items-center gap-1 pt-2">
+            {version && (
+              <Text className="!text-[11px] !text-neutral-400">Flixora v{version}</Text>
+            )}
 
-            {MENU_ITEMS.map((item, i) => (
-              <TouchableOpacity
-                key={item.label}
-                className="flex-row items-center py-4"
-                style={{
-                  borderBottomWidth: i < MENU_ITEMS.length - 1 ? 1 : 0,
-                  borderBottomColor: '#E5E4E0',
-                }}>
-                <View
-                  className="mr-4 items-center justify-center rounded-xl"
-                  style={{ width: 40, height: 40, backgroundColor: '#ECEAE6' }}>
-                  <Text className="!text-[16px]">{item.icon}</Text>
-                </View>
-
-                <Text className="flex-1 !text-[15px] font-bold" style={{ letterSpacing: -0.3 }}>
-                  {item.label}
-                </Text>
-
-                <View className="flex-row items-center" style={{ gap: 8 }}>
-                  <Text className="!text-[12px] text-[#999]">{item.meta}</Text>
-                  <Text className="!text-[12px] text-[#CCC]">›</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
+            <Text className="!text-[11px] !text-neutral-400">Powered by TMDB</Text>
           </View>
-
-          <View className="px-6">
-            <Text
-              className="mb-4 !text-[11px] font-bold"
-              style={{ letterSpacing: 2, textTransform: 'uppercase' }}>
-              Database
-            </Text>
-
-            <TouchableOpacity
-              className="overflow-hidden rounded-2xl"
-              style={{ backgroundColor: '#0D0D0D' }}
-              onPress={clearDatabase}>
-              <View className="flex-row items-center justify-between px-5 py-4">
-                <View>
-                  <Text
-                    className="!text-[15px] font-bold text-white"
-                    style={{ letterSpacing: -0.3 }}>
-                    Clear Database
-                  </Text>
-                  <Text className="mt-0.5 !text-[11px] text-[#666]">
-                    Removes all local data permanently
-                  </Text>
-                </View>
-                <View
-                  className="items-center justify-center rounded-xl"
-                  style={{ width: 36, height: 36, backgroundColor: 'rgba(255,255,255,0.08)' }}>
-                  <Text className="!text-[14px]">🗑</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
-    </Screen>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
 };
 
