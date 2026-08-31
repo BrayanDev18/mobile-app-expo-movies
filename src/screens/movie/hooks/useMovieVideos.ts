@@ -1,32 +1,36 @@
-import { MovieVideoResponse, MovieVideosProps } from '@/interfaces';
+import { MediaType, MovieVideoResponse } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 
-export const useMovieVideos = (movieId: number) => {
-  const { data: movieVideos, isLoading: isMovieVideosLoading } = useQuery({
-    queryKey: ['movieVideos', movieId],
+export const useMovieVideos = (movieId: number, mediaType: MediaType = 'movie') => {
+  const {
+    data: movieVideos = [],
+    isLoading: isMovieVideosLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['movieVideos', mediaType, movieId],
+    enabled: Number.isFinite(movieId),
     queryFn: async () => {
       const {
         data: { results: videosFromApi },
-      } = await moviesApi.get<MovieVideoResponse>(`/movie/${movieId}/videos`);
+      } = await moviesApi.get<MovieVideoResponse>(`/${mediaType}/${movieId}/videos`);
 
-      const newMovieVideos = videosFromApi.map((video) => ({
-        key: video.key,
-        name: video.name,
-        site: video.site,
-        type: video.type,
-        size: video.size ?? 0,
-        official: video.official ?? false,
-        published_at: video.published_at ?? null,
-        last_updated: Math.floor(Date.now() / 1000),
-      }));
-
-      return newMovieVideos;
+      return videosFromApi
+        .map((video) => ({
+          key: video.key,
+          name: video.name,
+          site: video.site,
+          type: video.type,
+          size: video.size ?? 0,
+          movie_id: movieId,
+          official: video.official ?? false,
+          published_at: video.published_at ?? null,
+          last_updated: 0,
+        }))
+        .reverse();
     },
   });
 
-  return {
-    movieVideos: movieVideos as MovieVideosProps[],
-    isMovieVideosLoading,
-  };
+  return { movieVideos, isMovieVideosLoading, isError, refetch };
 };

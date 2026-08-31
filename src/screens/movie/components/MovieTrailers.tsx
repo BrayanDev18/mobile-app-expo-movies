@@ -1,6 +1,5 @@
 import { Text } from '@/components';
-import { ScreenRoutes } from '@/constants';
-import { MovieVideosProps } from '@/interfaces';
+import { MediaType, MovieVideosProps } from '@/interfaces';
 import { formatDate, IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
@@ -13,7 +12,13 @@ import YoutubePlayer from 'react-native-youtube-iframe';
 
 const CARD_WIDTH = 270;
 
-export const MovieTrailers = ({ videos }: { videos: MovieVideosProps[] }) => {
+export const MovieTrailers = ({
+  videos,
+  mediaType = 'movie',
+}: {
+  videos: MovieVideosProps[];
+  mediaType?: MediaType;
+}) => {
   const { id } = useLocalSearchParams();
   const [playingKey, setPlayingKey] = useState<string | null>(null);
 
@@ -26,8 +31,8 @@ export const MovieTrailers = ({ videos }: { videos: MovieVideosProps[] }) => {
           <TouchableHighlight
             onPress={() =>
               router.push({
-                pathname: ScreenRoutes.videos as any,
-                params: { id },
+                pathname: '/(root)/movie/videos',
+                params: { id, type: mediaType },
               })
             }
             accessibilityRole="button"

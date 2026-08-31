@@ -1,10 +1,11 @@
 import { Loader, Screen, Text } from '@/components';
 import { useMovieVideos } from '@/hooks';
 import { formatDate } from '@/utils';
+import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useRef } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import YoutubePlayer, { type YoutubeIframeRef } from 'react-native-youtube-iframe';
 
 const VIDEO_QUALITIES: Record<number, string> = {
@@ -17,21 +18,44 @@ const VIDEO_QUALITIES: Record<number, string> = {
 };
 
 const VideosScreen = () => {
-  const { id } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams();
   const videoRef = useRef<YoutubeIframeRef | null>(null);
 
-  const { movieVideos, isMovieVideosLoading } = useMovieVideos(+id);
+  const { movieVideos, isMovieVideosLoading, isError, refetch } = useMovieVideos(
+    +id,
+    type === 'tv' ? 'tv' : 'movie'
+  );
 
   if (isMovieVideosLoading) return <Loader />;
+
+  if (isError) {
+    return (
+      <Screen canGoBack preset="fixed" safeAreaEdges={['top', 'bottom']}>
+        <View className="flex-1 items-center justify-center gap-4 px-10">
+          <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.3)" />
+
+          <Text className="!text-neutral-400">Something went wrong</Text>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Retry loading videos"
+            onPress={() => refetch()}
+            className="rounded-full bg-blue-500/15 px-6 py-2">
+            <Text className="font-medium !text-blue-400">Retry</Text>
+          </Pressable>
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen preset="auto" safeAreaEdges={['top', 'bottom']} canGoBack>
       <View className="flex-1 px-4 pt-14">
         <FlashList
-          data={movieVideos.reverse()}
+          data={movieVideos}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+          keyExtractor={(item, i) => `${item.key}-${i}`}
           ItemSeparatorComponent={() => <View className="h-6" />}
           renderItem={({ item: video }) => (
             <View className="w-full gap-3 rounded-3xl bg-neutral-800/20 p-2.5">

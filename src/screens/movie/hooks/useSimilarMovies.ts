@@ -11,6 +11,7 @@ export const useSimilarMovies = (movieId: number) => {
     refetch,
   } = useQuery({
     queryKey: ['movieSimilar', movieId],
+    enabled: Number.isFinite(movieId),
     queryFn: async () => {
       const { data } = await moviesApi.get<MoviesByCategoryResponse>(
         `/movie/${movieId}/similar`

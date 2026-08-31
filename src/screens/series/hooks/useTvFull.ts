@@ -9,7 +9,7 @@ import {
   TvByCategoryResponse,
   TvDetails,
 } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbImageLanguages } from '@/services';
 import { mapTvShows, mapTvToDb, tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 import * as Localization from 'expo-localization';
@@ -52,9 +52,7 @@ const certificationFor = (
 };
 
 export const useTvFull = (seriesId: number) => {
-  const locale = Localization.getLocales()[0];
-  const region = locale?.regionCode ?? 'US';
-  const language = locale?.languageCode ?? 'en';
+  const region = Localization.getLocales()[0]?.regionCode ?? 'US';
 
   const {
     data: series,
@@ -68,7 +66,7 @@ export const useTvFull = (seriesId: number) => {
       const { data } = await moviesApi.get<TvFullResponse>(MovieApiRoutes.tvDetails(seriesId), {
         params: {
           append_to_response: APPEND_TO_RESPONSE,
-          include_image_language: `${language},null`,
+          include_image_language: tmdbImageLanguages(),
         },
       });
 

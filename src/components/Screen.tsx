@@ -178,7 +178,7 @@ function ScreenWithoutScrolling(props: ScreenProps) {
   const { style, contentContainerStyle, children } = props;
   return (
     <View style={[$outerStyle, style]}>
-      <View style={[$innerStyle, contentContainerStyle]}>{children}</View>
+      <View style={[$innerStyle, $fixedInnerStyle, contentContainerStyle]}>{children}</View>
     </View>
   );
 }
@@ -289,4 +289,10 @@ const $outerStyle: ViewStyle = {
 const $innerStyle: ViewStyle = {
   justifyContent: 'flex-start',
   alignItems: 'stretch',
+};
+
+// Only for the non-scrolling preset — a flex: 1 contentContainerStyle would
+// break ScrollView content sizing, but a fixed screen must fill the viewport.
+const $fixedInnerStyle: ViewStyle = {
+  flex: 1,
 };

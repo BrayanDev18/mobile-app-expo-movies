@@ -1,5 +1,6 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
+import { openMediaDetails } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
@@ -25,7 +26,7 @@ export const MovieSimilar = ({
         rating={movie.rating}
         width={145}
         height={200}
-        onPress={() => router.push(`/movie/${movie.id}`)}
+        onPress={() => openMediaDetails(movie)}
       />
     ),
     []

@@ -11,6 +11,7 @@ interface CreditsResponse {
 export const useMovieCast = (movieId: number, mediaType: MediaType = 'movie') => {
   const { data, isLoading: isMovieCastLoading } = useQuery({
     queryKey: ['movieCast', mediaType, movieId],
+    enabled: Number.isFinite(movieId),
     queryFn: async () => {
       const { data } = await moviesApi.get<CreditsResponse>(`/${mediaType}/${movieId}/credits`);
 

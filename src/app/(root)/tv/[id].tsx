@@ -103,7 +103,7 @@ const SeriesDescriptionScreen = () => {
 
             <MovieWatchProviders providers={watchProviders} />
 
-            {trailers.length > 0 && <MovieTrailers videos={trailers} />}
+            {trailers.length > 0 && <MovieTrailers videos={trailers} mediaType="tv" />}
 
             {(cast.length > 0 || creator) && (
               <MovieCastAndCrew

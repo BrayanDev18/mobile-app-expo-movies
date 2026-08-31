@@ -33,14 +33,17 @@ const discoverTvParams = (filters: DiscoverTvFilters, region: string) => {
     minVotes,
   } = filters;
 
+  // firstAirDateFrom and yearFrom both target first_air_date.gte — the explicit
+  // date wins so callers can't silently drop one of them
+  const airDateFrom = firstAirDateFrom ?? (yearFrom ? `${yearFrom}-01-01` : undefined);
+
   return {
     sort_by: 'popularity.desc',
     ...(genreId && { with_genres: genreId }),
     ...(networkId && { with_networks: networkId }),
     ...(providerId && { with_watch_providers: providerId, watch_region: region }),
     ...(originalLanguage && { with_original_language: originalLanguage }),
-    ...(firstAirDateFrom && { 'first_air_date.gte': firstAirDateFrom }),
-    ...(yearFrom && { 'first_air_date.gte': `${yearFrom}-01-01` }),
+    ...(airDateFrom && { 'first_air_date.gte': airDateFrom }),
     ...(yearTo && { 'first_air_date.lte': `${yearTo}-12-31` }),
     ...(showType !== undefined && { with_type: showType }),
     ...(minVotes && { 'vote_count.gte': minVotes }),

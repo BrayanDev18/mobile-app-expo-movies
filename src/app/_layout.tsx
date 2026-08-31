@@ -3,7 +3,7 @@ import { changeLanguage, i18n } from '@/translate';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -19,13 +19,19 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const { language } = useLanguageStore();
+  const language = useLanguageStore((state) => state.language);
+  const previousLanguage = useRef(language);
 
   // const { success } = useInitDb();
 
   //resetDatabase();
 
   useEffect(() => {
+    // Skip mount and store-rehydration passes — only react to a real change
+    if (previousLanguage.current === language) return;
+
+    previousLanguage.current = language;
+
     if (language && language !== i18n.locale) {
       changeLanguage(language);
     }

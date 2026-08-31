@@ -1,4 +1,4 @@
-import { Button, Icon, Tab, Text } from '@/components';
+import { Button, Icon, IconName, Tab, Text } from '@/components';
 import { MediaType, MyListFlag, SavedMediaProps } from '@/interfaces';
 import { useMyListStore } from '@/stores';
 import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
@@ -6,7 +6,6 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import * as LucideIcons from 'lucide-react-native';
 import { Star } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -24,7 +23,7 @@ const FILTERS: { key: ListFilter; label: string }[] = [
 const LISTS: {
   key: MyListFlag;
   label: string;
-  removeIcon: keyof typeof LucideIcons;
+  removeIcon: IconName;
   emptyMessage: string;
 }[] = [
   {
@@ -49,7 +48,7 @@ const LISTS: {
 
 const MyListRow = ({ movie, removeIcon, onRemove }: {
   movie: SavedMediaProps;
-  removeIcon: keyof typeof LucideIcons;
+  removeIcon: IconName;
   onRemove: () => void;
 }) => {
   const year = movie.releaseDate?.slice(0, 4);
@@ -95,6 +94,7 @@ const MyListRow = ({ movie, removeIcon, onRemove }: {
         size={20}
         color="rgba(255,255,255,0.55)"
         className="h-11 w-11 items-center justify-center"
+        accessibilityLabel={`Remove ${movie.title} from this list`}
         onPress={onRemove}
       />
     </Pressable>

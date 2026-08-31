@@ -1,10 +1,10 @@
 import { Loader, Screen, Text } from '@/components';
 import { useSimilarMovies } from '@/hooks';
 import { MovieProps } from '@/interfaces';
-import { formatSpecialDate, IMAGE_PLACEHOLDER } from '@/utils';
+import { formatSpecialDate, IMAGE_PLACEHOLDER, openMediaDetails } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -39,7 +39,9 @@ const SimilarMovies = () => {
 const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
   return (
     <Pressable
-      onPress={() => router.push(`/movie/${movie.id}`)}
+      accessibilityRole="button"
+      accessibilityLabel={`View details for ${movie.title}`}
+      onPress={() => openMediaDetails(movie)}
       className="m-2 flex-1 rounded-bl-2xl rounded-br-2xl bg-neutral-950/30">
       <Image
         source={{ uri: movie.poster as string }}

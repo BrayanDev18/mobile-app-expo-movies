@@ -1,5 +1,4 @@
-import { Icon, Text } from '@/components';
-import { clearDatabase } from '@/expo-sqlite/db';
+import { Icon, IconName, Text } from '@/components';
 import {
   useLanguageStore,
   useMyListStore,
@@ -11,7 +10,6 @@ import {
 import { getAvatarColor } from '@/utils';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
-import * as LucideIcons from 'lucide-react-native';
 import { ReactNode, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -81,6 +79,7 @@ const ProfileHeader = () => {
             size={18}
             color="rgba(255,255,255,0.7)"
             className="h-11 w-11 items-center justify-center rounded-full border border-white/15"
+            accessibilityLabel="Save name"
             onPress={onSave}
           />
         </View>
@@ -97,6 +96,7 @@ const ProfileHeader = () => {
             size={14}
             color="rgba(255,255,255,0.5)"
             className="h-11 w-11 items-center justify-center"
+            accessibilityLabel="Edit name"
             onPress={() => {
               setDraft(name);
               setIsEditing(true);
@@ -123,7 +123,7 @@ const SettingsGroup = ({ title, children }: { title: string; children: ReactNode
 );
 
 interface SettingsRowProps {
-  icon: keyof typeof LucideIcons;
+  icon: IconName;
   label: string;
   meta?: string;
   onPress: () => void;
@@ -261,10 +261,19 @@ const ProfileScreen = () => {
 
             <SettingsRow
               icon="Trash2"
-              label="Clear database"
+              label="Erase all local data"
               destructive
               onPress={() =>
-                confirmClear('Clear database', 'Removes all local data permanently.', clearDatabase)
+                confirmClear(
+                  'Erase all local data',
+                  'Removes your lists, ratings, viewing history, and searches permanently.',
+                  () => {
+                    clearSearches();
+                    clearViewedMovies();
+                    clearViewedSeries();
+                    clearSavedItems();
+                  }
+                )
               }
               isLast
             />
