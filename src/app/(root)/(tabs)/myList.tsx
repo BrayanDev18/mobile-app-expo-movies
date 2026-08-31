@@ -1,11 +1,13 @@
 import { Button, Icon, Tab, Text } from '@/components';
-import { MediaType, MovieProps } from '@/interfaces';
+import { MediaType, MyListFlag, SavedMediaProps } from '@/interfaces';
 import { useMyListStore } from '@/stores';
-import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
+import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
+import * as LucideIcons from 'lucide-react-native';
+import { Star } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
@@ -19,7 +21,37 @@ const FILTERS: { key: ListFilter; label: string }[] = [
   { key: 'tv', label: 'Series' },
 ];
 
-const MyListRow = ({ movie, onRemove }: { movie: MovieProps; onRemove: () => void }) => {
+const LISTS: {
+  key: MyListFlag;
+  label: string;
+  removeIcon: keyof typeof LucideIcons;
+  emptyMessage: string;
+}[] = [
+  {
+    key: 'watchlist',
+    label: 'Watchlist',
+    removeIcon: 'BookmarkMinus',
+    emptyMessage: 'Titles you want to watch will show up here.',
+  },
+  {
+    key: 'watched',
+    label: 'Watched',
+    removeIcon: 'EyeOff',
+    emptyMessage: 'Mark titles as watched to keep track of them here.',
+  },
+  {
+    key: 'favorite',
+    label: 'Favorites',
+    removeIcon: 'HeartOff',
+    emptyMessage: 'Your favorite titles will live here.',
+  },
+];
+
+const MyListRow = ({ movie, removeIcon, onRemove }: {
+  movie: SavedMediaProps;
+  removeIcon: keyof typeof LucideIcons;
+  onRemove: () => void;
+}) => {
   const year = movie.releaseDate?.slice(0, 4);
   const mediaLabel = movie.mediaType === 'tv' ? 'Series' : 'Movie';
 
@@ -28,11 +60,7 @@ const MyListRow = ({ movie, onRemove }: { movie: MovieProps; onRemove: () => voi
       accessibilityRole="button"
       accessibilityLabel={`View details for ${movie.title}`}
       className="flex-row items-center py-3"
-      onPress={() => {
-        if (movie.mediaType === 'tv') return;
-
-        router.push({ pathname: '/(root)/movie/[id]', params: { id: movie.id } });
-      }}>
+      onPress={() => openMediaDetails(movie)}>
       <Image
         source={{ uri: tmdbResize(movie.poster, 'w92') ?? undefined }}
         style={{ width: 52, height: 68, borderRadius: 12 }}
@@ -43,17 +71,27 @@ const MyListRow = ({ movie, onRemove }: { movie: MovieProps; onRemove: () => voi
       />
 
       <View className="ml-4 flex-1">
-        <Text numberOfLines={1} className="!text-[15px] font-bold">
+        <Text numberOfLines={1} className="!text-md font-bold">
           {movie.title}
         </Text>
 
         <Text numberOfLines={1} className="mt-0.5 !text-[11px] !text-neutral-400">
           {[year, mediaLabel].filter(Boolean).join(' · ')}
         </Text>
+
+        {movie.userRating ? (
+          <View className="mt-1 flex-row items-center gap-1">
+            <Star size={11} color="#FACC15" fill="#FACC15" />
+
+            <Text className="!text-[11px] font-semibold !text-neutral-300">
+              {movie.userRating}/10
+            </Text>
+          </View>
+        ) : null}
       </View>
 
       <Icon
-        name="BookmarkMinus"
+        name={removeIcon}
         size={20}
         color="rgba(255,255,255,0.55)"
         className="h-11 w-11 items-center justify-center"
@@ -65,23 +103,27 @@ const MyListRow = ({ movie, onRemove }: { movie: MovieProps; onRemove: () => voi
 
 const MyListScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
-  const { saved, removeSaved } = useMyListStore();
+  const { items, toggleFlag } = useMyListStore();
+  const [activeList, setActiveList] = useState<MyListFlag>('watchlist');
   const [filter, setFilter] = useState<ListFilter>('all');
 
-  const hasMovies = saved.some((item) => (item.mediaType ?? 'movie') === 'movie');
-  const hasSeries = saved.some((item) => item.mediaType === 'tv');
+  const list = LISTS.find((item) => item.key === activeList) ?? LISTS[0];
+  const listItems = items.filter((item) => item[activeList]);
+
+  const hasMovies = listItems.some((item) => (item.mediaType ?? 'movie') === 'movie');
+  const hasSeries = listItems.some((item) => item.mediaType === 'tv');
   const showFilters = hasMovies && hasSeries;
 
   const filtered =
     filter === 'all' || !showFilters
-      ? saved
-      : saved.filter((item) => (item.mediaType ?? 'movie') === filter);
+      ? listItems
+      : listItems.filter((item) => (item.mediaType ?? 'movie') === filter);
 
-  const backdrop = saved[0]?.poster;
+  const backdrop = (listItems[0] ?? items[0])?.poster;
 
-  const onRemove = (movie: MovieProps) => {
+  const onRemove = (movie: SavedMediaProps) => {
     Haptics.selectionAsync();
-    removeSaved(movie);
+    toggleFlag(movie, activeList);
   };
 
   return (
@@ -103,7 +145,7 @@ const MyListScreen = () => {
         />
       )}
 
-      {saved.length === 0 ? (
+      {items.length === 0 ? (
         <View
           style={{ paddingTop: top }}
           className="flex-1 items-center justify-center gap-3 px-10">
@@ -112,11 +154,12 @@ const MyListScreen = () => {
           <Text className="!text-lg font-bold">Nothing saved yet</Text>
 
           <Text className="text-center !text-neutral-400">
-            Tap the bookmark on any movie to keep it here.
+            Add titles to your watchlist, mark them watched, or favorite them from any detail
+            screen.
           </Text>
 
           <View className="mt-3 w-full">
-            <Button title="Explore movies" onPress={() => router.push('/(root)/(tabs)/explore')} />
+            <Button title="Explore titles" onPress={() => router.push('/(root)/(tabs)/explore')} />
           </View>
         </View>
       ) : (
@@ -130,8 +173,29 @@ const MyListScreen = () => {
               </Text>
 
               <Text className="!text-[13px] !text-neutral-400">
-                {saved.length} {saved.length === 1 ? 'title' : 'titles'} saved
+                {items.length} {items.length === 1 ? 'title' : 'titles'} saved
               </Text>
+            </View>
+
+            <View className="mb-4 flex-row gap-2 px-4">
+              {LISTS.map((item) => {
+                const count = items.filter((saved) => saved[item.key]).length;
+
+                return (
+                  <Tab
+                    key={item.key}
+                    title={count ? `${item.label} (${count})` : item.label}
+                    isActive={activeList === item.key}
+                    adaptableWidth
+                    className="rounded-full border border-white/15"
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setActiveList(item.key);
+                      setFilter('all');
+                    }}
+                  />
+                );
+              })}
             </View>
 
             {showFilters && (
@@ -152,17 +216,32 @@ const MyListScreen = () => {
               </View>
             )}
 
-            <View className="px-4">
-              {filtered.map((movie, index) => (
-                <Animated.View
-                  key={`${movie.mediaType ?? 'movie'}-${movie.id}`}
-                  exiting={FadeOut.duration(200)}
-                  layout={LinearTransition.springify().damping(30).stiffness(200)}
-                  className={index < filtered.length - 1 ? 'border-b border-white/10' : ''}>
-                  <MyListRow movie={movie} onRemove={() => onRemove(movie)} />
-                </Animated.View>
-              ))}
-            </View>
+            {listItems.length === 0 ? (
+              <Animated.View
+                key={activeList}
+                entering={FadeIn.duration(250)}
+                className="items-center gap-3 px-10 py-16">
+                <Icon name="ListX" size={40} color="rgba(255,255,255,0.3)" />
+
+                <Text className="text-center !text-neutral-400">{list.emptyMessage}</Text>
+              </Animated.View>
+            ) : (
+              <View className="px-4">
+                {filtered.map((movie, index) => (
+                  <Animated.View
+                    key={`${movie.mediaType ?? 'movie'}-${movie.id}`}
+                    exiting={FadeOut.duration(200)}
+                    layout={LinearTransition.springify().damping(30).stiffness(200)}
+                    className={index < filtered.length - 1 ? 'border-b border-white/10' : ''}>
+                    <MyListRow
+                      movie={movie}
+                      removeIcon={list.removeIcon}
+                      onRemove={() => onRemove(movie)}
+                    />
+                  </Animated.View>
+                ))}
+              </View>
+            )}
           </Animated.View>
         </ScrollView>
       )}

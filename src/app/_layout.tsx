@@ -29,6 +29,9 @@ export default function RootLayout() {
     if (language && language !== i18n.locale) {
       changeLanguage(language);
     }
+
+    // TMDB responses are language-dependent — refetch everything on language change
+    queryClient.invalidateQueries();
   }, [language]);
 
   // if (!success) return null;

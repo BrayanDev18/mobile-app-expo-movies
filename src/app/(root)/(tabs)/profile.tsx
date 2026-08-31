@@ -1,4 +1,4 @@
-import { Icon, Tab, Text } from '@/components';
+import { Icon, Text } from '@/components';
 import { clearDatabase } from '@/expo-sqlite/db';
 import {
   useLanguageStore,
@@ -6,16 +6,14 @@ import {
   useProfileStore,
   useRecentSearchesStore,
   useViewedMoviesStore,
+  useViewedSeriesStore,
 } from '@/stores';
-import { getAvatarColor, tmdbResize } from '@/utils';
+import { getAvatarColor } from '@/utils';
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import * as LucideIcons from 'lucide-react-native';
-import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ReactNode, useState } from 'react';
+import { Alert, Linking, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -45,9 +43,8 @@ const initialsOf = (name: string) =>
     .join('')
     .toUpperCase();
 
-const IdentityCard = () => {
+const ProfileHeader = () => {
   const { name, setName } = useProfileStore();
-  const { saved } = useMyListStore();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(name);
 
@@ -58,17 +55,15 @@ const IdentityCard = () => {
   };
 
   return (
-    <View
-      className="flex-row items-center gap-4 rounded-3xl border p-4"
-      style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
+    <View className="items-center gap-4 pb-10 pt-2">
       <View
         className="items-center justify-center rounded-full"
-        style={{ width: 64, height: 64, backgroundColor: getAvatarColor(name) }}>
-        <Text className="!text-[22px] font-black">{initialsOf(name)}</Text>
+        style={{ width: 92, height: 92, backgroundColor: getAvatarColor(name) }}>
+        <Text className="!text-[32px] font-black">{initialsOf(name)}</Text>
       </View>
 
-      <View className="flex-1">
-        {isEditing ? (
+      {isEditing ? (
+        <View className="w-full flex-row items-center justify-center gap-2 px-10">
           <TextInput
             value={draft}
             onChangeText={setDraft}
@@ -78,243 +73,219 @@ const IdentityCard = () => {
             returnKeyType="done"
             placeholder="Your name"
             placeholderTextColor="#9ca3af"
-            className="h-10 rounded-xl bg-white/10 px-3 font-satoshi text-[16px] font-bold text-white"
+            className="h-11 flex-1 rounded-xl bg-white/10 px-4 text-center font-satoshi text-[17px] font-bold text-white"
           />
-        ) : (
-          <>
-            <Text numberOfLines={1} className="!text-xl font-bold">
-              {name}
-            </Text>
 
-            <Text className="mt-0.5 !text-[12px] !text-neutral-400">
-              {saved.length} {saved.length === 1 ? 'title' : 'titles'} in My List
-            </Text>
-          </>
-        )}
-      </View>
+          <Icon
+            name="Check"
+            size={18}
+            color="rgba(255,255,255,0.7)"
+            className="h-11 w-11 items-center justify-center rounded-full border border-white/15"
+            onPress={onSave}
+          />
+        </View>
+      ) : (
+        <View className="flex-row items-center gap-1">
+          <View className="w-11" />
 
-      <Icon
-        name={isEditing ? 'Check' : 'Pencil'}
-        size={18}
-        color="rgba(255,255,255,0.7)"
-        className="h-11 w-11 items-center justify-center rounded-full border border-white/15"
-        onPress={() => {
-          if (isEditing) {
-            onSave();
-          } else {
-            setDraft(name);
-            setIsEditing(true);
-          }
-        }}
-      />
+          <Text numberOfLines={1} className="!text-2xl font-bold">
+            {name}
+          </Text>
+
+          <Icon
+            name="Pencil"
+            size={14}
+            color="rgba(255,255,255,0.5)"
+            className="h-11 w-11 items-center justify-center"
+            onPress={() => {
+              setDraft(name);
+              setIsEditing(true);
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };
 
-const StatTile = ({ value, label }: { value: number; label: string }) => (
-  <View
-    className="flex-1 items-center gap-0.5 rounded-2xl border py-4"
-    style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
-    <Text className="!text-[22px] font-black" style={{ letterSpacing: -0.5 }}>
-      {value}
+const SettingsGroup = ({ title, children }: { title: string; children: ReactNode }) => (
+  <View className="gap-2 pb-7">
+    <Text className="px-2 !text-[12px] font-semibold !text-neutral-400" style={{ letterSpacing: 1.2 }}>
+      {title.toUpperCase()}
     </Text>
 
-    <Text className="!text-[11px] !text-neutral-400">{label}</Text>
+    <View
+      className="rounded-3xl border px-4"
+      style={{ borderColor: 'rgba(255,255,255,0.1)', backgroundColor: 'rgba(255,255,255,0.06)' }}>
+      {children}
+    </View>
   </View>
 );
 
-interface DataRowProps {
+interface SettingsRowProps {
   icon: keyof typeof LucideIcons;
   label: string;
   meta?: string;
   onPress: () => void;
   isLast?: boolean;
+  showChevron?: boolean;
+  destructive?: boolean;
 }
 
-const DataRow = ({ icon, label, meta, onPress, isLast }: DataRowProps) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityLabel={label}
-    onPress={onPress}
-    className={`flex-row items-center gap-3 py-4 ${isLast ? '' : 'border-b border-white/10'}`}>
-    <Icon name={icon} size={18} color="rgba(255,255,255,0.55)" />
+const SettingsRow = (props: SettingsRowProps) => {
+  const { icon, label, meta, onPress, isLast, showChevron = true, destructive } = props;
 
-    <Text className="flex-1 !text-[15px] font-medium">{label}</Text>
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      className={`flex-row items-center gap-3 py-3.5 ${isLast ? '' : 'border-b border-white/10'}`}>
+      <View
+        className="items-center justify-center rounded-lg"
+        style={{ width: 30, height: 30, backgroundColor: 'rgba(255,255,255,0.08)' }}>
+        <Icon
+          name={icon}
+          size={16}
+          color={destructive ? '#f87171' : 'rgba(255,255,255,0.7)'}
+        />
+      </View>
 
-    {meta ? <Text className="!text-[12px] !text-neutral-400">{meta}</Text> : null}
-  </Pressable>
-);
+      <Text
+        className={`flex-1 !text-[15px] font-medium ${destructive ? '!text-red-400' : ''}`}>
+        {label}
+      </Text>
+
+      {meta ? <Text className="!text-[13px] !text-neutral-400">{meta}</Text> : null}
+
+      {showChevron && <Icon name="ChevronRight" size={16} color="rgba(255,255,255,0.35)" />}
+    </Pressable>
+  );
+};
 
 const ProfileScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
   const { language, setLanguage } = useLanguageStore();
-  const { saved, clearSaved } = useMyListStore();
-  const { viewed, clearViewed } = useViewedMoviesStore();
+  const { items: savedItems, clearAll: clearSavedItems } = useMyListStore();
+  const { viewed: viewedMovies, clearViewed: clearViewedMovies } = useViewedMoviesStore();
+  const { viewed: viewedSeries, clearViewed: clearViewedSeries } = useViewedSeriesStore();
   const { searches, clearSearches } = useRecentSearchesStore();
 
-  const backdrop = saved[0]?.poster;
-  const recentViews = viewed.slice(0, 5);
+  const viewedCount = viewedMovies.length + viewedSeries.length;
   const version = Constants.expoConfig?.version;
+  const activeLanguage =
+    LANGUAGES.find((item) => language.startsWith(item.code))?.label ?? 'English';
+
+  const placeholder = () => Haptics.selectionAsync();
+
+  const chooseLanguage = () =>
+    Alert.alert('Language', 'Choose the app language.', [
+      ...LANGUAGES.map((item) => ({
+        text: item.label,
+        onPress: () => {
+          Haptics.selectionAsync();
+          setLanguage(item.code);
+        },
+      })),
+      { text: 'Cancel', style: 'cancel' as const },
+    ]);
 
   return (
     <View className="flex-1 bg-neutral-900">
-      {backdrop && (
-        <Image
-          source={{ uri: tmdbResize(backdrop, 'w185') ?? undefined }}
-          blurRadius={50}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
-
-      {backdrop && (
-        <LinearGradient
-          colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.85)', 'rgba(6,6,6,0.98)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
         <Animated.View entering={FadeIn.duration(300)} className="px-4">
-          <View className="pb-6">
+          <View className="pb-4">
             <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
-              Profile
+              Settings
             </Text>
           </View>
 
-          <View className="gap-3 pb-8">
-            <IdentityCard />
+          <ProfileHeader />
 
-            <View className="flex-row gap-3">
-              <StatTile value={saved.length} label="Saved" />
-              <StatTile value={viewed.length} label="Viewed" />
-              <StatTile value={searches.length} label="Searches" />
-            </View>
-          </View>
+          <SettingsGroup title="Preferences">
+            <SettingsRow
+              icon="Languages"
+              label="Language"
+              meta={activeLanguage}
+              onPress={chooseLanguage}
+            />
 
-          <View className="gap-3 pb-8">
-            <Text className="px-1 !text-[18px] font-semibold">Language</Text>
+            <SettingsRow icon="Bell" label="Notifications" onPress={placeholder} />
 
-            <View className="flex-row gap-2">
-              {LANGUAGES.map((item) => (
-                <Tab
-                  key={item.code}
-                  title={item.label}
-                  isActive={language.startsWith(item.code)}
-                  adaptableWidth
-                  className="rounded-full border border-white/15"
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setLanguage(item.code);
-                  }}
-                />
-              ))}
-            </View>
-          </View>
+            <SettingsRow icon="Moon" label="Appearance" meta="Dark" onPress={placeholder} />
 
-          {recentViews.length > 0 && (
-            <View className="gap-3 pb-8">
-              <Text className="px-1 !text-[18px] font-semibold">Recently viewed</Text>
+            <SettingsRow icon="Play" label="Autoplay trailers" onPress={placeholder} isLast />
+          </SettingsGroup>
 
-              <View>
-                {recentViews.map((item, index) => (
-                  <Pressable
-                    key={item.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={`View details for ${item.title}`}
-                    className={`flex-row items-center gap-3 py-3.5 ${
-                      index < recentViews.length - 1 ? 'border-b border-white/10' : ''
-                    }`}
-                    onPress={() =>
-                      router.push({ pathname: '/(root)/movie/[id]', params: { id: item.id } })
-                    }>
-                    <Icon name="Clock" size={16} color="rgba(255,255,255,0.4)" />
+          <SettingsGroup title="Data">
+            <SettingsRow
+              icon="History"
+              label="Clear search history"
+              meta={searches.length ? `${searches.length}` : undefined}
+              onPress={() =>
+                confirmClear(
+                  'Clear search history',
+                  'Your recent searches will be removed.',
+                  clearSearches
+                )
+              }
+            />
 
-                    <Text numberOfLines={1} className="flex-1 !text-[15px] font-medium">
-                      {item.title}
-                    </Text>
+            <SettingsRow
+              icon="EyeOff"
+              label="Clear recently viewed"
+              meta={viewedCount ? `${viewedCount}` : undefined}
+              onPress={() =>
+                confirmClear('Clear recently viewed', 'Your viewing history will be removed.', () => {
+                  clearViewedMovies();
+                  clearViewedSeries();
+                })
+              }
+            />
 
-                    <Icon name="ChevronRight" size={16} color="rgba(255,255,255,0.4)" />
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          )}
+            <SettingsRow
+              icon="BookmarkX"
+              label="Clear My List"
+              meta={savedItems.length ? `${savedItems.length}` : undefined}
+              onPress={() =>
+                confirmClear(
+                  'Clear My List',
+                  'Your watchlist, watched titles, favorites, and ratings will be removed.',
+                  clearSavedItems
+                )
+              }
+            />
 
-          <View className="gap-3 pb-8">
-            <Text className="px-1 !text-[18px] font-semibold">Manage data</Text>
+            <SettingsRow
+              icon="Trash2"
+              label="Clear database"
+              destructive
+              onPress={() =>
+                confirmClear('Clear database', 'Removes all local data permanently.', clearDatabase)
+              }
+              isLast
+            />
+          </SettingsGroup>
 
-            <View>
-              {searches.length > 0 && (
-                <DataRow
-                  icon="History"
-                  label="Clear search history"
-                  meta={`${searches.length}`}
-                  onPress={() =>
-                    confirmClear(
-                      'Clear search history',
-                      'Your recent searches will be removed.',
-                      clearSearches
-                    )
-                  }
-                />
-              )}
+          <SettingsGroup title="About">
+            <SettingsRow
+              icon="Clapperboard"
+              label="Powered by TMDB"
+              onPress={() => Linking.openURL('https://www.themoviedb.org/')}
+            />
 
-              {viewed.length > 0 && (
-                <DataRow
-                  icon="EyeOff"
-                  label="Clear recently viewed"
-                  meta={`${viewed.length}`}
-                  onPress={() =>
-                    confirmClear(
-                      'Clear recently viewed',
-                      'Your viewing history will be removed.',
-                      clearViewed
-                    )
-                  }
-                />
-              )}
+            <SettingsRow icon="MessageSquare" label="Send feedback" onPress={placeholder} />
 
-              {saved.length > 0 && (
-                <DataRow
-                  icon="BookmarkX"
-                  label="Remove all saved titles"
-                  meta={`${saved.length}`}
-                  onPress={() =>
-                    confirmClear(
-                      'Remove all saved titles',
-                      'Everything in My List will be removed.',
-                      clearSaved
-                    )
-                  }
-                />
-              )}
+            <SettingsRow icon="Shield" label="Privacy policy" onPress={placeholder} isLast />
+          </SettingsGroup>
 
-              <DataRow
-                icon="Trash2"
-                label="Clear database"
-                onPress={() =>
-                  confirmClear(
-                    'Clear database',
-                    'Removes all local data permanently.',
-                    clearDatabase
-                  )
-                }
-                isLast
-              />
-            </View>
-          </View>
-
-          <View className="items-center gap-1 pt-2">
+          <View className="items-center pt-1">
             {version && (
               <Text className="!text-[11px] !text-neutral-400">Flixora v{version}</Text>
             )}
-
-            <Text className="!text-[11px] !text-neutral-400">Powered by TMDB</Text>
           </View>
         </Animated.View>
       </ScrollView>

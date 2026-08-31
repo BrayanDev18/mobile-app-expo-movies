@@ -34,10 +34,13 @@ const uniqueById = <T extends { id: number }>(members: T[]): T[] => {
 };
 
 const CastList = () => {
-  const { id } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState<CastTab>('actors');
 
-  const { movieCast, movieCrew, isMovieCastLoading } = useMovieCast(+id);
+  const { movieCast, movieCrew, isMovieCastLoading } = useMovieCast(
+    +id,
+    type === 'tv' ? 'tv' : 'movie'
+  );
 
   const members = useMemo(() => {
     if (activeTab === 'actors') return movieCast;

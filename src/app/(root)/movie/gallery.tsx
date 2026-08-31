@@ -19,11 +19,14 @@ const shuffleArray = <T,>(array: T[]) => {
 };
 
 const MovieGallery = () => {
-  const { id } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams();
   const [visible, setVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
 
-  const { movieImages, isMovieImagesLoading } = useMovieImages(+id);
+  const { movieImages, isMovieImagesLoading } = useMovieImages(
+    +id,
+    type === 'tv' ? 'tv' : 'movie'
+  );
 
   const previewImages = useMemo(() => {
     const images = [...(movieImages?.backdrops ?? []), ...(movieImages?.posters ?? [])];

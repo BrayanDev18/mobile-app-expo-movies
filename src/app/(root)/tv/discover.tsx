@@ -1,29 +1,39 @@
 import { FlashList, Loader, Screen, Text } from '@/components';
-import { useDiscoverMoviesInfinite } from '@/hooks';
+import { useDiscoverTvInfinite } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { MovieCard } from '@/screens/movie/components';
-import { router, useLocalSearchParams } from 'expo-router';
+import { openMediaDetails } from '@/utils';
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { ActivityIndicator, Dimensions, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 40) / 2;
 
-const DiscoverScreen = () => {
-  const { genreId, providerId, yearFrom, yearTo, title } = useLocalSearchParams<{
-    genreId?: string;
-    providerId?: string;
-    yearFrom?: string;
-    yearTo?: string;
-    title?: string;
-  }>();
+const DiscoverTvScreen = () => {
+  const { genreId, networkId, providerId, originalLanguage, yearFrom, yearTo, showType, minVotes, title } =
+    useLocalSearchParams<{
+      genreId?: string;
+      networkId?: string;
+      providerId?: string;
+      originalLanguage?: string;
+      yearFrom?: string;
+      yearTo?: string;
+      showType?: string;
+      minVotes?: string;
+      title?: string;
+    }>();
 
-  const { movies, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useDiscoverMoviesInfinite({
+  const { series, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useDiscoverTvInfinite({
       genreId: genreId ? +genreId : undefined,
+      networkId: networkId ? +networkId : undefined,
       providerId: providerId ? +providerId : undefined,
+      originalLanguage,
       yearFrom: yearFrom ? +yearFrom : undefined,
       yearTo: yearTo ? +yearTo : undefined,
+      showType: showType ? +showType : undefined,
+      minVotes: minVotes ? +minVotes : undefined,
     });
 
   const renderItem = useCallback(
@@ -33,7 +43,7 @@ const DiscoverScreen = () => {
           movie={item}
           rating={item.rating}
           width={CARD_WIDTH}
-          onPress={() => router.push({ pathname: '/(root)/movie/[id]', params: { id: item.id } })}
+          onPress={() => openMediaDetails(item)}
         />
       </View>
     ),
@@ -46,7 +56,7 @@ const DiscoverScreen = () => {
     <Screen preset="fixed" safeAreaEdges={['top', 'bottom']} canGoBack>
       <View className="h-full">
         <FlashList
-          data={movies}
+          data={series}
           numColumns={2}
           keyExtractor={(item) => `${item.id}`}
           showsVerticalScrollIndicator={false}
@@ -72,4 +82,4 @@ const DiscoverScreen = () => {
   );
 };
 
-export default DiscoverScreen;
+export default DiscoverTvScreen;

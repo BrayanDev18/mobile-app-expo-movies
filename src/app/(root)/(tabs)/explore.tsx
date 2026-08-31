@@ -1,25 +1,27 @@
 import { Input, Tab, Text } from '@/components';
-import { useDebouncedValue, useSearchMulti, useTrending } from '@/hooks';
+import { useDebouncedValue, usePullToRefresh, useSearchMulti, useTrending } from '@/hooks';
+import { MediaType } from '@/interfaces';
 import {
   CollectionsRow,
   DecadeChips,
   GenreChips,
   MediaListRow,
-  MovieHorizontalList,
   PeopleHorizontalList,
   ProviderGrid,
-  RankedList,
+  RankedCarousel,
 } from '@/screens/movie/components';
 import { useRecentSearchesStore } from '@/stores';
 import { tmdbResize } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import {
   ActivityIndicator,
-  Dimensions,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   View,
@@ -27,18 +29,23 @@ import {
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get('window');
+const SCOPES: { key: MediaType; label: string }[] = [
+  { key: 'movie', label: 'Movies' },
+  { key: 'tv', label: 'Series' },
+];
 
 const ExploreScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
+  const [scope, setScope] = useState<MediaType>('movie');
   const { control, setValue } = useForm({ defaultValues: { search: '' } });
   const search = useWatch({ control, name: 'search' });
   const query = useDebouncedValue(search);
 
   const { media, people, isSearching, hasQuery } = useSearchMulti(query);
-  const { trending: topPicks } = useTrending('movie', 'day');
+  const { trending: topPicks } = useTrending(scope, 'day');
   const { trending: trendingAll } = useTrending('all', 'week');
   const { searches, addSearch, clearSearches } = useRecentSearchesStore();
+  const { refreshing, onRefresh } = usePullToRefresh();
 
   const rankedTrending = trendingAll.slice(0, 5);
   const showEmptyState = hasQuery && !isSearching && !media.length && !people.length;
@@ -64,7 +71,14 @@ const ExploreScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
+        contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="rgba(255,255,255,0.6)"
+          />
+        }>
         <View className="px-4 pb-5">
           <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
             Explore
@@ -141,30 +155,45 @@ const ExploreScreen = () => {
           </View>
         ) : (
           <Animated.View entering={FadeIn.duration(300)} style={{ gap: 32 }}>
-            <View className="gap-3">
-              <GenreChips />
-
-              <DecadeChips />
+            <View className="flex-row gap-2 px-4">
+              {SCOPES.map((item) => (
+                <Tab
+                  key={item.key}
+                  title={item.label}
+                  isActive={scope === item.key}
+                  adaptableWidth
+                  className="rounded-full border border-white/15"
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setScope(item.key);
+                  }}
+                />
+              ))}
             </View>
 
-            {topPicks.length > 0 && (
-              <View className="px-4">
-                <MovieHorizontalList
-                  title="Trending today"
-                  movies={topPicks}
-                />
+            <Animated.View key={scope} entering={FadeIn.duration(250)} style={{ gap: 32 }}>
+              <View className="gap-3">
+                <GenreChips mediaType={scope} />
+
+                <DecadeChips mediaType={scope} />
               </View>
-            )}
 
-            <ProviderGrid title="Browse by service" />
+              {topPicks.length > 0 && (
+                <View className="px-4">
+                  <RankedCarousel title="Trending today" movies={topPicks.slice(0, 10)} />
+                </View>
+              )}
 
-            {rankedTrending.length > 0 && (
-              <View className="px-4">
-                <RankedList title="Top 5 this week" movies={rankedTrending} />
-              </View>
-            )}
+              <ProviderGrid title="Browse by service" mediaType={scope} />
 
-            <CollectionsRow title="Sagas & collections" />
+              {rankedTrending.length > 0 && (
+                <View className="px-4">
+                  <RankedCarousel title="Top 5 this week" movies={rankedTrending} />
+                </View>
+              )}
+
+              {scope === 'movie' && <CollectionsRow title="Sagas & collections" />}
+            </Animated.View>
           </Animated.View>
         )}
       </ScrollView>

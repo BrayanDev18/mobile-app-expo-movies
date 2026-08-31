@@ -1,36 +1,39 @@
 import { Loader, Screen, Text } from '@/components';
-import { useMovieFull } from '@/hooks';
+import { useTvFull } from '@/hooks';
 import {
   MediaActionsBar,
   MovieCastAndCrew,
-  MovieCollectionBanner,
   MovieComments,
-  MovieFacts,
   MovieGallery,
   MovieHeader,
-  MovieInfo,
-  MovieSimilar,
+  MovieHorizontalList,
   MovieTrailers,
   MovieWatchProviders,
 } from '@/screens/movie/components';
-import { useViewedMoviesStore } from '@/stores';
+import {
+  NextEpisodeBanner,
+  SeasonsList,
+  SeriesFacts,
+  SeriesInfo,
+} from '@/screens/series/components';
+import { useViewedSeriesStore } from '@/stores';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
-const MovieDescriptionScreen = () => {
+const SeriesDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
-  const recordView = useViewedMoviesStore((state) => state.recordView);
+  const recordView = useViewedSeriesStore((state) => state.recordView);
 
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
 
-  const { movie, isLoading, isError, refetch } = useMovieFull(+id);
-  const details = movie?.details;
+  const { series, isLoading, isError, refetch } = useTvFull(+id);
+  const details = series?.details;
 
   useEffect(() => {
     if (details?.id && details.title) {
@@ -40,7 +43,7 @@ const MovieDescriptionScreen = () => {
 
   if (isLoading) return <Loader />;
 
-  if (isError || !movie || !details) {
+  if (isError || !series || !details) {
     return (
       <Screen canGoBack preset="fixed" safeAreaEdges={['top', 'bottom']}>
         <View className="flex-1 items-center justify-center gap-4 px-10">
@@ -50,7 +53,7 @@ const MovieDescriptionScreen = () => {
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Retry loading movie details"
+            accessibilityLabel="Retry loading series details"
             onPress={() => refetch()}
             className="rounded-full bg-blue-500/15 px-6 py-2">
             <Text className="font-medium !text-blue-400">Retry</Text>
@@ -60,14 +63,15 @@ const MovieDescriptionScreen = () => {
     );
   }
 
-  const { videos, cast, images, reviews, similar, recommendations, watchProviders } = movie;
+  const { videos, cast, images, reviews, similar, recommendations, watchProviders, creator } =
+    series;
 
   const trailers = videos.filter((video) => video.type === 'Trailer' || video.type === 'Teaser');
   const hasGallery = images.backdrops.length || images.logos.length || images.posters.length;
   const related = recommendations.length ? recommendations : similar;
 
   return (
-    <Screen canGoBack safeAreaEdges={["bottom"]}>
+    <Screen canGoBack safeAreaEdges={['bottom']}>
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
@@ -80,11 +84,7 @@ const MovieDescriptionScreen = () => {
           </View>
 
           <View className="gap-6 px-4">
-            <MovieInfo
-              movie={details}
-              certification={movie.certification}
-              director={movie.director?.name}
-            />
+            <SeriesInfo series={details} certification={series.certification} />
 
             <MediaActionsBar
               movie={{
@@ -94,28 +94,48 @@ const MovieDescriptionScreen = () => {
                 poster: details.poster,
                 backdrop: details.backdrop,
                 rating: details.rating,
-                releaseDate: details.releaseDate ?? '',
-                mediaType: 'movie',
+                releaseDate: details.firstAirDate ?? '',
+                mediaType: 'tv',
               }}
             />
 
-            {movie.collection && <MovieCollectionBanner collection={movie.collection} />}
+            {details.nextEpisode && <NextEpisodeBanner nextEpisode={details.nextEpisode} />}
 
             <MovieWatchProviders providers={watchProviders} />
 
             {trailers.length > 0 && <MovieTrailers videos={trailers} />}
 
-            {(cast.length > 0 || movie.director) && (
-              <MovieCastAndCrew movieId={details.id} cast={cast} director={movie.director} />
+            {(cast.length > 0 || creator) && (
+              <MovieCastAndCrew
+                movieId={details.id}
+                cast={cast}
+                director={creator}
+                mediaType="tv"
+              />
             )}
 
-            {hasGallery ? <MovieGallery movieId={details.id} gallery={images} /> : null}
+            <SeasonsList
+              seriesId={details.id}
+              seriesTitle={details.title}
+              seasons={details.seasons}
+            />
 
-            <MovieFacts movie={details} />
+            {hasGallery ? (
+              <MovieGallery movieId={details.id} gallery={images} mediaType="tv" />
+            ) : null}
+
+            <SeriesFacts series={details} />
 
             {reviews.length > 0 && <MovieComments comments={reviews} />}
 
-            {related.length > 0 && <MovieSimilar movieId={details.id} similarMovies={related} />}
+            {related.length > 0 && (
+              <MovieHorizontalList
+                title="You might also like"
+                movies={related.slice(0, 10)}
+                cardWidth={145}
+                cardHeight={200}
+              />
+            )}
           </View>
         </View>
       </Animated.ScrollView>
@@ -123,4 +143,4 @@ const MovieDescriptionScreen = () => {
   );
 };
 
-export default MovieDescriptionScreen;
+export default SeriesDescriptionScreen;
