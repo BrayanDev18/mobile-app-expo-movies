@@ -23,4 +23,3 @@ export * from './MovieWatchProviders';
 export * from './PeopleHorizontalList';
 export * from './ProviderGrid';
 export * from './RankedCarousel';
-export * from './RankedList';

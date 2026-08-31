@@ -3,7 +3,6 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      ['inline-import', { extensions: ['.sql'] }],
       'react-native-worklets/plugin',
       [
         'module-resolver',
@@ -11,8 +10,6 @@ module.exports = function (api) {
           root: ['./src'],
           alias: {
             '@/components': './src/components',
-            '@/expo-sqlite': './src/expo-sqlite',
-            '@/expo-sqlite/*': './src/expo-sqlite/*',
             '@/utils': './src/utils',
             '@/translate': './src/translate',
             '@/stores': './src/stores',
@@ -20,10 +17,8 @@ module.exports = function (api) {
             '@/services': './src/services',
             '@/constants': './src/constants',
             '@/assets': './assets',
-            '@/types': './src/types',
             '@/interfaces': './src/interfaces',
             '@/screens': './src/screens',
-            '@/screens/*': './src/screens/*',
           },
         },
       ],

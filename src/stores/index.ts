@@ -3,6 +3,5 @@ export * from './useMediaScopeStore';
 export * from './useMyListStore';
 export * from './useProfileStore';
 export * from './useRecentSearchesStore';
-export * from './useThemeStore';
 export * from './useViewedMoviesStore';
 export * from './useViewedSeriesStore';

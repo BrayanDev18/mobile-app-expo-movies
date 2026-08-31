@@ -9,12 +9,6 @@
       "@/components/*": [
         "./src/components/*"
       ],
-      "@/expo-sqlite": [
-        "./src/expo-sqlite"
-      ],
-      "@/expo-sqlite/*": [
-        "./src/expo-sqlite/*"
-      ],
       "@/utils": [
         "./src/utils"
       ],
@@ -35,9 +29,6 @@
       ],
       "@/assets": [
         "./assets"
-      ],
-      "@/types": [
-        "./src/types"
       ],
       "@/interfaces": [
         "./src/interfaces"

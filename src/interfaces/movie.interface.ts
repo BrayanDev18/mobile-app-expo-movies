@@ -9,7 +9,6 @@ export interface MovieProps {
   backdrop: string | null;
   rating: number;
   releaseDate: string;
-  category?: string;
   mediaType?: MediaType;
 }
 
@@ -44,18 +43,6 @@ export interface PersonProps {
   name: string;
   avatar: string | null;
   knownFor?: string;
-}
-
-export interface SimilarMoviesResponse {
-  results: SimilarMoviesProps[];
-}
-
-export interface SimilarMoviesProps {
-  id: number;
-  title: string | null;
-  release_date: number | null;
-  movie_id: number;
-  poster_path: string | null;
 }
 
 export interface MovieVideoResponse {
@@ -253,16 +240,6 @@ export interface CollectionProps {
   poster: string | null;
   backdrop: string | null;
   parts: MovieProps[];
-}
-
-export interface MovieProvidersResponse {
-  results: MovieProvidersProps[];
-}
-
-export interface ProviderProps {
-  _id: number;
-  logo: string;
-  name: string;
 }
 
 export interface MovieProvidersProps {

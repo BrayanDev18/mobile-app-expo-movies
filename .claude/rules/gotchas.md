@@ -2,10 +2,11 @@
 
 ## Image URLs
 
-TMDB returns relative paths. Always prepend `IMAGE_BASE_URL` from `@/constants/MovieApiBase`:
+TMDB returns relative paths. Build URLs with `tmdbImage` from `@/utils` (never concatenate hosts by hand), and resize an already-built URL with `tmdbResize`:
 ```ts
-import { IMAGE_BASE_URL } from '@/constants/MovieApiBase';
-const fullUrl = `${IMAGE_BASE_URL}${movie.poster_path}`;
+import { tmdbImage, tmdbResize } from '@/utils';
+const fullUrl = tmdbImage(movie.poster_path, 'w342');
+const smaller = tmdbResize(movie.poster, 'w185');
 ```
 
 ## Navigation

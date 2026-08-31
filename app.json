@@ -78,7 +78,6 @@
           }
         }
       ],
-      "expo-sqlite",
       "expo-web-browser",
       "expo-image",
       "expo-status-bar"

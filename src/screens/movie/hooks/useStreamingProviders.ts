@@ -1,5 +1,5 @@
 import { MovieApiRoutes } from '@/constants';
-import { MediaType, WatchProvidersResponse } from '@/interfaces';
+import { MediaType, StreamingProviderProps, WatchProvidersResponse } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -50,11 +50,13 @@ export const useStreamingProviders = (mediaType: MediaType = 'movie') => {
           return true;
         })
         .slice(0, PROVIDERS_LIMIT)
-        .map((provider) => ({
-          id: provider.provider_id,
-          name: provider.provider_name,
-          logo: tmdbImage(provider.logo_path, 'w185'),
-        }));
+        .map(
+          (provider): StreamingProviderProps => ({
+            id: provider.provider_id,
+            name: provider.provider_name,
+            logo: tmdbImage(provider.logo_path, 'w185'),
+          })
+        );
     },
   });
 

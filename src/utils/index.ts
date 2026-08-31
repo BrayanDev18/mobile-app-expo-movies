@@ -6,4 +6,3 @@ export * from './formatSeries';
 export * from './mapMedia';
 export * from './navigateMedia';
 export * from './tmdbImage';
-export * from './randomAvatar';

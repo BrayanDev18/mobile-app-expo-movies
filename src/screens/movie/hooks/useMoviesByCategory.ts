@@ -17,7 +17,7 @@ export const useMoviesByCategory = (category: string) => {
         MovieApiRoutes.moviesByCategory(category)
       );
 
-      return mapMovies(data.results).map((movie) => ({ ...movie, category }));
+      return mapMovies(data.results);
     },
   });
 

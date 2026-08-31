@@ -22,10 +22,6 @@ export default function RootLayout() {
   const language = useLanguageStore((state) => state.language);
   const previousLanguage = useRef(language);
 
-  // const { success } = useInitDb();
-
-  //resetDatabase();
-
   useEffect(() => {
     // Skip mount and store-rehydration passes — only react to a real change
     if (previousLanguage.current === language) return;
@@ -39,8 +35,6 @@ export default function RootLayout() {
     // TMDB responses are language-dependent — refetch everything on language change
     queryClient.invalidateQueries();
   }, [language]);
-
-  // if (!success) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

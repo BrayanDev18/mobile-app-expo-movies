@@ -1,9 +1,9 @@
 import { Button, Icon, Text } from '@/components';
-import { navigate } from '@/constants';
 import { useTrending } from '@/hooks';
 import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -109,7 +109,7 @@ const MainIndex = () => {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(650).duration(500)} className="gap-3">
-          <Button title="Get started" onPress={() => navigate('home', 'replace')} />
+          <Button title="Get started" onPress={() => router.replace('/(root)/(tabs)/home')} />
 
           <Text className="text-center !text-[11px] !text-neutral-400">Powered by TMDB</Text>
         </Animated.View>

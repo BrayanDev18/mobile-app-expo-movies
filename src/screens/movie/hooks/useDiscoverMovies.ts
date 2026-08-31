@@ -2,7 +2,7 @@ import { MovieApiRoutes } from '@/constants';
 import { MovieProps, MoviesByCategoryResponse } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { mapMovies, mediaKey } from '@/utils';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 import * as Localization from 'expo-localization';
 
@@ -59,17 +59,6 @@ export const discoverMoviesQuery = (filters: DiscoverMoviesFilters, region: stri
     return mapMovies(data.results);
   },
 });
-
-export const useDiscoverMovies = (filters: DiscoverMoviesFilters) => {
-  const {
-    data: movies = [],
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery(discoverMoviesQuery(filters, deviceRegion()));
-
-  return { movies, isLoading, isError, refetch };
-};
 
 export const useDiscoverMoviesInfinite = (filters: DiscoverMoviesFilters) => {
   const region = deviceRegion();

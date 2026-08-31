@@ -1,5 +1,5 @@
 import { MovieApiRoutes } from '@/constants';
-import { TvSeasonDetailsResponse } from '@/interfaces';
+import { TvSeasonDetailsProps, TvSeasonDetailsResponse } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ export const useTvSeason = (seriesId: number, seasonNumber: number) => {
   } = useQuery({
     queryKey: ['tvSeason', seriesId, seasonNumber],
     enabled: !!seriesId && seasonNumber >= 0,
-    queryFn: async () => {
+    queryFn: async (): Promise<TvSeasonDetailsProps> => {
       const { data } = await moviesApi.get<TvSeasonDetailsResponse>(
         MovieApiRoutes.tvSeason(seriesId, seasonNumber)
       );

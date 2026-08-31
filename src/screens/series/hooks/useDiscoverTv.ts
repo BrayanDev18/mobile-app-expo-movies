@@ -2,7 +2,7 @@ import { MovieApiRoutes } from '@/constants';
 import { TvByCategoryResponse } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { mapTvShows } from '@/utils';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { dedupeMedia, deviceRegion } from '../../movie/hooks/useDiscoverMovies';
 
 export interface DiscoverTvFilters {
@@ -76,12 +76,6 @@ export const discoverTvQuery = (filters: DiscoverTvFilters) => {
       return mapTvShows(data.results);
     },
   };
-};
-
-export const useDiscoverTv = (filters: DiscoverTvFilters) => {
-  const { data: series = [], isLoading, isError, refetch } = useQuery(discoverTvQuery(filters));
-
-  return { series, isLoading, isError, refetch };
 };
 
 export const useDiscoverTvInfinite = (filters: DiscoverTvFilters) => {

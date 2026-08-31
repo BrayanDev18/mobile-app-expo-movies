@@ -7,7 +7,6 @@ export * from './Input';
 export * from './Loader';
 export * from './RowBack';
 export * from './Screen';
-export * from './SectionHeader';
 export * from './Interop';
 export * from './SwipeTabs';
 export * from './Tabs';
