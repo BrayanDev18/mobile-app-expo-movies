@@ -1,4 +1,4 @@
-import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
+import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -16,7 +16,7 @@ export const MovieHeader = ({
   poster,
   scrollY,
 }: {
-  poster: string;
+  poster: string | null;
   scrollY: SharedValue<number>;
 }) => {
   const backgroundStyle = useAnimatedStyle(() => ({
@@ -38,7 +38,7 @@ export const MovieHeader = ({
   return (
     <View style={{ height: heightScreen * 0.53 }} className="relative items-center justify-center">
       <AnimatedImage
-        source={{ uri: tmdbResize(poster, 'w185') ?? undefined }}
+        source={{ uri: tmdbImage(poster, 'w185') ?? undefined }}
         style={[StyleSheet.absoluteFill, backgroundStyle]}
         contentPosition="top center"
         cachePolicy="memory-disk"
@@ -63,7 +63,7 @@ export const MovieHeader = ({
           posterStyle,
         ]}>
         <Image
-          source={{ uri: poster }}
+          source={{ uri: tmdbImage(poster, 'w500') ?? undefined }}
           style={{ width: '100%', height: '100%' }}
           cachePolicy="memory-disk"
           contentFit="fill"

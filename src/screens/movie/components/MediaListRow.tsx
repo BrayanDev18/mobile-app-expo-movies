@@ -1,7 +1,6 @@
-import { Text } from '@/components';
+import { Text, TmdbImage } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
-import { Image } from 'expo-image';
+import { openMediaDetails } from '@/utils';
 import { Pressable, View } from 'react-native';
 
 interface MediaListRowProps {
@@ -30,12 +29,11 @@ export const MediaListRow = ({ movie, rank }: MediaListRowProps) => {
         </Text>
       )}
 
-      <Image
-        source={{ uri: tmdbResize(movie.poster, 'w92') ?? undefined }}
+      <TmdbImage
+        path={movie.poster}
+        size="w92"
         style={{ width: 62, height: 72, borderRadius: 8 }}
         contentFit="cover"
-        cachePolicy="memory-disk"
-        placeholder={IMAGE_PLACEHOLDER}
         accessibilityLabel={`${movie.title} poster`}
       />
 

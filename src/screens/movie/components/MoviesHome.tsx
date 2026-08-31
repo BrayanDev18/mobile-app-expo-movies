@@ -1,6 +1,6 @@
 import { useHomeSections, useMoviesByCategory, usePullToRefresh, useTrendingPeople } from '@/hooks';
 import { HomeSection, MovieProps } from '@/interfaces';
-import { tmdbResize } from '@/utils';
+import { tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -127,7 +127,7 @@ const BackdropImage = (props: BackdropImageProps) => {
 
   return (
     <AnimatedImage
-      source={{ uri: tmdbResize(image.poster, 'w185') ?? undefined }}
+      source={{ uri: tmdbImage(image.poster, 'w185') ?? undefined }}
       blurRadius={50}
       style={[StyleSheet.absoluteFill, styles]}
     />

@@ -72,7 +72,7 @@ const MovieDescriptionScreen = () => {
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}>
-        <MovieHeader poster={details.poster as string} scrollY={scrollY} />
+        <MovieHeader poster={details.poster} scrollY={scrollY} />
 
         <View className="-mt-16 rounded-t-3xl bg-neutral-900 backdrop-blur-xl">
           <View className="items-center py-3">

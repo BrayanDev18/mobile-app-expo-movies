@@ -103,10 +103,10 @@ export const useMovieFull = (movieId: number) => {
           ? {
               id: data.belongs_to_collection.id,
               name: data.belongs_to_collection.name,
-              backdrop: tmdbImage(
-                data.belongs_to_collection.backdrop_path ?? data.belongs_to_collection.poster_path,
-                'w780'
-              ),
+              backdrop:
+                data.belongs_to_collection.backdrop_path ??
+                data.belongs_to_collection.poster_path ??
+                null,
             }
           : null,
         director: mapDirector(data.credits?.crew),

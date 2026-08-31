@@ -1,7 +1,7 @@
 import { Loader, Screen, Text } from '@/components';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
-import { formatDate, formatDuration, IMAGE_PLACEHOLDER } from '@/utils';
+import { formatDate, formatDuration, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
@@ -30,7 +30,7 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
       <View className="gap-2.5 py-4">
         <View className="flex-row items-center gap-3">
           <Image
-            source={{ uri: episode.still ?? undefined }}
+            source={{ uri: tmdbImage(episode.still, 'w342') ?? undefined }}
             style={{ width: 140, height: 79, borderRadius: 12 }}
             contentFit="cover"
             cachePolicy="memory-disk"
@@ -120,7 +120,7 @@ const SeasonScreen = () => {
             <View className="gap-4 pb-2">
               <View className="flex-row items-center gap-4">
                 <Image
-                  source={{ uri: seasonDetails.poster ?? undefined }}
+                  source={{ uri: tmdbImage(seasonDetails.poster, 'w185') ?? undefined }}
                   style={{ width: 84, height: 126, borderRadius: 12 }}
                   contentFit="cover"
                   cachePolicy="memory-disk"

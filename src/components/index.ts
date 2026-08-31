@@ -11,3 +11,4 @@ export * from './Interop';
 export * from './SwipeTabs';
 export * from './Tabs';
 export * from './Text';
+export * from './TmdbImage';

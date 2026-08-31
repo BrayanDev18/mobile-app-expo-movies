@@ -1,5 +1,4 @@
 import { TvDetails, TvDetailsProps } from '@/interfaces';
-import { tmdbImage } from './tmdbImage';
 
 export const mapTvDetails = (data: TvDetails): TvDetailsProps => ({
   id: data.id,
@@ -7,8 +6,8 @@ export const mapTvDetails = (data: TvDetails): TvDetailsProps => ({
   originalTitle: data.original_name,
   tagline: data.tagline,
   overview: data.overview,
-  poster: tmdbImage(data.poster_path),
-  backdrop: tmdbImage(data.backdrop_path),
+  poster: data.poster_path ?? null,
+  backdrop: data.backdrop_path ?? null,
   firstAirDate: data.first_air_date,
   lastAirDate: data.last_air_date,
   rating: data.vote_average,
@@ -26,7 +25,7 @@ export const mapTvDetails = (data: TvDetails): TvDetailsProps => ({
     id: season.id,
     name: season.name,
     overview: season.overview,
-    poster: tmdbImage(season.poster_path),
+    poster: season.poster_path ?? null,
     seasonNumber: season.season_number,
     episodeCount: season.episode_count,
     airDate: season.air_date,

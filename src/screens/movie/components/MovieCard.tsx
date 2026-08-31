@@ -1,6 +1,6 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { cn, formatDate, IMAGE_PLACEHOLDER } from '@/utils';
+import { cn, formatDate, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,7 +34,7 @@ export const MovieCard = (props: MovieCardProps) => {
       accessibilityLabel={`View details for ${movie.title}`}
       onPress={onPress}>
       <Image
-        source={{ uri: movieImage as string }}
+        source={{ uri: tmdbImage(movieImage, isBackdrop ? 'w780' : 'w342') ?? undefined }}
         style={{
           width: cardWidth,
           height: cardHeight,

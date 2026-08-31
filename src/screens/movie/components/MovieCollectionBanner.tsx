@@ -1,5 +1,5 @@
 import { Text } from '@/components';
-import { IMAGE_PLACEHOLDER } from '@/utils';
+import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +17,7 @@ export const MovieCollectionBanner = ({ collection }: MovieCollectionBannerProps
     onPress={() => router.push(`/(root)/movie/collection/${collection.id}` as Href)}>
     <View className="overflow-hidden rounded-2xl border border-white/10">
       <Image
-        source={{ uri: collection.backdrop ?? undefined }}
+        source={{ uri: tmdbImage(collection.backdrop, 'w780') ?? undefined }}
         style={{ width: '100%', height: 110 }}
         contentFit="cover"
         cachePolicy="memory-disk"

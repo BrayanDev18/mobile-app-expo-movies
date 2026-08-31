@@ -11,7 +11,7 @@ import {
   RankedCarousel,
 } from '@/screens/movie/components';
 import { useRecentSearchesStore } from '@/stores';
-import { tmdbResize } from '@/utils';
+import { tmdbImage } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
@@ -55,7 +55,7 @@ const ExploreScreen = () => {
     <View className="flex-1 bg-neutral-900">
       {backdrop && (
         <Image
-          source={{ uri: tmdbResize(backdrop, 'w185') ?? undefined }}
+          source={{ uri: tmdbImage(backdrop, 'w185') ?? undefined }}
           blurRadius={50}
           style={StyleSheet.absoluteFill}
         />

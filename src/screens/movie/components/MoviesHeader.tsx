@@ -1,6 +1,6 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { formatDate, IMAGE_PLACEHOLDER, openMediaDetails } from '@/utils';
+import { formatDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -92,7 +92,7 @@ const ImageItem = (props: ImageItemProps) => {
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
       <Animated.View style={[{ flex: 1 }, imageStyle]}>
         <AnimatedImage
-          source={{ uri: image.poster as string }}
+          source={{ uri: tmdbImage(image.poster, 'w500') ?? undefined }}
           style={{ width: '100%', height: '100%', borderRadius: 22 }}
           contentFit="fill"
           cachePolicy="memory-disk"

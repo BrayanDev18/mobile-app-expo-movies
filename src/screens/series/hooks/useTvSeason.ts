@@ -1,7 +1,7 @@
 import { MovieApiRoutes } from '@/constants';
 import { TvSeasonDetailsProps, TvSeasonDetailsResponse } from '@/interfaces';
 import { moviesApi, tmdbKey } from '@/services';
-import { tmdbImage } from '@/utils';
+
 import { useQuery } from '@tanstack/react-query';
 
 export const useTvSeason = (seriesId: number, seasonNumber: number) => {
@@ -22,13 +22,13 @@ export const useTvSeason = (seriesId: number, seasonNumber: number) => {
         id: data.id,
         name: data.name,
         overview: data.overview,
-        poster: tmdbImage(data.poster_path),
+        poster: data.poster_path ?? null,
         airDate: data.air_date,
         episodes: (data.episodes ?? []).map((episode) => ({
           id: episode.id,
           name: episode.name,
           overview: episode.overview,
-          still: tmdbImage(episode.still_path),
+          still: episode.still_path ?? null,
           episodeNumber: episode.episode_number,
           airDate: episode.air_date,
           runtime: episode.runtime,

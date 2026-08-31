@@ -1,7 +1,7 @@
 import { Loader, Screen, Text } from '@/components';
 import { useCollection } from '@/hooks';
 import { MediaListRow } from '@/screens/movie/components';
-import { IMAGE_PLACEHOLDER } from '@/utils';
+import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
@@ -28,7 +28,7 @@ const CollectionScreen = () => {
         <Animated.View entering={FadeIn.duration(300)}>
           <View>
             <Image
-              source={{ uri: collection.backdrop ?? undefined }}
+              source={{ uri: tmdbImage(collection.backdrop, 'w780') ?? undefined }}
               style={{ width: '100%', aspectRatio: 1.78, borderRadius: 24 }}
               contentFit="cover"
               cachePolicy="memory-disk"

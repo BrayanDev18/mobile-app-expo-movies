@@ -1,7 +1,7 @@
 import { Loader, Screen, Text } from '@/components';
 import { useSimilarMovies } from '@/hooks';
 import { MovieProps } from '@/interfaces';
-import { formatSpecialDate, IMAGE_PLACEHOLDER, openMediaDetails } from '@/utils';
+import { formatSpecialDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
@@ -44,7 +44,7 @@ const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
       onPress={() => openMediaDetails(movie)}
       className="m-2 flex-1 rounded-bl-2xl rounded-br-2xl bg-neutral-950/30">
       <Image
-        source={{ uri: movie.poster as string }}
+        source={{ uri: tmdbImage(movie.poster, 'w342') ?? undefined }}
         style={{
           width: '100%',
           height: 240,

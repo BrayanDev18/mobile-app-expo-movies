@@ -1,6 +1,6 @@
 import { Button, Icon, Text } from '@/components';
 import { useTrending } from '@/hooks';
-import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
+import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -66,7 +66,7 @@ const MainIndex = () => {
                   key={`${tile.uri}-${tileIndex}`}
                   entering={FadeIn.delay((tileIndex * COLUMNS + columnIndex) * 60).duration(400)}>
                   <Image
-                    source={{ uri: tmdbResize(tile.uri, 'w342') ?? undefined }}
+                    source={{ uri: tmdbImage(tile.uri, 'w342') ?? undefined }}
                     style={{ width: '100%', height: tile.height, borderRadius: 12 }}
                     contentFit="cover"
                     cachePolicy="memory-disk"

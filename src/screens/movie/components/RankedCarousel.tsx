@@ -1,8 +1,7 @@
-import { Text } from '@/components';
+import { Text, TmdbImage } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
+import { openMediaDetails } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
-import { Image } from 'expo-image';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -28,8 +27,9 @@ export const RankedCarousel = ({ title, movies }: RankedCarouselProps) => {
           {index + 1}
         </Text>
 
-        <Image
-          source={{ uri: tmdbResize(item.poster, 'w342') ?? undefined }}
+        <TmdbImage
+          path={item.poster}
+          size="w342"
           style={{
             width: POSTER_WIDTH,
             height: POSTER_HEIGHT,
@@ -38,8 +38,6 @@ export const RankedCarousel = ({ title, movies }: RankedCarouselProps) => {
 
           }}
           contentFit="cover"
-          cachePolicy="memory-disk"
-          placeholder={IMAGE_PLACEHOLDER}
           accessibilityLabel={`${item.title} poster`}
         />
       </Pressable>

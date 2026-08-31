@@ -2,7 +2,7 @@ import { Text } from '@/components';
 import { EXPLORE_COLLECTIONS } from '@/constants';
 import { useCollections } from '@/hooks';
 import { CollectionProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
+import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -27,7 +27,7 @@ export const CollectionsRow = ({ title }: CollectionsRowProps) => {
         onPress={() => router.push(`/(root)/movie/collection/${item.id}` as Href)}>
         <View style={{ width: CARD_WIDTH }}>
           <Image
-            source={{ uri: item.backdrop ?? undefined }}
+            source={{ uri: tmdbImage(item.backdrop, 'w780') ?? undefined }}
             style={{ width: CARD_WIDTH, aspectRatio: 1.78, borderRadius: 12 }}
             contentFit="cover"
             cachePolicy="memory-disk"

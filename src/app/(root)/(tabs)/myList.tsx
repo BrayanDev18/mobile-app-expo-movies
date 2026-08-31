@@ -1,7 +1,7 @@
 import { Button, Icon, IconName, Tab, Text } from '@/components';
 import { MediaType, MyListFlag, SavedMediaProps } from '@/interfaces';
 import { useMyListStore } from '@/stores';
-import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
+import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -61,7 +61,7 @@ const MyListRow = ({ movie, removeIcon, onRemove }: {
       className="flex-row items-center py-3"
       onPress={() => openMediaDetails(movie)}>
       <Image
-        source={{ uri: tmdbResize(movie.poster, 'w92') ?? undefined }}
+        source={{ uri: tmdbImage(movie.poster, 'w92') ?? undefined }}
         style={{ width: 52, height: 68, borderRadius: 12 }}
         contentFit="cover"
         cachePolicy="memory-disk"
@@ -130,7 +130,7 @@ const MyListScreen = () => {
     <View className="flex-1 bg-neutral-900">
       {backdrop && (
         <Image
-          source={{ uri: tmdbResize(backdrop, 'w185') ?? undefined }}
+          source={{ uri: tmdbImage(backdrop, 'w185') ?? undefined }}
           blurRadius={50}
           style={StyleSheet.absoluteFill}
         />

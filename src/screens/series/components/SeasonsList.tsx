@@ -1,8 +1,6 @@
-import { Text } from '@/components';
+import { Text, TmdbImage } from '@/components';
 import { TvSeasonProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
@@ -45,12 +43,11 @@ export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps
                   params: { id: seriesId, season: item.seasonNumber, seriesTitle },
                 })
               }>
-              <Image
-                source={{ uri: item.poster ?? undefined }}
+              <TmdbImage
+                path={item.poster}
+                size="w185"
                 style={{ width: 120, height: 180, borderRadius: 12 }}
                 contentFit="cover"
-                cachePolicy="memory-disk"
-                placeholder={IMAGE_PLACEHOLDER}
                 accessibilityLabel={`${item.name} poster`}
               />
 

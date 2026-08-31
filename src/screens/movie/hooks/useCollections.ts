@@ -1,15 +1,15 @@
 import { MovieApiRoutes } from '@/constants';
 import { CollectionDetailsResponse, CollectionProps } from '@/interfaces';
 import { moviesApi, tmdbKey } from '@/services';
-import { mapMovies, tmdbImage } from '@/utils';
+import { mapMovies } from '@/utils';
 import { useQueries, useQuery } from '@tanstack/react-query';
 
 const mapCollection = (data: CollectionDetailsResponse): CollectionProps => ({
   id: data.id,
   name: data.name.replace(/\s+Collection$/i, ''),
   overview: data.overview,
-  poster: tmdbImage(data.poster_path),
-  backdrop: tmdbImage(data.backdrop_path, 'w780'),
+  poster: data.poster_path ?? null,
+  backdrop: data.backdrop_path ?? null,
   parts: mapMovies(data.parts)
     .filter((part) => part.poster)
     .sort((a, b) => (a.releaseDate || '9999').localeCompare(b.releaseDate || '9999')),
