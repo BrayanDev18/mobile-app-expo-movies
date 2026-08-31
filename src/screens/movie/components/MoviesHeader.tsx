@@ -1,10 +1,9 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { formatDate, IMAGE_PLACEHOLDER } from '@/utils';
+import { formatDate, IMAGE_PLACEHOLDER, openMediaDetails } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -89,11 +88,7 @@ const ImageItem = (props: ImageItemProps) => {
 
   return (
     <Pressable
-      onPress={() => {
-        if (image.mediaType === 'tv') return;
-
-        router.push({ pathname: '/(root)/movie/[id]', params: { id: image.id } });
-      }}
+      onPress={() => openMediaDetails(image)}
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
       <Animated.View style={[{ flex: 1 }, imageStyle]}>
         <AnimatedImage

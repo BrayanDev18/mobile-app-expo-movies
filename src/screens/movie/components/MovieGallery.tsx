@@ -1,5 +1,5 @@
 import { ImagePreviewModal, Text } from '@/components';
-import { MovieImages, MovieImagesResponse } from '@/interfaces';
+import { MediaType, MovieImages, MovieImagesResponse } from '@/interfaces';
 import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
@@ -11,9 +11,11 @@ import { Pressable, TouchableHighlight, View } from 'react-native';
 export const MovieGallery = ({
   movieId,
   gallery,
+  mediaType = 'movie',
 }: {
   movieId: number;
   gallery: MovieImagesResponse;
+  mediaType?: MediaType;
 }) => {
   const [openModalGallery, setOpenModalGallery] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MovieImages | null>(null);
@@ -40,7 +42,7 @@ export const MovieGallery = ({
               onPress={() =>
                 router.push({
                   pathname: '/(root)/movie/gallery',
-                  params: { id: movieId },
+                  params: { id: movieId, type: mediaType },
                 })
               }>
               <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />

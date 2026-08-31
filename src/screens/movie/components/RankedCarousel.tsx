@@ -1,9 +1,8 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
+import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -22,11 +21,7 @@ export const RankedCarousel = ({ title, movies }: RankedCarouselProps) => {
         accessibilityRole="button"
         accessibilityLabel={`View details for ${item.title}, ranked ${index + 1}`}
         className="flex-row items-end"
-        onPress={() => {
-          if (item.mediaType === 'tv') return;
-
-          router.push({ pathname: '/(root)/movie/[id]', params: { id: item.id } });
-        }}>
+        onPress={() => openMediaDetails(item)}>
         <Text
           className="font-black !text-white/25"
           style={{ fontSize: 96, lineHeight: 96, letterSpacing: -6 }}>

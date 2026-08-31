@@ -1,8 +1,7 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
+import { IMAGE_PLACEHOLDER, openMediaDetails, tmdbResize } from '@/utils';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 interface MediaListRowProps {
@@ -22,11 +21,7 @@ export const MediaListRow = ({ movie, rank }: MediaListRowProps) => {
       accessibilityRole="button"
       accessibilityLabel={`View details for ${movie.title}`}
       className="flex-row items-center py-3"
-      onPress={() => {
-        if (movie.mediaType === 'tv') return;
-
-        router.push({ pathname: '/(root)/movie/[id]', params: { id: movie.id } });
-      }}>
+      onPress={() => openMediaDetails(movie)}>
       {rank !== undefined && (
         <Text
           className="!text-[32px] font-black !text-white/25"

@@ -1,8 +1,8 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
+import { openMediaDetails } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { TouchableHighlight, View } from 'react-native';
 import { MovieCard } from './MovieCard';
@@ -27,14 +27,7 @@ export const MovieHorizontalList = (props: MovieHorizontalListProps) => {
         variant={variant}
         width={cardWidth}
         height={cardHeight}
-        onPress={() => {
-          if (item.mediaType === 'tv') return;
-
-          router.push({
-            pathname: '/(root)/movie/[id]',
-            params: { id: item.id },
-          });
-        }}
+        onPress={() => openMediaDetails(item)}
       />
     ),
     [variant, cardWidth, cardHeight]

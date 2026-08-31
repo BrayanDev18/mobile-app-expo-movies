@@ -1,5 +1,5 @@
 import { Text } from '@/components';
-import { MovieCastProps } from '@/interfaces';
+import { MediaType, MovieCastProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
@@ -11,10 +11,11 @@ interface MovieCastAndCrewProps {
   movieId: number;
   cast: MovieCastProps[];
   director?: MovieCastProps | null;
+  mediaType?: MediaType;
 }
 
 export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
-  const { movieId, cast, director } = props;
+  const { movieId, cast, director, mediaType = 'movie' } = props;
 
   const members = [...(cast?.slice(0, 5) ?? []), ...(director ? [director] : [])];
 
@@ -30,7 +31,7 @@ export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
             onPress={() =>
               router.push({
                 pathname: '/(root)/movie/cast/castList',
-                params: { id: movieId },
+                params: { id: movieId, type: mediaType },
               })
             }>
             <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />

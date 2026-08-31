@@ -29,6 +29,16 @@ export interface TrendingResultProps {
   known_for_department?: string;
 }
 
+export type MyListFlag = 'watchlist' | 'watched' | 'favorite';
+
+export interface SavedMediaProps extends MovieProps {
+  watchlist: boolean;
+  watched: boolean;
+  favorite: boolean;
+  userRating: number | null;
+  savedAt: number;
+}
+
 export interface PersonProps {
   id: number;
   name: string;

@@ -1,5 +1,6 @@
 import { Text } from '@/components';
 import { useStreamingProviders } from '@/hooks';
+import { MediaType } from '@/interfaces';
 import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
@@ -13,12 +14,15 @@ const TILE_SIZE = (width - 40 - GAP * (COLUMNS - 1)) / COLUMNS;
 
 interface ProviderGridProps {
   title?: string;
+  mediaType?: MediaType;
 }
 
-export const ProviderGrid = ({ title }: ProviderGridProps) => {
-  const { providers } = useStreamingProviders();
+export const ProviderGrid = ({ title, mediaType = 'movie' }: ProviderGridProps) => {
+  const { providers } = useStreamingProviders(mediaType);
 
   if (!providers.length) return null;
+
+  const mediaLabel = mediaType === 'tv' ? 'series' : 'movies';
 
   return (
     <View className="gap-3 px-4">
@@ -29,10 +33,10 @@ export const ProviderGrid = ({ title }: ProviderGridProps) => {
           <Pressable
             key={provider.id}
             accessibilityRole="button"
-            accessibilityLabel={`Browse movies on ${provider.name}`}
+            accessibilityLabel={`Browse ${mediaLabel} on ${provider.name}`}
             onPress={() =>
               router.push({
-                pathname: '/(root)/movie/discover',
+                pathname: mediaType === 'tv' ? '/(root)/tv/discover' : '/(root)/movie/discover',
                 params: { providerId: provider.id, title: provider.name },
               })
             }>

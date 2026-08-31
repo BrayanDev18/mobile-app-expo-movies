@@ -55,7 +55,7 @@ export const FloatingTabBar = ({ state, descriptors, navigation }: BottomTabBarP
 
       <View
         pointerEvents="box-none"
-        style={{ position: 'absolute', left: 20, right: 20, bottom: bottom - 5 }}>
+        style={{ position: 'absolute', left: 20, right: 20, bottom: bottom - 10 }}>
         <BlurView
           tint="dark"
           intensity={50}

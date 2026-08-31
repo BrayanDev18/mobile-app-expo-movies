@@ -1,4 +1,4 @@
-import { MovieProps } from '@/interfaces';
+import { MovieProps, MyListFlag, SavedMediaProps } from '@/interfaces';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -6,36 +6,95 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 const keyOf = (movie: Pick<MovieProps, 'id' | 'mediaType'>) =>
   `${movie.mediaType ?? 'movie'}-${movie.id}`;
 
+const asSavedItem = (movie: MovieProps): SavedMediaProps => ({
+  id: movie.id,
+  title: movie.title,
+  overview: movie.overview,
+  poster: movie.poster,
+  backdrop: movie.backdrop,
+  rating: movie.rating,
+  releaseDate: movie.releaseDate,
+  mediaType: movie.mediaType ?? 'movie',
+  watchlist: false,
+  watched: false,
+  favorite: false,
+  userRating: null,
+  savedAt: Date.now(),
+});
+
+const isEmptyItem = (item: SavedMediaProps) =>
+  !item.watchlist && !item.watched && !item.favorite && item.userRating === null;
+
 interface MyListState {
-  saved: MovieProps[];
-  toggleSaved: (movie: MovieProps) => void;
-  removeSaved: (movie: MovieProps) => void;
-  clearSaved: () => void;
+  items: SavedMediaProps[];
+  toggleFlag: (movie: MovieProps, flag: MyListFlag) => void;
+  setRating: (movie: MovieProps, userRating: number | null) => void;
+  removeItem: (movie: Pick<MovieProps, 'id' | 'mediaType'>) => void;
+  clearAll: () => void;
 }
 
 export const useMyListStore = create<MyListState>()(
   persist(
     (set) => ({
-      saved: [],
-      toggleSaved: (movie) =>
+      items: [],
+      toggleFlag: (movie, flag) =>
         set((state) => {
-          const exists = state.saved.some((item) => keyOf(item) === keyOf(movie));
+          const existing = state.items.find((item) => keyOf(item) === keyOf(movie));
+
+          if (!existing) {
+            return { items: [{ ...asSavedItem(movie), [flag]: true }, ...state.items] };
+          }
+
+          const updated = { ...existing, [flag]: !existing[flag] };
 
           return {
-            saved: exists
-              ? state.saved.filter((item) => keyOf(item) !== keyOf(movie))
-              : [movie, ...state.saved],
+            items: isEmptyItem(updated)
+              ? state.items.filter((item) => keyOf(item) !== keyOf(movie))
+              : state.items.map((item) => (keyOf(item) === keyOf(movie) ? updated : item)),
           };
         }),
-      removeSaved: (movie) =>
+      setRating: (movie, userRating) =>
+        set((state) => {
+          const existing = state.items.find((item) => keyOf(item) === keyOf(movie));
+
+          if (!existing) {
+            if (userRating === null) return state;
+
+            return { items: [{ ...asSavedItem(movie), userRating }, ...state.items] };
+          }
+
+          const updated = { ...existing, userRating };
+
+          return {
+            items: isEmptyItem(updated)
+              ? state.items.filter((item) => keyOf(item) !== keyOf(movie))
+              : state.items.map((item) => (keyOf(item) === keyOf(movie) ? updated : item)),
+          };
+        }),
+      removeItem: (movie) =>
         set((state) => ({
-          saved: state.saved.filter((item) => keyOf(item) !== keyOf(movie)),
+          items: state.items.filter((item) => keyOf(item) !== keyOf(movie)),
         })),
-      clearSaved: () => set({ saved: [] }),
+      clearAll: () => set({ items: [] }),
     }),
     {
       name: 'flixora-my-list-store',
+      version: 1,
       storage: createJSONStorage(() => AsyncStorage),
+      migrate: (persisted: unknown, version) => {
+        if (version === 0) {
+          const legacy = persisted as { saved?: MovieProps[] };
+
+          return {
+            items: (legacy?.saved ?? []).map((movie) => ({
+              ...asSavedItem(movie),
+              watchlist: true,
+            })),
+          };
+        }
+
+        return persisted as MyListState;
+      },
     }
   )
 );

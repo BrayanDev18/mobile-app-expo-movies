@@ -1,10 +1,11 @@
 import { FlashList, Tab } from '@/components';
 import { DecadeProps, EXPLORE_DECADES } from '@/constants';
+import { MediaType } from '@/interfaces';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { View } from 'react-native';
 
-export const DecadeChips = () => {
+export const DecadeChips = ({ mediaType = 'movie' }: { mediaType?: MediaType }) => {
   const renderItem = useCallback(
     ({ item }: { item: DecadeProps }) => (
       <Tab
@@ -14,13 +15,13 @@ export const DecadeChips = () => {
         className="rounded-full border border-white/15"
         onPress={() =>
           router.push({
-            pathname: '/(root)/movie/discover',
+            pathname: mediaType === 'tv' ? '/(root)/tv/discover' : '/(root)/movie/discover',
             params: { yearFrom: item.from, yearTo: item.to, title: item.label },
           })
         }
       />
     ),
-    []
+    [mediaType]
   );
 
   return (
