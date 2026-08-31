@@ -1,5 +1,5 @@
 import { MovieApiRoutes } from '@/constants';
-import { WatchProvidersResponse } from '@/interfaces';
+import { MediaType, WatchProvidersResponse } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -10,7 +10,7 @@ const PROVIDERS_LIMIT = 8;
 // Skip TMDB's aggregator and rental/variant listings so only primary services show
 const EXCLUDED_TERMS = ['justwatch', 'channel', 'store', 'premium', 'with ads'];
 
-export const useStreamingProviders = () => {
+export const useStreamingProviders = (mediaType: MediaType = 'movie') => {
   const region = deviceRegion();
 
   const {
@@ -19,11 +19,14 @@ export const useStreamingProviders = () => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['streamingProviders', region],
+    queryKey: ['streamingProviders', mediaType, region],
     queryFn: async () => {
-      const { data } = await moviesApi.get<WatchProvidersResponse>(MovieApiRoutes.watchProviders, {
-        params: { watch_region: region },
-      });
+      const { data } = await moviesApi.get<WatchProvidersResponse>(
+        MovieApiRoutes.watchProvidersByMedia(mediaType),
+        {
+          params: { watch_region: region },
+        }
+      );
 
       const seenBrands = new Set<string>();
 

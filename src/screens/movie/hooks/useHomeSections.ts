@@ -15,7 +15,14 @@ export interface HomeSection {
   variant?: 'poster' | 'backdrop';
   cardWidth?: number;
   ranked?: boolean;
-  seeAll?: { genreId?: number; providerId?: number };
+  seeAll?: {
+    genreId?: number;
+    providerId?: number;
+    networkId?: number;
+    originalLanguage?: string;
+    showType?: number;
+    minVotes?: number;
+  };
 }
 
 export const useHomeSections = () => {

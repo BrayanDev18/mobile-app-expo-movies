@@ -4,6 +4,7 @@ import {
   MovieProps,
   PersonProps,
   TrendingResultProps,
+  TvResultProps,
 } from '@/interfaces';
 import { tmdbImage } from './tmdbImage';
 
@@ -16,6 +17,18 @@ export const mapMovies = (results: MovieByCategoryProps[] = []): MovieProps[] =>
     backdrop: tmdbImage(movie.backdrop_path),
     rating: movie.vote_average,
     releaseDate: movie.release_date,
+  }));
+
+export const mapTvShows = (results: TvResultProps[] = []): MovieProps[] =>
+  results.map((show) => ({
+    id: show.id,
+    title: show.name ?? show.original_name ?? '',
+    overview: show.overview,
+    poster: tmdbImage(show.poster_path),
+    backdrop: tmdbImage(show.backdrop_path),
+    rating: show.vote_average,
+    releaseDate: show.first_air_date,
+    mediaType: 'tv' as const,
   }));
 
 export const mapTrendingMedia = (results: TrendingResultProps[] = []): MovieProps[] =>

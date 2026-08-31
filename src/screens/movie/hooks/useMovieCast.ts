@@ -1,4 +1,4 @@
-import { MovieCast, MovieCastProps, MovieCrewProps } from '@/interfaces';
+import { MediaType, MovieCast, MovieCastProps, MovieCrewProps } from '@/interfaces';
 import { moviesApi } from '@/services';
 import { tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -8,11 +8,11 @@ interface CreditsResponse {
   crew: (MovieCast & { job?: string })[];
 }
 
-export const useMovieCast = (movieId: number) => {
+export const useMovieCast = (movieId: number, mediaType: MediaType = 'movie') => {
   const { data, isLoading: isMovieCastLoading } = useQuery({
-    queryKey: ['movieCast', movieId],
+    queryKey: ['movieCast', mediaType, movieId],
     queryFn: async () => {
-      const { data } = await moviesApi.get<CreditsResponse>(`/movie/${movieId}/credits`);
+      const { data } = await moviesApi.get<CreditsResponse>(`/${mediaType}/${movieId}/credits`);
 
       const cast: MovieCastProps[] = data.cast.map((member) => ({
         id: member.id,

@@ -2,6 +2,8 @@ export * from './AvatarColors';
 export * from './cn';
 export * from './formatDate';
 export * from './formatMovie';
+export * from './formatSeries';
 export * from './mapMedia';
+export * from './navigateMedia';
 export * from './tmdbImage';
 export * from './randomAvatar';
