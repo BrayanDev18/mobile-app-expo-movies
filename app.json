@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "mobile-app-expo-movies",
-    "slug": "mobile-app-expo-movies",
+    "name": "Flixora",
+    "slug": "flixora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobileappexpomovies",
-    "userInterfaceStyle": "automatic",
+    "scheme": "flixora",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.mobile-app-expo-movies"
+      "bundleIdentifier": "com.flixora.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.mobileappexpomovies"
+      "package": "com.flixora.app"
     },
     "web": {
       "output": "static",
@@ -33,9 +33,9 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#060606",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#060606"
           }
         }
       ],

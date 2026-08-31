@@ -1,6 +1,7 @@
 import { MediaType } from '@/interfaces';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+import { StorageKeys } from './storageKeys';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface ViewedMedia {
@@ -38,7 +39,7 @@ export const useViewedMediaStore = create<ViewedMediaState>()(
       clearViewed: () => set({ viewed: [] }),
     }),
     {
-      name: 'flixora-viewed-media-store',
+      name: StorageKeys.viewedMedia,
       storage: createJSONStorage(() => AsyncStorage),
       onRehydrateStorage: () => (state) => {
         // One-time import of the two pre-merge history stores

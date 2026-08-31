@@ -5,18 +5,16 @@
 ```
 src/app/
 ├── _layout.tsx          # Root: GestureHandler → QueryClientProvider → Stack
-├── index.tsx            # Welcome/onboarding
-├── (auth)/sign-in.tsx   # Auth flow
+├── index.tsx            # Welcome/onboarding (persisted hasOnboarded flag)
+├── (auth)/sign-in.tsx   # Auth flow (stub)
 └── (root)/
-    ├── (tabs)/          # Bottom tabs: home, explore, myList, profile
-    │   └── _layout.tsx  # Custom Material Top Tabs with animated tab bar
-    ├── movie/[id].tsx   # Dynamic movie detail route
-    ├── movie/cast/[id]  # Cast detail route
-    ├── series/          # Series screens
-    └── tv/              # TV show screens
+    ├── (tabs)/          # Bottom tabs: home (Movies/Series toggle), explore, myList, profile
+    │   └── _layout.tsx  # Custom animated floating tab bar
+    ├── movie/           # [id] detail, discover, gallery, videos, similar, cast/, collection/
+    └── tv/              # [id] detail, season, discover
 ```
 
-Typed routes are enabled (`experiments.typedRoutes: true` in app.json). Route constants live in `src/constants/ScreenRoutes.ts`.
+Typed routes are enabled (`experiments.typedRoutes: true` in app.json). Media navigation helpers live in `src/utils/navigateMedia.ts` (see gotchas.md).
 
 ## Feature Organization Pattern
 

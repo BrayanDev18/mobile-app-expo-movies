@@ -8,10 +8,12 @@ React Native movie app (Flixora) built with Expo SDK 54, React 19, and React Nat
 
 ## Common Commands
 
-- `npx expo start` — Start dev server (Expo Go or dev client)
-- `npx expo run:ios` / `npx expo run:android` — Native build and run
-- `npx expo lint` — Run ESLint
-No test runner is configured.
+- `bun run start` — Start dev server (Expo Go or dev client)
+- `bun run ios` / `bun run android` — Native build and run
+- `bun run lint` / `bun run lint:fix` — ESLint
+- `bun run typecheck` — `tsc --noEmit`
+- `bun run format` — Prettier over `src/`
+No test runner is configured. The package manager is bun (`bun.lock`).
 
 ## Environment Variables
 
@@ -19,11 +21,10 @@ Copy `.env.example` to `.env` and set:
 ```
 EXPO_PUBLIC_MOVIES_API_BASE_URL=https://api.themoviedb.org/3
 EXPO_PUBLIC_MOVIES_API_KEY=<your_tmdb_api_key>
-EXPO_PUBLIC_LOCALSTORAGE_LANGUAGE_KEY=flixora-languaje-store
-EXPO_PUBLIC_LOCALSTORAGE_THEME_KEY=flixora-theme-store
 ```
+Zustand persistence keys are NOT env vars — they live in `src/stores/storageKeys.ts`.
 
 ## Path Aliases
 
 Defined in both `tsconfig.json` and babel `module-resolver`:
-`@/components`, `@/hooks`, `@/stores`, `@/services`, `@/constants`, `@/utils`, `@/interfaces`, `@/types`, `@/screens`, `@/translate`, `@/assets`
+`@/components`, `@/hooks`, `@/stores`, `@/services`, `@/constants`, `@/utils`, `@/interfaces`, `@/screens`, `@/translate`, `@/assets`

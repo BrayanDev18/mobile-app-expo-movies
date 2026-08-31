@@ -90,16 +90,7 @@ Avoid force-casting: `movie.poster as string`. Check truthiness first.
 
 ## FlashList Performance
 
-Always provide `estimatedItemSize` — FlashList warns without it and layout suffers:
-
-```tsx
-<FlashList
-  data={movies}
-  estimatedItemSize={220}  // approximate item height in px
-  keyExtractor={(item) => String(item.id)}
-  ...
-/>
-```
+This project uses FlashList v2 (`@shopify/flash-list` 2.x), where `estimatedItemSize` is no longer needed — do NOT add it. Import `FlashList` from `@/components` (the NativeWind-aware wrapper), never directly from `@shopify/flash-list`.
 
 Use consistent `keyExtractor` format: `String(item.id)`. If duplicates are possible, append index: `` `${item.id}-${index}` ``.
 

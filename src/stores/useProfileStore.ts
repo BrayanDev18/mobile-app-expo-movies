@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+import { StorageKeys } from './storageKeys';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface ProfileState {
@@ -24,7 +25,7 @@ export const useProfileStore = create<ProfileState>()(
       completeOnboarding: () => set({ hasOnboarded: true }),
     }),
     {
-      name: 'flixora-profile-store',
+      name: StorageKeys.profile,
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

@@ -2,18 +2,18 @@
 
 ## Image URLs
 
-TMDB returns relative paths. Build URLs with `tmdbImage` from `@/utils` (never concatenate hosts by hand), and resize an already-built URL with `tmdbResize`:
-```ts
-import { tmdbImage, tmdbResize } from '@/utils';
-const fullUrl = tmdbImage(movie.poster_path, 'w342');
-const smaller = tmdbResize(movie.poster, 'w185');
+Domain models store the raw TMDB path (`movie.poster` is a path, NOT a URL). Resolve the size at render, preferably with the `TmdbImage` component (placeholder + caching baked in), or `tmdbImage(path, size)` for animated/special images:
+```tsx
+import { TmdbImage } from '@/components';
+<TmdbImage path={movie.poster} size="w342" style={...} />
 ```
+`tmdbResize` exists only for gallery images, which are URL-based by contract. `tmdbImage` passes absolute URLs through untouched (legacy persisted data).
 
 ## Navigation
 
-- For static routes, use the `navigate()` helper from `@/constants/ScreenRoutes` (supports push, replace, back, dismissAll, dismissTo)
-- For dynamic routes like `movie/[id]`, use `router.push()` directly from `expo-router` — not all routes are in ScreenRoutes
-- Route params are typed via Expo's typed routes experiment
+- ALL media/person/collection/discover navigation goes through the typed helpers in `@/utils` (`src/utils/navigateMedia.ts`): `openMediaDetails`, `openPersonDetails`, `openCollection`, `openDiscover(mediaType, params)`, `openCastList`, `openGallery`. Never hardcode `/movie/...` or `/tv/...` strings for these.
+- `openMediaDetails` branches on `mediaType` — items mapped from TV endpoints carry `mediaType: 'tv'` and route to `tv/[id]`.
+- For anything else use `router.push()` from `expo-router`; route params are typed via Expo's typed routes experiment.
 
 ## Component Imports
 
@@ -27,7 +27,7 @@ import { Screen, Text, Button, Icon } from '@/components';
 `MovieApiRoutes` in `@/constants/MovieApiRoutes` uses functions for parameterized routes:
 ```ts
 MovieApiRoutes.details(movieId)      // → `movie/${id}`
-MovieApiRoutes.trendingAll('day')    // → `/trending/all/day`
+MovieApiRoutes.trending('all', 'day') // → `/trending/all/day`
 MovieApiRoutes.moviesByCategory(cat) // → `/movie/${category}`
 ```
 

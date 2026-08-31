@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+import { StorageKeys } from './storageKeys';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 const MAX_RECENT_SEARCHES = 8;
@@ -29,7 +30,7 @@ export const useRecentSearchesStore = create<RecentSearchesState>()(
       clearSearches: () => set({ searches: [] }),
     }),
     {
-      name: 'flixora-recent-searches-store',
+      name: StorageKeys.recentSearches,
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

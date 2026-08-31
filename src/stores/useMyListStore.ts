@@ -2,6 +2,7 @@ import { MovieProps, MyListFlag, SavedMediaProps } from '@/interfaces';
 import { mediaKey } from '@/utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+import { StorageKeys } from './storageKeys';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 const asSavedItem = (movie: MovieProps): SavedMediaProps => ({
@@ -71,7 +72,7 @@ export const useMyListStore = create<MyListState>()(
       clearAll: () => set({ items: [] }),
     }),
     {
-      name: 'flixora-my-list-store',
+      name: StorageKeys.myList,
       version: 1,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted: unknown, version) => {

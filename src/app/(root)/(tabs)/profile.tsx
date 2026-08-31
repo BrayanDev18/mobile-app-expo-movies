@@ -216,11 +216,11 @@ const ProfileScreen = () => {
               onPress={chooseLanguage}
             />
 
-            <SettingsRow icon="Bell" label="Notifications" onPress={placeholder} />
+            <SettingsRow icon="Bell" label="Notifications" meta="Soon" showChevron={false} onPress={placeholder} />
 
-            <SettingsRow icon="Moon" label="Appearance" meta="Dark" onPress={placeholder} />
+            <SettingsRow icon="Moon" label="Appearance" meta="Dark" showChevron={false} onPress={placeholder} />
 
-            <SettingsRow icon="Play" label="Autoplay trailers" onPress={placeholder} isLast />
+            <SettingsRow icon="Play" label="Autoplay trailers" meta="Soon" showChevron={false} onPress={placeholder} isLast />
           </SettingsGroup>
 
           <SettingsGroup title="Data">
@@ -289,9 +289,9 @@ const ProfileScreen = () => {
               onPress={() => Linking.openURL('https://www.themoviedb.org/')}
             />
 
-            <SettingsRow icon="MessageSquare" label="Send feedback" onPress={placeholder} />
+            <SettingsRow icon="MessageSquare" label="Send feedback" meta="Soon" showChevron={false} onPress={placeholder} />
 
-            <SettingsRow icon="Shield" label="Privacy policy" onPress={placeholder} isLast />
+            <SettingsRow icon="Shield" label="Privacy policy" meta="Soon" showChevron={false} onPress={placeholder} isLast />
           </SettingsGroup>
 
           <View className="items-center pt-1">
