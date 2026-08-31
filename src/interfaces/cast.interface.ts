@@ -16,9 +16,11 @@ export interface CastDetailsProps {
   profile_path: string;
 }
 
-export interface CastImagesRecord {
-  cast_id: number;
-  profiles: string;
+export interface PersonSocialLinkProps {
+  key: string;
+  icon: string;
+  label: string;
+  url: string;
 }
 
 export interface CastImagesResponse {
@@ -31,31 +33,6 @@ export interface CastImageProfileProps {
   height: number;
   file_path: string;
   width: number;
-}
-
-export interface CastCreditsResponse {
-  cast: CastCreditProps[];
-}
-
-export interface CastCreditRecord {
-  id: number;
-  name: string | null;
-  character: string | null;
-  poster_path: string | null;
-  backdrop_path: string | null;
-  adult: boolean;
-  credit_id: string;
-  order: number;
-  original_title: string;
-  original_language: string;
-  overview: string;
-  release_date: string;
-  video: boolean;
-  popularity: number;
-  vote_average: number;
-  vote_count: number;
-  genre_ids: string;
-  cast_id: number;
 }
 
 export interface CastCreditProps {

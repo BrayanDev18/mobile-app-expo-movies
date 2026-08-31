@@ -1,4 +1,4 @@
-import { useScrollToTop } from '@react-navigation/native';
+import { useScrollToTop } from 'expo-router/react-navigation';
 import { StatusBarProps } from 'expo-status-bar';
 import React, { useRef, useState } from 'react';
 import {
@@ -160,9 +160,6 @@ function useAutoPreset(props: AutoScreenProps): {
     updateScrollState();
   }
 
-  // update scroll state on every render
-  if (preset === 'auto') updateScrollState();
-
   return {
     scrollEnabled: preset === 'auto' ? scrollEnabled : true,
     onContentSizeChange,
@@ -178,7 +175,7 @@ function ScreenWithoutScrolling(props: ScreenProps) {
   const { style, contentContainerStyle, children } = props;
   return (
     <View style={[$outerStyle, style]}>
-      <View style={[$innerStyle, contentContainerStyle]}>{children}</View>
+      <View style={[$innerStyle, $fixedInnerStyle, contentContainerStyle]}>{children}</View>
     </View>
   );
 }
@@ -289,4 +286,10 @@ const $outerStyle: ViewStyle = {
 const $innerStyle: ViewStyle = {
   justifyContent: 'flex-start',
   alignItems: 'stretch',
+};
+
+// Only for the non-scrolling preset — a flex: 1 contentContainerStyle would
+// break ScrollView content sizing, but a fixed screen must fill the viewport.
+const $fixedInnerStyle: ViewStyle = {
+  flex: 1,
 };

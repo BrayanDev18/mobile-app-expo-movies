@@ -1,27 +1,34 @@
-import { Text } from '@/components';
-import { MovieProvidersProps } from '@/interfaces';
+import { SectionTitle, Text } from '@/components';
+import { MovieProvidersProps, RegionWatchProvidersProps } from '@/interfaces';
+import { tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { Linking, Pressable, View } from 'react-native';
 
-export const MovieWatchProviders = ({ providers }: { providers: any }) => {
+export const MovieWatchProviders = ({
+  providers,
+}: {
+  providers: RegionWatchProvidersProps | null;
+}) => {
   if (!providers) return null;
 
   const { flatrate, rent, buy, link } = providers;
 
   const groups = [
     { title: 'Streaming', data: flatrate },
-    { title: 'Alquiler', data: rent },
-    { title: 'Compra', data: buy },
+    { title: 'Rent', data: rent },
+    { title: 'Buy', data: buy },
   ];
+
+  if (groups.every((group) => !group.data?.length)) return null;
 
   return (
     <View className="gap-3">
-      <Text className="!text-lg font-bold">Watch providers:</Text>
+      <SectionTitle title="Where to watch" />
 
       <View className="w-full gap-4">
         {groups.map((group, index) => {
-          if (!group.data) return null;
+          if (!group.data?.length) return null;
 
           return (
             <View key={index} className="gap-3">
@@ -37,7 +44,7 @@ export const MovieWatchProviders = ({ providers }: { providers: any }) => {
                         <View className="rounded-xl bg-white/10 p-1">
                           <Image
                             source={{
-                              uri: `https://image.tmdb.org/t/p/original${provider.logo_path}`,
+                              uri: tmdbImage(provider.logo_path, 'w92') ?? undefined,
                             }}
                             style={{
                               width: 35,
@@ -46,6 +53,7 @@ export const MovieWatchProviders = ({ providers }: { providers: any }) => {
                             }}
                             contentFit="fill"
                             cachePolicy="memory-disk"
+                            accessibilityLabel={`${provider.provider_name} logo`}
                           />
                         </View>
 
@@ -62,10 +70,16 @@ export const MovieWatchProviders = ({ providers }: { providers: any }) => {
         })}
 
         {link ? (
-          <Pressable onPress={() => Linking.openURL(link)} className="w-40">
-            <Text className="text-sm !text-blue-400 underline">Ver más detalles</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="See all watch options on TMDB"
+            onPress={() => Linking.openURL(link)}
+            className="self-start">
+            <Text className="text-sm !text-blue-400 underline">See all options</Text>
           </Pressable>
         ) : null}
+
+        <Text className="!text-[11px] !text-neutral-400">Streaming availability by JustWatch</Text>
       </View>
     </View>
   );

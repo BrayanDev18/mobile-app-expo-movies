@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
+import { StorageKeys } from './storageKeys';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { i18n } from '../translate';
 
@@ -18,7 +19,7 @@ export const useLanguageStore = create<LanguageState>()(
       },
     }),
     {
-      name: process.env.EXPO_PUBLIC_LOCALSTORAGE_LANGUAGE_KEY ?? 'language-store',
+      name: StorageKeys.language,
       storage: createJSONStorage(() => AsyncStorage),
     }
   )

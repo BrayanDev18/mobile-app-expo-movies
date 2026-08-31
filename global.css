@@ -1,3 +1,48 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
+@import 'tailwindcss/utilities.css';
+@import 'nativewind/theme';
+
+@source './src';
+
+@theme {
+  --font-satoshi: 'Satoshi';
+
+  --color-light-100: #fafbfd;
+  --color-light-200: #f3f3f3;
+  --color-light-300: #9ed1ef;
+  --color-light-400: #68bef1;
+  --color-light-500: #447ca4;
+  --color-light-600: #4680a8;
+  --color-light-700: #3b82f6;
+
+  --color-dark-100: #a6a6a6;
+  --color-dark-200: #757575;
+  --color-dark-300: #3a3a3a;
+  --color-dark-400: #1f1f1f;
+  --color-dark-500: #232323;
+  --color-dark-600: #151515;
+  --color-dark-700: #060606;
+  --color-dark-800: #0f1016;
+
+  --text-xxs: 8px;
+  --text-xs: 12px;
+  --text-xs--line-height: initial;
+  --text-sm: 14px;
+  --text-sm--line-height: initial;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-lg--line-height: initial;
+  --text-xl: 20px;
+  --text-xl--line-height: initial;
+  --text-2xl: 24px;
+  --text-2xl--line-height: initial;
+  --text-3xl: 28px;
+  --text-3xl--line-height: initial;
+  --text-4xl: 32px;
+  --text-4xl--line-height: initial;
+  --text-5xl: 36px;
+  --text-5xl--line-height: initial;
+  --text-6xl: 40px;
+  --text-6xl--line-height: initial;
+}

@@ -6,5 +6,6 @@ module.exports = {
   trailingComma: 'es5',
 
   plugins: [require.resolve('prettier-plugin-tailwindcss')],
-  tailwindAttributes: ['className'],
+  tailwindStylesheet: './global.css',
+  tailwindAttributes: ['className', 'contentContainerClassName'],
 };

@@ -8,7 +8,6 @@ import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import '../../global.css';
-import '../utils/cssInterop';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,19 +19,15 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const { language } = useLanguageStore();
+  const language = useLanguageStore((state) => state.language);
 
-  // const { success } = useInitDb();
-
-  //resetDatabase();
-
+  // TMDB queries carry the language inside their queryKey (see tmdbKey), so a
+  // language change resolves to fresh cache entries without any invalidation.
   useEffect(() => {
     if (language && language !== i18n.locale) {
       changeLanguage(language);
     }
   }, [language]);
-
-  // if (!success) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

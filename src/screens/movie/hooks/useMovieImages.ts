@@ -1,25 +1,28 @@
-import { IMAGE_BASE_URL } from '@/constants';
-import { MovieImages, MovieImagesProps } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { MediaType, MovieImages } from '@/interfaces';
+import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import { mapImages } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
-import * as Localization from 'expo-localization';
+interface MediaImagesResponse {
+  backdrops: MovieImages[];
+  logos: MovieImages[];
+  posters: MovieImages[];
+}
 
-const mapImages = (images: MovieImages[] = []): MovieImagesProps[] =>
-  images.map((image) => ({
-    url: `${IMAGE_BASE_URL}${image.file_path}`,
-    aspectRatio: image.aspect_ratio,
-  }));
-
-export const useMovieImages = (movieId: number) => {
-  const language = Localization.getLocales()[0]?.languageCode ?? 'en';
-
-  const { data: movieImages, isLoading: isMovieImagesLoading } = useQuery({
-    queryKey: ['movieImages', movieId],
+export const useMovieImages = (movieId: number, mediaType: MediaType = 'movie') => {
+  const {
+    data: movieImages,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: tmdbKey('movieImages', mediaType, movieId),
+    enabled: Number.isFinite(movieId),
     queryFn: async () => {
-      const { data } = await moviesApi.get(`/movie/${movieId}/images`, {
-        params: { language },
-      });
+      const { data } = await moviesApi.get<MediaImagesResponse>(
+        `/${mediaType}/${movieId}/images`,
+        { params: { include_image_language: tmdbImageLanguages() } }
+      );
 
       return {
         backdrops: mapImages(data.backdrops),
@@ -29,8 +32,5 @@ export const useMovieImages = (movieId: number) => {
     },
   });
 
-  return {
-    movieImages: movieImages,
-    isMovieImagesLoading,
-  };
+  return { movieImages, isLoading, isError, refetch };
 };

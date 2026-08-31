@@ -1,83 +1,82 @@
-import { Loader, Screen } from '@/components';
+import { ErrorState, Loader } from '@/components';
+import { useMovieFull } from '@/hooks';
 import {
-  useMovieCast,
-  useMovieDetails,
-  useMovieImages,
-  useMovieReview,
-  useMovieVideos,
-  useMovieWatchProviders,
-  useSimilarMovies,
-} from '@/hooks';
-import { MovieVideosProps } from '@/interfaces';
-import {
+  MediaActionsBar,
+  MediaDetailShell,
   MovieCastAndCrew,
+  MovieCollectionBanner,
   MovieComments,
+  MovieFacts,
   MovieGallery,
-  MovieHeader,
   MovieInfo,
   MovieSimilar,
   MovieTrailers,
   MovieWatchProviders,
 } from '@/screens/movie/components';
+import { useViewedMediaStore } from '@/stores';
 import { useLocalSearchParams } from 'expo-router';
-import { View } from 'react-native';
+import { useEffect } from 'react';
 
 const MovieDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
+  const recordView = useViewedMediaStore((state) => state.recordView);
 
-  const { movieDetails, isMovieDetailsLoading } = useMovieDetails(+id);
-  const { movieVideos, isMovieVideosLoading } = useMovieVideos(+id);
-  const { similarMovies, isSimilarMoviesLoading } = useSimilarMovies(+id);
-  const { movieCast, movieCrew, isMovieCastLoading } = useMovieCast(+id);
-  const { movieImages, isMovieImagesLoading } = useMovieImages(+id);
-  const { movieReviews, isMovieReviewsLoading } = useMovieReview(+id);
-  const { movieWatchProviders, isMovieWatchProviders } = useMovieWatchProviders(+id);
+  const { movie, isLoading, isError, refetch } = useMovieFull(+id);
+  const details = movie?.details;
 
-  const filteredVideos = movieVideos?.filter(
-    (video: MovieVideosProps) => video.type === 'Trailer' || video.type === 'Teaser'
-  );
+  useEffect(() => {
+    if (details?.id && details.title) {
+      recordView({ id: details.id, title: details.title, mediaType: 'movie' });
+    }
+  }, [details?.id, details?.title, recordView]);
 
-  if (
-    isMovieDetailsLoading ||
-    isMovieVideosLoading ||
-    isSimilarMoviesLoading ||
-    isMovieCastLoading ||
-    isMovieImagesLoading ||
-    isMovieReviewsLoading ||
-    isMovieWatchProviders
-  )
-    return <Loader />;
+  if (isLoading) return <Loader />;
+
+  if (isError || !movie || !details) {
+    return <ErrorState retryLabel="Retry loading movie details" onRetry={() => refetch()} />;
+  }
+
+  const { trailers, cast, images, hasGallery, reviews, related, watchProviders } = movie;
 
   return (
-    <Screen canGoBack preset="scroll" safeAreaEdges={['bottom']}>
-      <MovieHeader poster={movieDetails.poster as string} />
+    <MediaDetailShell poster={details.poster}>
+      <MovieInfo
+        movie={details}
+        certification={movie.certification}
+        director={movie.director?.name}
+      />
 
-      <View className="-mt-12 rounded-t-3xl bg-neutral-900 backdrop-blur-xl">
-        <View className="items-center py-3">
-          <View className="h-1.5 w-12 rounded-full bg-white/30" />
-        </View>
+      <MediaActionsBar
+        movie={{
+          id: details.id,
+          title: details.title,
+          overview: details.overview,
+          poster: details.poster,
+          backdrop: details.backdrop,
+          rating: details.rating,
+          releaseDate: details.releaseDate ?? '',
+          mediaType: 'movie',
+        }}
+      />
 
-        <View className="gap-6 px-4">
-          <MovieInfo movie={movieDetails} />
+      {movie.collection && <MovieCollectionBanner collection={movie.collection} />}
 
-          <MovieTrailers videos={filteredVideos} />
+      <MovieWatchProviders providers={watchProviders} />
 
-          <MovieCastAndCrew movieId={movieDetails.id} cast={movieCast} movieCrew={movieCrew} />
+      {trailers.length > 0 && <MovieTrailers videos={trailers} />}
 
-          <MovieWatchProviders providers={movieWatchProviders} />
+      {(cast.length > 0 || movie.director) && (
+        <MovieCastAndCrew movieId={details.id} cast={cast} director={movie.director} />
+      )}
 
-          <MovieComments comments={movieReviews} />
+      {hasGallery ? <MovieGallery movieId={details.id} gallery={images} /> : null}
 
-          <MovieSimilar movieId={movieDetails.id} similarMovies={similarMovies} />
+      <MovieFacts movie={details} />
 
-          {movieImages?.backdrops.length ||
-          movieImages?.logos.length ||
-          movieImages?.posters.length ? (
-            <MovieGallery movieId={movieDetails.id} gallery={movieImages} />
-          ) : null}
-        </View>
-      </View>
-    </Screen>
+      {reviews.length > 0 && <MovieComments comments={reviews} />}
+
+      {related.length > 0 && <MovieSimilar movieId={details.id} similarMovies={related} />}
+    </MediaDetailShell>
   );
 };
 

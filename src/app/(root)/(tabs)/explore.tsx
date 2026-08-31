@@ -1,332 +1,158 @@
-import { Screen } from '@/components';
+import { BlurredBackdrop, ChipRow, EmptyState, Input, SectionTitle, Tab, Text } from '@/components';
+import { useDebouncedValue, usePullToRefresh, useSearchMulti, useTrending } from '@/hooks';
+import { MEDIA_SCOPES } from '@/constants';
+import { MediaType } from '@/interfaces';
 import {
-  useDiscoverMovies,
-  useDiscoverTv,
-  useGetTrendingAll,
-  useMovieGenres,
-  useMoviesByCategory,
-  useSearch,
-  useSeriesByCategory,
-  useTrendingMovies,
-  useTrendingPeople,
-  useTrendingTv,
-  useTvGenres,
-} from '@/hooks';
-import { MovieProps } from '@/interfaces';
-import {
-  DiscoverSection,
-  ExploreFilterTabs,
-  ExploreSearchBar,
-  SearchResultsGrid,
-  TrendingPeopleStrip,
-} from '@/screens/explore/components';
-import { ExploreFilter } from '@/screens/explore/components/ExploreFilterTabs';
-import { HomeSection, TrendingStrip } from '@/screens/home/components';
-import { router } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+  CollectionsRow,
+  DecadeChips,
+  GenreChips,
+  MediaListRow,
+  PeopleHorizontalList,
+  ProviderGrid,
+  RankedCarousel,
+} from '@/screens/movie/components';
+import { useRecentSearchesStore } from '@/stores';
+import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ExploreScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
+  const [scope, setScope] = useState<MediaType>('movie');
+  const { control, setValue } = useForm({ defaultValues: { search: '' } });
+  const search = useWatch({ control, name: 'search' });
+  const query = useDebouncedValue(search);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<ExploreFilter>('all');
-  const [activeGenre, setActiveGenre] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState('popularity.desc');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { media, people, isSearching, hasQuery } = useSearchMulti(query);
+  const { trending: topPicks } = useTrending(scope, 'day');
+  const { trending: trendingAll } = useTrending('all', 'week');
+  const searches = useRecentSearchesStore((state) => state.searches);
+  const addSearch = useRecentSearchesStore((state) => state.addSearch);
+  const clearSearches = useRecentSearchesStore((state) => state.clearSearches);
+  const { refreshing, onRefresh } = usePullToRefresh();
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setDebouncedQuery(searchQuery.trim());
-    }, 400);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [searchQuery]);
-
-  const { trendingAll, isLoading: loadingTrendingAll, refetch: refetchTrendingAll } =
-    useGetTrendingAll();
-  const { trendingMovies, isLoading: loadingTrendingMovies, refetch: refetchTrendingMovies } =
-    useTrendingMovies();
-  const { trendingTv, isLoading: loadingTrendingTv, refetch: refetchTrendingTv } =
-    useTrendingTv();
-  const { trendingPeople, isLoading: loadingTrendingPeople, refetch: refetchTrendingPeople } =
-    useTrendingPeople();
-  const { genres: movieGenres } = useMovieGenres();
-  const { genres: tvGenres } = useTvGenres();
-  const { movies: popularMovies, isLoading: loadingPopular, refetch: refetchPopular } =
-    useMoviesByCategory('popular');
-  const { movies: topRatedMovies, isLoading: loadingTopRated, refetch: refetchTopRated } =
-    useMoviesByCategory('top_rated');
-  const { series: popularSeries, isLoading: loadingPopularSeries, refetch: refetchPopularSeries } =
-    useSeriesByCategory('popular');
-  const { series: topRatedSeries, isLoading: loadingTopRatedSeries, refetch: refetchTopRatedSeries } =
-    useSeriesByCategory('top_rated');
-
-  const searchType =
-    activeFilter === 'movies'
-      ? 'movie'
-      : activeFilter === 'series'
-        ? 'tv'
-        : activeFilter === 'people'
-          ? 'person'
-          : 'multi';
-  const { searchMovies, searchPeople, isLoading: searching } = useSearch(debouncedQuery, searchType);
-  const hasSearch = debouncedQuery.length >= 2;
-
-  const { movies: discoverMovies, isLoading: loadingDiscoverMovies } = useDiscoverMovies(
-    activeFilter !== 'series' ? activeGenre : null,
-    sortBy,
-  );
-  const { series: discoverTv, isLoading: loadingDiscoverTv } = useDiscoverTv(
-    activeFilter === 'series' ? activeGenre : null,
-    sortBy,
-  );
-  const discoverResults = activeFilter === 'series' ? discoverTv : discoverMovies;
-  const loadingDiscover = activeFilter === 'series' ? loadingDiscoverTv : loadingDiscoverMovies;
-
-  const handleMixedItemPress = useCallback((item: MovieProps) => {
-    if (item.media_type === 'tv') {
-      router.push({ pathname: '/(root)/series/[id]', params: { id: item.id } });
-    } else {
-      router.push({ pathname: '/(root)/movie/[id]', params: { id: item.id } });
-    }
-  }, []);
-
-  const handleMoviePress = useCallback((item: MovieProps) => {
-    router.push({ pathname: '/(root)/movie/[id]', params: { id: item.id } });
-  }, []);
-
-  const handleSeriesPress = useCallback((item: MovieProps) => {
-    router.push({ pathname: '/(root)/series/[id]', params: { id: item.id } });
-  }, []);
-
-  const onRefresh = useCallback(async () => {
-    setIsRefreshing(true);
-    await Promise.all([
-      refetchTrendingAll(),
-      refetchTrendingMovies(),
-      refetchTrendingTv(),
-      refetchTrendingPeople(),
-      refetchPopular(),
-      refetchTopRated(),
-      refetchPopularSeries(),
-      refetchTopRatedSeries(),
-    ]);
-    setIsRefreshing(false);
-  }, [
-    refetchTrendingAll,
-    refetchTrendingMovies,
-    refetchTrendingTv,
-    refetchTrendingPeople,
-    refetchPopular,
-    refetchTopRated,
-    refetchPopularSeries,
-    refetchTopRatedSeries,
-  ]);
-
-  const handleGenreChange = useCallback((genreId: number | null) => {
-    setActiveGenre(genreId);
-    if (genreId === null) setSortBy('popularity.desc');
-  }, []);
-
-  const handleFilterChange = useCallback((filter: ExploreFilter) => {
-    setActiveFilter(filter);
-    setActiveGenre(null);
-    setSortBy('popularity.desc');
-  }, []);
-
-  const handleClearSearch = useCallback(() => {
-    setSearchQuery('');
-    setDebouncedQuery('');
-  }, []);
-
-  const renderBrowseContent = () => {
-    switch (activeFilter) {
-      case 'movies':
-        return (
-          <View className="gap-8">
-            <TrendingStrip
-              movies={trendingMovies}
-              isLoading={loadingTrendingMovies}
-              title="Trending Movies"
-              icon="Film"
-              iconColor="#3B82F6"
-              onItemPress={handleMoviePress}
-            />
-            <DiscoverSection
-              genres={movieGenres}
-              activeGenre={activeGenre}
-              sortBy={sortBy}
-              onGenreChange={handleGenreChange}
-              onSortChange={setSortBy}
-              movies={discoverMovies}
-              isLoading={loadingDiscoverMovies}
-              mediaType="movie"
-            />
-            <HomeSection
-              title="Popular Movies"
-              icon="TrendingUp"
-              iconColor="#F97316"
-              movies={popularMovies}
-              isLoading={loadingPopular}
-              onItemPress={handleMoviePress}
-            />
-            <HomeSection
-              title="Top Rated"
-              icon="Star"
-              iconColor="#EAB308"
-              movies={topRatedMovies}
-              isLoading={loadingTopRated}
-              onItemPress={handleMoviePress}
-            />
-          </View>
-        );
-
-      case 'series':
-        return (
-          <View className="gap-8">
-            <TrendingStrip
-              movies={trendingTv}
-              isLoading={loadingTrendingTv}
-              title="Trending Series"
-              icon="Tv"
-              iconColor="#8B5CF6"
-              onItemPress={handleSeriesPress}
-            />
-            <DiscoverSection
-              genres={tvGenres}
-              activeGenre={activeGenre}
-              sortBy={sortBy}
-              onGenreChange={handleGenreChange}
-              onSortChange={setSortBy}
-              movies={discoverTv}
-              isLoading={loadingDiscoverTv}
-              mediaType="tv"
-            />
-            <HomeSection
-              title="Popular Series"
-              icon="TrendingUp"
-              iconColor="#F97316"
-              movies={popularSeries}
-              isLoading={loadingPopularSeries}
-              onItemPress={handleSeriesPress}
-            />
-            <HomeSection
-              title="Top Rated Series"
-              icon="Star"
-              iconColor="#EAB308"
-              movies={topRatedSeries}
-              isLoading={loadingTopRatedSeries}
-              onItemPress={handleSeriesPress}
-            />
-          </View>
-        );
-
-      case 'people':
-        return (
-          <View className="gap-8">
-            <TrendingPeopleStrip people={trendingPeople} isLoading={loadingTrendingPeople} />
-          </View>
-        );
-
-      default:
-        return (
-          <View className="gap-8">
-            <TrendingStrip
-              movies={trendingAll}
-              isLoading={loadingTrendingAll}
-              title="Trending Today"
-              icon="Flame"
-              iconColor="#F97316"
-              onItemPress={handleMixedItemPress}
-            />
-            <TrendingPeopleStrip people={trendingPeople} isLoading={loadingTrendingPeople} />
-            <DiscoverSection
-              genres={movieGenres}
-              activeGenre={activeGenre}
-              sortBy={sortBy}
-              onGenreChange={handleGenreChange}
-              onSortChange={setSortBy}
-              movies={discoverResults}
-              isLoading={loadingDiscover}
-              mediaType="movie"
-            />
-            <HomeSection
-              title="Popular Movies"
-              icon="Film"
-              iconColor="#3B82F6"
-              movies={popularMovies}
-              isLoading={loadingPopular}
-              onItemPress={handleMoviePress}
-            />
-            <HomeSection
-              title="Popular Series"
-              icon="Tv"
-              iconColor="#8B5CF6"
-              movies={popularSeries}
-              isLoading={loadingPopularSeries}
-              onItemPress={handleSeriesPress}
-            />
-            <TrendingStrip
-              movies={trendingMovies}
-              isLoading={loadingTrendingMovies}
-              title="Trending Movies"
-              icon="Clapperboard"
-              iconColor="#EC4899"
-              onItemPress={handleMoviePress}
-            />
-            <HomeSection
-              title="Top Rated Movies"
-              icon="Star"
-              iconColor="#EAB308"
-              movies={topRatedMovies}
-              isLoading={loadingTopRated}
-              onItemPress={handleMoviePress}
-            />
-          </View>
-        );
-    }
-  };
+  const rankedTrending = trendingAll.slice(0, 5);
+  const showEmptyState = hasQuery && !isSearching && !media.length && !people.length;
+  const backdrop = (rankedTrending[0] ?? topPicks[0])?.poster;
 
   return (
-    <Screen>
-      <View style={{ paddingTop: top + 10 }} className="gap-4 pb-4">
-        <ExploreSearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={handleClearSearch}
-        />
-        <ExploreFilterTabs activeFilter={activeFilter} onFilterChange={handleFilterChange} />
-      </View>
+    <View className="flex-1 bg-neutral-900">
+      <BlurredBackdrop path={backdrop} />
 
-      {hasSearch ? (
-        <SearchResultsGrid
-          movies={searchMovies}
-          people={searchPeople}
-          isPeople={activeFilter === 'people'}
-          isLoading={searching}
-          query={debouncedQuery}
-        />
-      ) : (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={onRefresh}
-              tintColor="rgba(255,255,255,0.6)"
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="rgba(255,255,255,0.6)"
+          />
+        }>
+        <View className="px-4 pb-5">
+          <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
+            Explore
+          </Text>
+        </View>
+
+        <View className="mb-8 gap-3">
+          <View className="px-4">
+            <Input
+              iconName="Search"
+              name="search"
+              control={control}
+              placeholder="Search movies, series, people…"
+              returnKeyType="search"
+              autoCapitalize="none"
+              autoCorrect={false}
+              onSubmitEditing={() => addSearch(search)}
             />
-          }
-          contentContainerStyle={{ paddingBottom: bottom + 80 }}>
-          {renderBrowseContent()}
-        </ScrollView>
-      )}
-    </Screen>
+          </View>
+
+          {!hasQuery && searches.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row items-center gap-2 px-4">
+                {searches.map((term) => (
+                  <Tab
+                    key={term}
+                    title={term}
+                    isActive={false}
+                    adaptableWidth
+                    className="rounded-full border border-white/15"
+                    onPress={() => setValue('search', term)}
+                  />
+                ))}
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear recent searches"
+                  className="h-11 items-center justify-center px-3"
+                  onPress={clearSearches}>
+                  <Text className="!text-[13px] !text-neutral-400">Clear</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
+          )}
+        </View>
+
+        {hasQuery ? (
+          <View className="gap-8 px-4">
+            {isSearching && <ActivityIndicator className="py-12" color="rgba(255,255,255,0.6)" />}
+
+            {showEmptyState && (
+              <EmptyState icon="Search" message={`No results for “${query.trim()}”`} />
+            )}
+
+            {people.length > 0 && <PeopleHorizontalList title="People" people={people} />}
+
+            {media.length > 0 && (
+              <View>
+                <SectionTitle title="Movies & Series" className="px-1" />
+
+                <View className="mt-2">
+                  {media.map((item) => (
+                    <View key={`${item.mediaType}-${item.id}`} className="border-b border-white/10">
+                      <MediaListRow movie={item} />
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+        ) : (
+          <Animated.View entering={FadeIn.duration(300)} style={{ gap: 32 }}>
+            <ChipRow items={MEDIA_SCOPES} active={scope} onSelect={setScope} />
+
+            <Animated.View key={scope} entering={FadeIn.duration(250)} style={{ gap: 32 }}>
+              <View className="gap-3">
+                <GenreChips mediaType={scope} />
+
+                <DecadeChips mediaType={scope} />
+              </View>
+
+              {topPicks.length > 0 && (
+                <View className="px-4">
+                  <RankedCarousel title="Trending today" movies={topPicks.slice(0, 10)} />
+                </View>
+              )}
+
+              <ProviderGrid title="Browse by service" mediaType={scope} />
+
+              {rankedTrending.length > 0 && (
+                <View className="px-4">
+                  <RankedCarousel title="Top 5 this week" movies={rankedTrending} />
+                </View>
+              )}
+
+              {scope === 'movie' && <CollectionsRow title="Sagas & collections" />}
+            </Animated.View>
+          </Animated.View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

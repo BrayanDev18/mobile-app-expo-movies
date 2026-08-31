@@ -1,10 +1,9 @@
 import { Text } from '@/components';
 import { MovieProps } from '@/interfaces';
-import { formatDate } from '@/utils';
+import { formatDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Extrapolation,
@@ -17,14 +16,13 @@ import Animated, {
 interface MoviesHeaderProps {
   movies: MovieProps[];
   scrollX: SharedValue<number>;
-  onItemPress?: (item: MovieProps) => void;
+  onScroll: ReturnType<typeof useAnimatedScrollHandler>;
 }
 
 interface ImageItemProps {
   image: MovieProps;
   index: number;
   scrollX: SharedValue<number>;
-  onItemPress?: (item: MovieProps) => void;
 }
 
 const { width } = Dimensions.get('window');
@@ -34,18 +32,17 @@ const IMAGE_WIDTH = width * 0.6;
 const IMAGE_HEIGHT = IMAGE_WIDTH * 1.5;
 const SPACING = 20;
 
-export const MoviesHeader = (props: MoviesHeaderProps) => {
-  const { movies, scrollX, onItemPress } = props;
+// Snap interval of the hero carousel — parents use it to normalize scrollX
+export const HERO_ITEM_SIZE = IMAGE_WIDTH + SPACING;
 
-  const onScroll = useAnimatedScrollHandler((e) => {
-    scrollX.value = e.contentOffset.x / (IMAGE_WIDTH + SPACING);
-  });
+export const MoviesHeader = (props: MoviesHeaderProps) => {
+  const { movies, scrollX, onScroll } = props;
 
   return (
     <Animated.FlatList
       keyExtractor={(item) => item.id.toString()}
       horizontal
-      snapToInterval={IMAGE_WIDTH + SPACING}
+      snapToInterval={HERO_ITEM_SIZE}
       decelerationRate="fast"
       style={{ flexGrow: 0 }}
       showsHorizontalScrollIndicator={false}
@@ -55,7 +52,7 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
       }}
       data={movies}
       renderItem={({ item, index }) => (
-        <ImageItem key={index} image={item} index={index} scrollX={scrollX} onItemPress={onItemPress} />
+        <ImageItem key={index} image={item} index={index} scrollX={scrollX} />
       )}
       onScroll={onScroll}
       scrollEventThrottle={16}
@@ -64,7 +61,7 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
 };
 
 const ImageItem = (props: ImageItemProps) => {
-  const { image, index, scrollX, onItemPress } = props;
+  const { image, index, scrollX } = props;
 
   const imageStyle = useAnimatedStyle(() => {
     const inputRange = [index - 1, index, index + 1];
@@ -91,18 +88,15 @@ const ImageItem = (props: ImageItemProps) => {
 
   return (
     <Pressable
-      onPress={() =>
-        onItemPress
-          ? onItemPress(image)
-          : router.push({ pathname: '/(root)/movie/[id]', params: { id: image.id } })
-      }
+      onPress={() => openMediaDetails(image)}
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
-      <Animated.View className="flex-1" style={[imageStyle]}>
+      <Animated.View style={[{ flex: 1 }, imageStyle]}>
         <AnimatedImage
-          source={{ uri: image.poster as string }}
+          source={{ uri: tmdbImage(image.poster, 'w500') ?? undefined }}
           style={{ width: '100%', height: '100%', borderRadius: 22 }}
           contentFit="fill"
           cachePolicy="memory-disk"
+          placeholder={IMAGE_PLACEHOLDER}
         />
 
         <Animated.View style={[styles.overlay, overlayStyle]} />
@@ -110,7 +104,10 @@ const ImageItem = (props: ImageItemProps) => {
         <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient} />
 
         <View style={styles.infoContainer}>
-          <BlurView intensity={80} tint="systemChromeMaterialDark" style={styles.blurContainer}>
+          <BlurView
+            intensity={80}
+            tint="systemChromeMaterialDark"
+            style={styles.blurContainer}>
             <Text className="text-center !text-[16px] font-bold" numberOfLines={2}>
               {image.title}
             </Text>
@@ -131,7 +128,7 @@ const ImageItem = (props: ImageItemProps) => {
 
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
     borderRadius: 22,
   },

@@ -1,7 +1,7 @@
-import { ImagePreviewModal, Loader, Screen } from '@/components';
+import { FlashList, ImagePreviewModal, Loader, Screen } from '@/components';
 import { useCastDetails } from '@/hooks';
 import { CastImageProfileProps } from '@/interfaces';
-import { FlashList } from '@shopify/flash-list';
+import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -11,9 +11,9 @@ const CastGallery = () => {
   const { id } = useLocalSearchParams();
 
   const [openModalGallery, setOpenModalGallery] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<CastImageProfileProps | null>();
+  const [selectedImage, setSelectedImage] = useState<CastImageProfileProps>();
 
-  const { castImages, isCastImagesLoading } = useCastDetails(+id);
+  const { castImages, isLoading } = useCastDetails(+id);
 
   const handleOpenModal = (image: CastImageProfileProps) => {
     setSelectedImage(image);
@@ -21,7 +21,7 @@ const CastGallery = () => {
   };
 
   const handleHideModal = () => {
-    setSelectedImage(null);
+    setSelectedImage(undefined);
     setOpenModalGallery(false);
   };
 
@@ -37,19 +37,22 @@ const CastGallery = () => {
           }}
           contentFit="cover"
           cachePolicy="memory-disk"
+          placeholder={IMAGE_PLACEHOLDER}
         />
       </Pressable>
     );
   }, []);
 
-  if (isCastImagesLoading && !castImages?.profiles.length) return <Loader />;
+  if (isLoading && !castImages?.profiles.length) return <Loader />;
 
   return (
     <Screen preset="fixed" safeAreaEdges={['top', 'bottom']} canGoBack>
       <View className="h-full">
         <FlashList
           data={castImages?.profiles}
+          masonry
           numColumns={2}
+          optimizeItemArrangement
           removeClippedSubviews={true}
           keyExtractor={(item) => `cast-${item.file_path}`}
           scrollEventThrottle={16}
@@ -61,7 +64,7 @@ const CastGallery = () => {
 
       <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as any}
+        image={selectedImage}
         onHide={handleHideModal}
       />
     </Screen>

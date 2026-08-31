@@ -1,31 +1,11 @@
-import { ImagePreviewModal, Loader, Screen } from '@/components';
+import { FlashList, ImagePreviewModal, Loader, Screen } from '@/components';
 import { useMovieImages } from '@/hooks';
 import { MovieImagesProps } from '@/interfaces';
-import { FlashList } from '@shopify/flash-list';
+import { IMAGE_PLACEHOLDER } from '@/utils';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-
-const splitIntoColumns = (data: MovieImagesProps[], columns = 2) => {
-  const cols = Array.from({ length: columns }, () => ({
-    items: [] as MovieImagesProps[],
-    height: 0,
-  }));
-
-  data.forEach((item) => {
-    const aspectRatio = item.aspectRatio ?? 1;
-
-    const estimatedHeight = 1 / aspectRatio;
-
-    const shortestColumn = cols.reduce((prev, curr) => (curr.height < prev.height ? curr : prev));
-
-    shortestColumn.items.push(item);
-    shortestColumn.height += estimatedHeight;
-  });
-
-  return cols.map((col) => col.items);
-};
 
 const shuffleArray = <T,>(array: T[]) => {
   const shuffled = [...array];
@@ -39,19 +19,20 @@ const shuffleArray = <T,>(array: T[]) => {
 };
 
 const MovieGallery = () => {
-  const { id } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams();
   const [visible, setVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
 
-  const { movieImages, isMovieImagesLoading } = useMovieImages(+id);
+  const { movieImages, isLoading } = useMovieImages(
+    +id,
+    type === 'tv' ? 'tv' : 'movie'
+  );
 
   const previewImages = useMemo(() => {
     const images = [...(movieImages?.backdrops ?? []), ...(movieImages?.posters ?? [])];
 
     return shuffleArray(images);
   }, [movieImages]);
-
-  const columns = splitIntoColumns(previewImages, 2);
 
   const handleOpenModal = (image: MovieImagesProps) => {
     setSelectedImage(image);
@@ -69,30 +50,33 @@ const MovieGallery = () => {
             borderRadius: 10,
           }}
           contentFit="cover"
+          cachePolicy="memory-disk"
+          placeholder={IMAGE_PLACEHOLDER}
         />
       </Pressable>
     ),
     []
   );
 
-  if (isMovieImagesLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
-    <Screen preset="auto" safeAreaEdges={['top', 'bottom']} canGoBack>
-      <View className="flex-row px-2 pt-12">
-        {columns.map((column, columnIndex) => (
-          <FlashList
-            key={columnIndex}
-            data={column}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            style={{ flex: 1, paddingTop: columnIndex === 1 ? 15 : 0 }}
-          />
-        ))}
+    <Screen preset="fixed" safeAreaEdges={['top', 'bottom']} canGoBack>
+      <View className="h-full">
+        <FlashList
+          data={previewImages}
+          masonry
+          numColumns={2}
+          optimizeItemArrangement
+          keyExtractor={(item, index) => `${item.url}-${index}`}
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName="px-2 pt-12"
+          renderItem={renderItem}
+        />
       </View>
 
       <ImagePreviewModal
-        image={selectedImage as MovieImagesProps}
+        image={selectedImage}
         visible={visible}
         onHide={() => setVisible(false)}
       />

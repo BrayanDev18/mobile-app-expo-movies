@@ -1,7 +1,6 @@
-import { Loader, Screen, Text } from '@/components';
+import { ErrorState, FlashList, Loader, Screen, Text } from '@/components';
 import { useMovieVideos } from '@/hooks';
 import { formatDate } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useRef } from 'react';
 import { View } from 'react-native';
@@ -17,21 +16,28 @@ const VIDEO_QUALITIES: Record<number, string> = {
 };
 
 const VideosScreen = () => {
-  const { id } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams();
   const videoRef = useRef<YoutubeIframeRef | null>(null);
 
-  const { movieVideos, isMovieVideosLoading } = useMovieVideos(+id);
+  const { movieVideos, isLoading, isError, refetch } = useMovieVideos(
+    +id,
+    type === 'tv' ? 'tv' : 'movie'
+  );
 
-  if (isMovieVideosLoading) return <Loader />;
+  if (isLoading) return <Loader />;
+
+  if (isError) {
+    return <ErrorState retryLabel="Retry loading videos" onRetry={() => refetch()} />;
+  }
 
   return (
     <Screen preset="auto" safeAreaEdges={['top', 'bottom']} canGoBack>
       <View className="flex-1 px-4 pt-14">
         <FlashList
-          data={movieVideos.reverse()}
+          data={movieVideos}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
-          keyExtractor={(item, i) => `${item.movie_id}-${i}`}
+          keyExtractor={(item, i) => `${item.key}-${i}`}
           ItemSeparatorComponent={() => <View className="h-6" />}
           renderItem={({ item: video }) => (
             <View className="w-full gap-3 rounded-3xl bg-neutral-800/20 p-2.5">

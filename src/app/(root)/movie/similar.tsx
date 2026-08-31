@@ -1,24 +1,23 @@
-import { Loader, Screen, Text } from '@/components';
+import { FlashList, Loader, Screen, Text } from '@/components';
 import { useSimilarMovies } from '@/hooks';
 import { MovieProps } from '@/interfaces';
-import { formatSpecialDate } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
+import { formatSpecialDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 
 const SimilarMovies = () => {
   const { id } = useLocalSearchParams();
 
-  const { similarMovies, isSimilarMoviesLoading } = useSimilarMovies(+id);
+  const { similarMovies, isLoading } = useSimilarMovies(+id);
 
   const renderItem = useCallback(
     ({ item: movie }: { item: MovieProps }) => <SimiliarMovieItem movie={movie} />,
     []
   );
 
-  if (isSimilarMoviesLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <Screen preset="auto" safeAreaEdges={['top', 'bottom']} canGoBack>
@@ -39,10 +38,12 @@ const SimilarMovies = () => {
 const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
   return (
     <Pressable
-      onPress={() => router.push(`/movie/${movie.id}`)}
+      accessibilityRole="button"
+      accessibilityLabel={`View details for ${movie.title}`}
+      onPress={() => openMediaDetails(movie)}
       className="m-2 flex-1 rounded-bl-2xl rounded-br-2xl bg-neutral-950/30">
       <Image
-        source={{ uri: movie.poster as string }}
+        source={{ uri: tmdbImage(movie.poster, 'w342') ?? undefined }}
         style={{
           width: '100%',
           height: 240,
@@ -51,6 +52,7 @@ const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
         }}
         contentFit="cover"
         cachePolicy="memory-disk"
+        placeholder={IMAGE_PLACEHOLDER}
       />
 
       <View className="gap-1 p-3">

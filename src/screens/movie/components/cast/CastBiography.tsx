@@ -1,12 +1,11 @@
-import { ExpandableText, ImagePreviewModal } from '@/components';
+import { ExpandableText, FlashList, ImagePreviewModal, SectionTitle } from '@/components';
 import { Text } from '@/components/Text';
 import { CastDetailsProps, CastImageProfileProps } from '@/interfaces';
-import { Ionicons } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
+import { formatDate } from '@/utils';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, TouchableHighlight, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface CastBiographyProps {
@@ -44,37 +43,49 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
       <Animated.ScrollView
         entering={FadeInDown.springify()}
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="gap-5">
-        <Text className="gap-2 !text-md">
-          Nicknames:{' '}
-          {aliases?.map((name, index) => (
-            <Text key={index} className="!text-neutral-400">
-              {name}
-
-              {index === aliases?.length - 1 ? '' : ', '}
-            </Text>
-          ))}
-        </Text>
-
-        <Text className="gap-2 !text-md">
-          Birthday: <Text className="!text-neutral-400">{cast?.birthday}</Text>
-        </Text>
-
-        {cast?.deathday ? (
+        contentContainerStyle={{ gap: 20 }}>
+        {aliases?.length ? (
           <Text className="gap-2 !text-md">
-            Deathday: <Text className="!text-neutral-400">{cast?.deathday}</Text>
+            Also known as:{' '}
+            {aliases.map((name, index) => (
+              <Text key={index} className="!text-neutral-400">
+                {name}
+
+                {index === aliases.length - 1 ? '' : ', '}
+              </Text>
+            ))}
           </Text>
         ) : null}
 
-        <Text className="gap-2 !text-md">
-          Prefession: <Text className="!text-neutral-400">{cast?.known_for_department}</Text>
-        </Text>
+        {cast?.birthday ? (
+          <Text className="gap-2 !text-md">
+            Birthday: <Text className="!text-neutral-400">{formatDate(cast.birthday)}</Text>
+          </Text>
+        ) : null}
+
+        {cast?.deathday ? (
+          <Text className="gap-2 !text-md">
+            Died: <Text className="!text-neutral-400">{formatDate(cast.deathday)}</Text>
+          </Text>
+        ) : null}
+
+        {cast?.place_of_birth ? (
+          <Text className="gap-2 !text-md">
+            Born in: <Text className="!text-neutral-400">{cast.place_of_birth}</Text>
+          </Text>
+        ) : null}
+
+        {cast?.known_for_department ? (
+          <Text className="gap-2 !text-md">
+            Profession: <Text className="!text-neutral-400">{cast.known_for_department}</Text>
+          </Text>
+        ) : null}
 
         <View className="gap-2">
-          <Text className="!text-lg font-bold">Biography</Text>
+          <SectionTitle title="Biography" />
 
           <ExpandableText numberOfLines={8} textClassname="!text-md !text-neutral-400">
-            {cast?.biography}
+            {cast?.biography || 'No biography available.'}
           </ExpandableText>
         </View>
 
@@ -85,7 +96,7 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
 
       <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as any}
+        image={selectedImage}
         onHide={handleHideModal}
       />
     </>
@@ -117,20 +128,14 @@ const CastGallery = (props: CastGalleryProps) => {
 
   return (
     <View className="gap-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="!text-lg font-bold">Gallery</Text>
-
-        {images?.length > 1 ? (
-          <TouchableHighlight
-            className="h-12 w-12 items-center justify-center rounded-full"
-            underlayColor="#404040"
-            onPress={() =>
-              router.push({ pathname: '/(root)/movie/cast/gallery', params: { id: castId } })
-            }>
-            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </TouchableHighlight>
-        ) : null}
-      </View>
+      <SectionTitle
+        title="Gallery"
+        onSeeAll={
+          images?.length > 1
+            ? () => router.push({ pathname: '/(root)/movie/cast/gallery', params: { id: castId } })
+            : undefined
+        }
+      />
 
       <FlashList
         horizontal

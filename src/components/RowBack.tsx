@@ -10,8 +10,11 @@ export const RowBack = ({ onPress = () => router.back() }) => {
   const { top } = useSafeAreaInsets();
 
   return (
-    <View style={{ top: top - 25 }} className="absolute z-20 p-4">
+    <View style={{ top: Math.max(top - 25, 8) }} className="absolute z-20 p-4">
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        hitSlop={8}
         onPress={() => {
           onPress();
         }}

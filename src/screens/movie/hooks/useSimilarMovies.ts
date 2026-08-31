@@ -1,32 +1,25 @@
-import { IMAGE_BASE_URL } from '@/constants';
-import { MovieByCategoryProps, MovieProps } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { MoviesByCategoryResponse } from '@/interfaces';
+import { moviesApi, tmdbKey } from '@/services';
+import { mapMovies } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
 export const useSimilarMovies = (movieId: number) => {
-  const { data: similarMovies, isLoading: isSimilarMoviesLoading } = useQuery({
-    queryKey: ['movieSimilar', movieId],
+  const {
+    data: similarMovies = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: tmdbKey('movieSimilar', movieId),
+    enabled: Number.isFinite(movieId),
     queryFn: async () => {
-      const {
-        data: { results: similarMovies },
-      } = await moviesApi.get(`/movie/${movieId}/similar`);
+      const { data } = await moviesApi.get<MoviesByCategoryResponse>(
+        `/movie/${movieId}/similar`
+      );
 
-      const mappedSimilarMovies = similarMovies.map((movie: MovieByCategoryProps) => ({
-        id: movie.id,
-        title: movie.title ?? movie.original_title,
-        overview: movie.overview,
-        poster: movie.poster_path ? `${IMAGE_BASE_URL}${movie.poster_path}` : null,
-        backdrop: movie.backdrop_path ? `${IMAGE_BASE_URL}${movie.backdrop_path}` : null,
-        rating: movie.vote_average,
-        releaseDate: movie.release_date,
-      }));
-
-      return mappedSimilarMovies;
+      return mapMovies(data.results);
     },
   });
 
-  return {
-    similarMovies: similarMovies as MovieProps[],
-    isSimilarMoviesLoading,
-  };
+  return { similarMovies, isLoading, isError, refetch };
 };

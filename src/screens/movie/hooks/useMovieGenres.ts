@@ -1,31 +1,25 @@
 import { MovieApiRoutes } from '@/constants';
-import { GenreProps } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { GenreProps, MediaType } from '@/interfaces';
+import { moviesApi, tmdbKey } from '@/services';
 import { useQuery } from '@tanstack/react-query';
 
-interface GenreListResponse {
-  genres: GenreProps[];
-}
-
-export const useMovieGenres = () => {
+export const useMovieGenres = (mediaType: MediaType = 'movie') => {
   const {
     data: genres = [],
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['movieGenres'],
+    queryKey: tmdbKey('movieGenres', mediaType),
+    staleTime: Infinity,
     queryFn: async () => {
-      const { data } = await moviesApi.get<GenreListResponse>(MovieApiRoutes.movieGenres);
+      const { data } = await moviesApi.get<{ genres: GenreProps[] }>(
+        MovieApiRoutes.genres(mediaType)
+      );
+
       return data.genres;
     },
-    staleTime: 1000 * 60 * 60,
   });
 
-  return {
-    genres: genres as GenreProps[],
-    isLoading,
-    isError,
-    refetch,
-  };
+  return { genres, isLoading, isError, refetch };
 };

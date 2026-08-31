@@ -1,50 +1,71 @@
-# Welcome to your Expo app 👋
+# Flixora
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A movie & TV discovery app built with Expo SDK 54, React 19, and React Native 0.81, powered by [The Movie Database (TMDB)](https://www.themoviedb.org/). Dark-first, cinematic UI with Satoshi typography.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Home** with a Movies/Series scope toggle: crossfading hero carousel, trending, now playing / airing today, genre, network, and streaming-service rails
+- **Detail screens** for movies and series (trailers, cast & crew, seasons and episode lists, gallery, reviews, where to watch, related titles) in a single TMDB request each
+- **Explore**: multi-search (movies, series, people), browse by genre, decade, or streaming service, sagas & collections
+- **My List**: watchlist / watched / favorites with personal 1–10 ratings, persisted locally
+- **Localized content**: the in-app language switch drives every TMDB request
+- Infinite discover grids, pull-to-refresh, skeleton loading, and offline-friendly caching via React Query
 
-   ```bash
-   npm install
-   ```
+## Getting started
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+The project uses [bun](https://bun.sh) (see `bun.lock`):
 
 ```bash
-npm run reset-project
+bun install
+cp .env.example .env      # then set your TMDB key (below)
+bun run ios               # or: bun run android / bun run start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+> First clone: `expo-env.d.ts` is generated — run `bun run start` once before `typecheck` if TypeScript complains about it.
 
-## Learn more
+### Environment variables
 
-To learn more about developing your project with Expo, look at the following resources:
+| Variable | Value |
+|---|---|
+| `EXPO_PUBLIC_MOVIES_API_BASE_URL` | `https://api.themoviedb.org/3` |
+| `EXPO_PUBLIC_MOVIES_API_KEY` | Your TMDB API key — create one free at [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Without a valid key the app starts but every request fails.
 
-## Join the community
+## Scripts
 
-Join our community of developers creating universal apps.
+| Script | What it does |
+|---|---|
+| `bun run start` | Expo dev server |
+| `bun run ios` / `bun run android` | Native build and run |
+| `bun run lint` / `bun run lint:fix` | ESLint |
+| `bun run typecheck` | `tsc --noEmit` |
+| `bun run format` | Prettier over `src/` |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+No test runner is configured yet.
+
+## Project layout
+
+```
+src/
+├── app/                  # Expo Router routes (file-based)
+│   ├── (root)/(tabs)/    # Bottom tabs: home, explore, myList, profile
+│   ├── (root)/movie/     # Movie detail, discover, gallery, videos, cast, collections
+│   └── (root)/tv/        # Series detail, season, discover
+├── components/           # Shared UI (Screen, Text, SectionTitle, ErrorState, …)
+├── screens/
+│   ├── movie/            # Movie feature: components + hooks (also hosts shared media UI)
+│   └── series/           # Series feature: components + hooks
+├── hooks/                # Cross-cutting hooks (debounce, pull-to-refresh, scrollY)
+├── services/             # Axios instance, language interceptor, query keys
+├── stores/               # Zustand stores (My List, viewed history, language, …)
+├── utils/                # TMDB mappers, image helpers, navigation, formatters
+├── interfaces/           # Raw TMDB types + app domain models
+└── constants/            # API routes, section configs, scopes
+```
+
+Conventions live in `.claude/rules/` (architecture, styling, data fetching, quality patterns).
+
+## Credits
+
+Data and images from [TMDB](https://www.themoviedb.org/). This product uses the TMDB API but is not endorsed or certified by TMDB.

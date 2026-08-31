@@ -31,3 +31,11 @@ export const formatPrice = (price: number) => {
     currency: 'USD',
   }).format(price);
 };
+
+export const formatMoney = (amount?: number): string | null => {
+  if (!amount) return null;
+  if (amount >= 1e9) return `$${(amount / 1e9).toFixed(1)}B`;
+  if (amount >= 1e6) return `$${Math.round(amount / 1e6)}M`;
+
+  return `$${amount.toLocaleString()}`;
+};

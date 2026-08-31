@@ -20,11 +20,15 @@ export function Text({
   className = '',
   ...rest
 }: TextProps) {
-  const i18nText = tx ? translate(tx, txOptions) : '';
-  const content = text || i18nText || children;
+  const i18nText = tx ? translate(tx, txOptions) : undefined;
+  const content = text ?? i18nText ?? children;
 
   return (
-    <RNText {...rest} style={$styleOverride} className={cn(className, 'text-sm text-white')}>
+    <RNText
+      {...rest}
+      style={$styleOverride}
+      // Defaults first so a caller's className wins without needing `!`
+      className={cn('font-satoshi text-sm text-white', className)}>
       {content}
     </RNText>
   );
