@@ -4,8 +4,7 @@ import {
   useMyListStore,
   useProfileStore,
   useRecentSearchesStore,
-  useViewedMoviesStore,
-  useViewedSeriesStore,
+  useViewedMediaStore,
 } from '@/stores';
 import { getAvatarColor } from '@/utils';
 import Constants from 'expo-constants';
@@ -167,11 +166,11 @@ const ProfileScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
   const { language, setLanguage } = useLanguageStore();
   const { items: savedItems, clearAll: clearSavedItems } = useMyListStore();
-  const { viewed: viewedMovies, clearViewed: clearViewedMovies } = useViewedMoviesStore();
-  const { viewed: viewedSeries, clearViewed: clearViewedSeries } = useViewedSeriesStore();
+  const viewed = useViewedMediaStore((state) => state.viewed);
+  const clearViewed = useViewedMediaStore((state) => state.clearViewed);
   const { searches, clearSearches } = useRecentSearchesStore();
 
-  const viewedCount = viewedMovies.length + viewedSeries.length;
+  const viewedCount = viewed.length;
   const version = Constants.expoConfig?.version;
   const activeLanguage =
     LANGUAGES.find((item) => language.startsWith(item.code))?.label ?? 'English';
@@ -239,10 +238,11 @@ const ProfileScreen = () => {
               label="Clear recently viewed"
               meta={viewedCount ? `${viewedCount}` : undefined}
               onPress={() =>
-                confirmClear('Clear recently viewed', 'Your viewing history will be removed.', () => {
-                  clearViewedMovies();
-                  clearViewedSeries();
-                })
+                confirmClear(
+                  'Clear recently viewed',
+                  'Your viewing history will be removed.',
+                  clearViewed
+                )
               }
             />
 
@@ -269,8 +269,7 @@ const ProfileScreen = () => {
                   'Removes your lists, ratings, viewing history, and searches permanently.',
                   () => {
                     clearSearches();
-                    clearViewedMovies();
-                    clearViewedSeries();
+                    clearViewed();
                     clearSavedItems();
                   }
                 )

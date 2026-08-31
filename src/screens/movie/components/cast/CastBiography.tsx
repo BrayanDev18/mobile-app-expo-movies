@@ -1,13 +1,12 @@
-import { ExpandableText, ImagePreviewModal } from '@/components';
+import { ExpandableText, ImagePreviewModal, SectionTitle } from '@/components';
 import { Text } from '@/components/Text';
 import { CastDetailsProps, CastImageProfileProps } from '@/interfaces';
 import { formatDate } from '@/utils';
-import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, TouchableHighlight, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface CastBiographyProps {
@@ -84,7 +83,7 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
         ) : null}
 
         <View className="gap-2">
-          <Text className="!text-lg font-bold">Biography</Text>
+          <SectionTitle title="Biography" />
 
           <ExpandableText numberOfLines={8} textClassname="!text-md !text-neutral-400">
             {cast?.biography || 'No biography available.'}
@@ -130,20 +129,14 @@ const CastGallery = (props: CastGalleryProps) => {
 
   return (
     <View className="gap-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="!text-lg font-bold">Gallery</Text>
-
-        {images?.length > 1 ? (
-          <TouchableHighlight
-            className="h-12 w-12 items-center justify-center rounded-full"
-            underlayColor="#404040"
-            onPress={() =>
-              router.push({ pathname: '/(root)/movie/cast/gallery', params: { id: castId } })
-            }>
-            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </TouchableHighlight>
-        ) : null}
-      </View>
+      <SectionTitle
+        title="Gallery"
+        onSeeAll={
+          images?.length > 1
+            ? () => router.push({ pathname: '/(root)/movie/cast/gallery', params: { id: castId } })
+            : undefined
+        }
+      />
 
       <FlashList
         horizontal

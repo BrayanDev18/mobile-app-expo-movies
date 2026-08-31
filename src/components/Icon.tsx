@@ -8,6 +8,7 @@ import {
   Clapperboard,
   Compass,
   EyeOff,
+  Film,
   HeartOff,
   History,
   Languages,
@@ -21,6 +22,7 @@ import {
   Star,
   Trash2,
   TrendingUp,
+  Users,
 } from 'lucide-react-native';
 import { Pressable, View, ViewStyle } from 'react-native';
 
@@ -36,6 +38,7 @@ const ICONS = {
   Clapperboard,
   Compass,
   EyeOff,
+  Film,
   HeartOff,
   History,
   Languages,
@@ -49,6 +52,7 @@ const ICONS = {
   Star,
   Trash2,
   TrendingUp,
+  Users,
 } as const;
 
 export type IconName = keyof typeof ICONS;

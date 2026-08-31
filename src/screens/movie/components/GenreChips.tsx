@@ -1,7 +1,7 @@
+import { openDiscover } from '@/utils';
 import { FlashList, Tab } from '@/components';
 import { GenreProps, MediaType } from '@/interfaces';
 import { useMovieGenres } from '@/hooks';
-import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { View } from 'react-native';
 
@@ -15,12 +15,7 @@ export const GenreChips = ({ mediaType = 'movie' }: { mediaType?: MediaType }) =
         isActive={false}
         adaptableWidth
         className="rounded-full border border-white/15"
-        onPress={() =>
-          router.push({
-            pathname: mediaType === 'tv' ? '/(root)/tv/discover' : '/(root)/movie/discover',
-            params: { genreId: item.id, title: item.name },
-          })
-        }
+        onPress={() => openDiscover(mediaType, { genreId: item.id, title: item.name })}
       />
     ),
     [mediaType]

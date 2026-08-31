@@ -1,14 +1,13 @@
-import { Loader, Screen, Tab, Text } from '@/components';
+import { ChipRow, EmptyState, Loader, Screen, Text } from '@/components';
 import { useMovieCast } from '@/hooks';
 import { MovieCastProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
+import { IMAGE_PLACEHOLDER, openPersonDetails } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
-import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 type CastTab = 'actors' | 'producers' | 'directors' | 'writers';
@@ -70,22 +69,7 @@ const CastList = () => {
           Cast & Crew
         </Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="grow-0">
-          <View className="flex-row gap-2">
-            {TABS.map((tab) => (
-              <Tab
-                key={tab.key}
-                title={tab.label}
-                isActive={activeTab === tab.key}
-                adaptableWidth
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setActiveTab(tab.key);
-                }}
-              />
-            ))}
-          </View>
-        </ScrollView>
+        <ChipRow items={TABS} active={activeTab} onSelect={setActiveTab} scrollable className="" />
 
         <Animated.View key={activeTab} entering={FadeIn.duration(250)} className="flex-1">
           <FlashList
@@ -96,13 +80,7 @@ const CastList = () => {
             showsVerticalScrollIndicator={false}
             keyExtractor={(item, index) => `${item.id}-${index}`}
             ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            ListEmptyComponent={
-              <View className="items-center gap-3 py-12">
-                <Ionicons name="people-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-                <Text className="!text-neutral-400">Nothing listed here</Text>
-              </View>
-            }
+            ListEmptyComponent={<EmptyState icon="Users" message="Nothing listed here" />}
           />
         </Animated.View>
       </View>
@@ -117,7 +95,7 @@ const CastItem = ({ cast }: { cast: MovieCastProps }) => {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`View details for ${cast.name}`}
-      onPress={() => router.push(`/movie/cast/${cast.id}`)}
+      onPress={() => openPersonDetails(cast.id)}
       className="flex-row items-center justify-between rounded-2xl bg-neutral-800 p-2.5">
       <View className="flex-1 flex-row items-center gap-x-3 pr-2">
         <Image

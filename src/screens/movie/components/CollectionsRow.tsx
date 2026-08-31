@@ -1,12 +1,11 @@
-import { Text } from '@/components';
+import { SectionTitle, Text } from '@/components';
 import { EXPLORE_COLLECTIONS } from '@/constants';
 import { useCollections } from '@/hooks';
 import { CollectionProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
+import { IMAGE_PLACEHOLDER, openCollection, tmdbImage } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Href, router } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -24,7 +23,7 @@ export const CollectionsRow = ({ title }: CollectionsRowProps) => {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`View the ${item.name} saga`}
-        onPress={() => router.push(`/(root)/movie/collection/${item.id}` as Href)}>
+        onPress={() => openCollection(item.id)}>
         <View style={{ width: CARD_WIDTH }}>
           <Image
             source={{ uri: tmdbImage(item.backdrop, 'w780') ?? undefined }}
@@ -59,7 +58,7 @@ export const CollectionsRow = ({ title }: CollectionsRowProps) => {
 
   return (
     <View className="gap-3 px-4">
-      {title && <Text className="px-1 !text-[18px] font-semibold">{title}</Text>}
+      {title && <SectionTitle title={title} className="px-1" />}
 
       <FlashList
         horizontal

@@ -1,125 +1,82 @@
-import { Loader, Screen, Text } from '@/components';
+import { ErrorState, Loader } from '@/components';
 import { useMovieFull } from '@/hooks';
 import {
   MediaActionsBar,
+  MediaDetailShell,
   MovieCastAndCrew,
   MovieCollectionBanner,
   MovieComments,
   MovieFacts,
   MovieGallery,
-  MovieHeader,
   MovieInfo,
   MovieSimilar,
   MovieTrailers,
   MovieWatchProviders,
 } from '@/screens/movie/components';
-import { useViewedMoviesStore } from '@/stores';
-import { Ionicons } from '@expo/vector-icons';
+import { useViewedMediaStore } from '@/stores';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, View } from 'react-native';
-import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
 const MovieDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
-  const recordView = useViewedMoviesStore((state) => state.recordView);
-
-  const scrollY = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
+  const recordView = useViewedMediaStore((state) => state.recordView);
 
   const { movie, isLoading, isError, refetch } = useMovieFull(+id);
   const details = movie?.details;
 
   useEffect(() => {
     if (details?.id && details.title) {
-      recordView({ id: details.id, title: details.title });
+      recordView({ id: details.id, title: details.title, mediaType: 'movie' });
     }
   }, [details?.id, details?.title, recordView]);
 
   if (isLoading) return <Loader />;
 
   if (isError || !movie || !details) {
-    return (
-      <Screen canGoBack preset="fixed" safeAreaEdges={['top', 'bottom']}>
-        <View className="flex-1 items-center justify-center gap-4 px-10">
-          <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-          <Text className="!text-neutral-400">Something went wrong</Text>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Retry loading movie details"
-            onPress={() => refetch()}
-            className="rounded-full bg-blue-500/15 px-6 py-2">
-            <Text className="font-medium !text-blue-400">Retry</Text>
-          </Pressable>
-        </View>
-      </Screen>
-    );
+    return <ErrorState retryLabel="Retry loading movie details" onRetry={() => refetch()} />;
   }
 
-  const { videos, cast, images, reviews, similar, recommendations, watchProviders } = movie;
-
-  const trailers = videos.filter((video) => video.type === 'Trailer' || video.type === 'Teaser');
-  const hasGallery = images.backdrops.length || images.logos.length || images.posters.length;
-  const related = recommendations.length ? recommendations : similar;
+  const { trailers, cast, images, hasGallery, reviews, related, watchProviders } = movie;
 
   return (
-    <Screen canGoBack safeAreaEdges={["bottom"]}>
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}>
-        <MovieHeader poster={details.poster} scrollY={scrollY} />
+    <MediaDetailShell poster={details.poster}>
+      <MovieInfo
+        movie={details}
+        certification={movie.certification}
+        director={movie.director?.name}
+      />
 
-        <View className="-mt-16 rounded-t-3xl bg-neutral-900 backdrop-blur-xl">
-          <View className="items-center py-3">
-            <View className="h-1.5 w-12 rounded-full bg-white/30" />
-          </View>
+      <MediaActionsBar
+        movie={{
+          id: details.id,
+          title: details.title,
+          overview: details.overview,
+          poster: details.poster,
+          backdrop: details.backdrop,
+          rating: details.rating,
+          releaseDate: details.releaseDate ?? '',
+          mediaType: 'movie',
+        }}
+      />
 
-          <View className="gap-6 px-4">
-            <MovieInfo
-              movie={details}
-              certification={movie.certification}
-              director={movie.director?.name}
-            />
+      {movie.collection && <MovieCollectionBanner collection={movie.collection} />}
 
-            <MediaActionsBar
-              movie={{
-                id: details.id,
-                title: details.title,
-                overview: details.overview,
-                poster: details.poster,
-                backdrop: details.backdrop,
-                rating: details.rating,
-                releaseDate: details.releaseDate ?? '',
-                mediaType: 'movie',
-              }}
-            />
+      <MovieWatchProviders providers={watchProviders} />
 
-            {movie.collection && <MovieCollectionBanner collection={movie.collection} />}
+      {trailers.length > 0 && <MovieTrailers videos={trailers} />}
 
-            <MovieWatchProviders providers={watchProviders} />
+      {(cast.length > 0 || movie.director) && (
+        <MovieCastAndCrew movieId={details.id} cast={cast} director={movie.director} />
+      )}
 
-            {trailers.length > 0 && <MovieTrailers videos={trailers} />}
+      {hasGallery ? <MovieGallery movieId={details.id} gallery={images} /> : null}
 
-            {(cast.length > 0 || movie.director) && (
-              <MovieCastAndCrew movieId={details.id} cast={cast} director={movie.director} />
-            )}
+      <MovieFacts movie={details} />
 
-            {hasGallery ? <MovieGallery movieId={details.id} gallery={images} /> : null}
+      {reviews.length > 0 && <MovieComments comments={reviews} />}
 
-            <MovieFacts movie={details} />
-
-            {reviews.length > 0 && <MovieComments comments={reviews} />}
-
-            {related.length > 0 && <MovieSimilar movieId={details.id} similarMovies={related} />}
-          </View>
-        </View>
-      </Animated.ScrollView>
-    </Screen>
+      {related.length > 0 && <MovieSimilar movieId={details.id} similarMovies={related} />}
+    </MediaDetailShell>
   );
 };
 

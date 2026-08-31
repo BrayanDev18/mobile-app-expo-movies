@@ -1,5 +1,5 @@
 import { SERIES_GENRES, SERIES_NETWORKS } from '@/constants';
-import { useViewedSeriesStore } from '@/stores';
+import { selectLastViewed, useViewedMediaStore } from '@/stores';
 import { claimUnique } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
 import { useTrending } from '../../../hooks/useTrending';
@@ -22,7 +22,7 @@ export const useSeriesHomeSections = () => {
   const { series: airingToday } = useTvByCategory('airing_today');
   const { series: onTheAir } = useTvByCategory('on_the_air');
 
-  const lastViewed = useViewedSeriesStore((state) => state.viewed[0]);
+  const lastViewed = useViewedMediaStore(selectLastViewed('tv'));
   const { series: recommendedSeries } = useTvRecommendations(lastViewed?.id);
 
   const discoverRows = useQueries({

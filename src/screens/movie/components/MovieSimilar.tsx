@@ -1,11 +1,10 @@
-import { Text } from '@/components';
+import { SectionTitle } from '@/components';
 import { MovieProps } from '@/interfaces';
 import { openMediaDetails } from '@/utils';
-import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { TouchableHighlight, View } from 'react-native';
+import { View } from 'react-native';
 import { MovieCard } from './MovieCard';
 
 interface MovieSimilarProps {
@@ -34,25 +33,14 @@ export const MovieSimilar = ({
 
   return (
     <View className="gap-3">
-      <View className="flex-row items-center justify-between">
-        <Text className="!text-lg font-bold">{title}</Text>
-
-        {similarMovies.length > 5 ? (
-          <TouchableHighlight
-            onPress={() =>
-              router.push({
-                pathname: '/movie/similar',
-                params: { id: movieId },
-              })
-            }
-            accessibilityRole="button"
-            accessibilityLabel={`See all ${title}`}
-            className="h-12 w-12 items-center justify-center rounded-full"
-            underlayColor="#404040">
-            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </TouchableHighlight>
-        ) : null}
-      </View>
+      <SectionTitle
+        title={title}
+        onSeeAll={
+          similarMovies.length > 5
+            ? () => router.push({ pathname: '/(root)/movie/similar', params: { id: movieId } })
+            : undefined
+        }
+      />
 
       <FlashList
         horizontal

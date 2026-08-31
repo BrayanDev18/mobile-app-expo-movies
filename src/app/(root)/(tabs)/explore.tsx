@@ -1,5 +1,6 @@
-import { Input, Tab, Text } from '@/components';
+import { BlurredBackdrop, ChipRow, EmptyState, Input, SectionTitle, Tab, Text } from '@/components';
 import { useDebouncedValue, usePullToRefresh, useSearchMulti, useTrending } from '@/hooks';
+import { MEDIA_SCOPES } from '@/constants';
 import { MediaType } from '@/interfaces';
 import {
   CollectionsRow,
@@ -11,28 +12,11 @@ import {
   RankedCarousel,
 } from '@/screens/movie/components';
 import { useRecentSearchesStore } from '@/stores';
-import { tmdbImage } from '@/utils';
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import {
-  ActivityIndicator,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const SCOPES: { key: MediaType; label: string }[] = [
-  { key: 'movie', label: 'Movies' },
-  { key: 'tv', label: 'Series' },
-];
 
 const ExploreScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
@@ -53,20 +37,7 @@ const ExploreScreen = () => {
 
   return (
     <View className="flex-1 bg-neutral-900">
-      {backdrop && (
-        <Image
-          source={{ uri: tmdbImage(backdrop, 'w185') ?? undefined }}
-          blurRadius={50}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
-
-      <LinearGradient
-        colors={['rgba(0,0,0,0.45)', 'rgba(0,0,0,0.85)', 'rgba(6,6,6,0.98)']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      <BlurredBackdrop path={backdrop} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -130,18 +101,14 @@ const ExploreScreen = () => {
             {isSearching && <ActivityIndicator className="py-12" color="rgba(255,255,255,0.6)" />}
 
             {showEmptyState && (
-              <View className="items-center justify-center gap-3 py-12">
-                <Ionicons name="search-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-                <Text className="!text-neutral-400">No results for “{query.trim()}”</Text>
-              </View>
+              <EmptyState icon="Search" message={`No results for “${query.trim()}”`} />
             )}
 
             {people.length > 0 && <PeopleHorizontalList title="People" people={people} />}
 
             {media.length > 0 && (
               <View>
-                <Text className="px-1 !text-[18px] font-semibold">Movies & Series</Text>
+                <SectionTitle title="Movies & Series" className="px-1" />
 
                 <View className="mt-2">
                   {media.map((item) => (
@@ -155,21 +122,7 @@ const ExploreScreen = () => {
           </View>
         ) : (
           <Animated.View entering={FadeIn.duration(300)} style={{ gap: 32 }}>
-            <View className="flex-row gap-2 px-4">
-              {SCOPES.map((item) => (
-                <Tab
-                  key={item.key}
-                  title={item.label}
-                  isActive={scope === item.key}
-                  adaptableWidth
-                  className="rounded-full border border-white/15"
-                  onPress={() => {
-                    Haptics.selectionAsync();
-                    setScope(item.key);
-                  }}
-                />
-              ))}
-            </View>
+            <ChipRow items={MEDIA_SCOPES} active={scope} onSelect={setScope} />
 
             <Animated.View key={scope} entering={FadeIn.duration(250)} style={{ gap: 32 }}>
               <View className="gap-3">

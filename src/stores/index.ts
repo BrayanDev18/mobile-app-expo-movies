@@ -3,5 +3,4 @@ export * from './useMediaScopeStore';
 export * from './useMyListStore';
 export * from './useProfileStore';
 export * from './useRecentSearchesStore';
-export * from './useViewedMoviesStore';
-export * from './useViewedSeriesStore';
+export * from './useViewedMediaStore';

@@ -87,18 +87,28 @@ export const useMovieFull = (movieId: number) => {
         },
       });
 
+      const videos = mapVideos(data.videos?.results);
+      const similar = mapMovies(data.similar?.results);
+      const recommendations = mapMovies(data.recommendations?.results);
+      const images = {
+        backdrops: mapImages(data.images?.backdrops),
+        logos: mapImages(data.images?.logos),
+        posters: mapImages(data.images?.posters),
+      };
+
       return {
         details: mapMovieDetails(data),
-        videos: mapVideos(data.videos?.results),
+        videos,
+        trailers: videos.filter((video) => video.type === 'Trailer' || video.type === 'Teaser'),
         cast: mapCastMembers(data.credits?.cast),
-        images: {
-          backdrops: mapImages(data.images?.backdrops),
-          logos: mapImages(data.images?.logos),
-          posters: mapImages(data.images?.posters),
-        },
+        images,
+        hasGallery: Boolean(
+          images.backdrops.length || images.logos.length || images.posters.length
+        ),
         reviews: mapReviews(data.reviews?.results),
-        similar: mapMovies(data.similar?.results),
-        recommendations: mapMovies(data.recommendations?.results),
+        similar,
+        recommendations,
+        related: recommendations.length ? recommendations : similar,
         collection: data.belongs_to_collection
           ? {
               id: data.belongs_to_collection.id,

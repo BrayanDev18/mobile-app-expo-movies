@@ -1,7 +1,7 @@
 import { HOME_GENRES, HOME_PROVIDERS } from '@/constants';
 import { HomeSection } from '@/interfaces';
 import { useTrending } from '../../../hooks/useTrending';
-import { useViewedMoviesStore } from '@/stores';
+import { selectLastViewed, useViewedMediaStore } from '@/stores';
 import { claimUnique, deviceRegion } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
 import { discoverMoviesQuery } from './useDiscoverMovies';
@@ -15,7 +15,7 @@ export const useHomeSections = () => {
   const { movies: nowPlayingMovies } = useMoviesByCategory('now_playing');
   const { movies: upcomingMovies } = useMoviesByCategory('upcoming');
 
-  const lastViewed = useViewedMoviesStore((state) => state.viewed[0]);
+  const lastViewed = useViewedMediaStore(selectLastViewed('movie'));
   const { movies: recommendedMovies } = useMovieRecommendations(lastViewed?.id);
 
   const region = deviceRegion();

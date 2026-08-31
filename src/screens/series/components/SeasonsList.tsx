@@ -1,4 +1,4 @@
-import { Text, TmdbImage } from '@/components';
+import { SectionTitle, Text, TmdbImage } from '@/components';
 import { TvSeasonProps } from '@/interfaces';
 import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
@@ -19,9 +19,7 @@ export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps
 
   return (
     <View className="gap-3">
-      <Text accessibilityRole="header" className="!text-lg font-bold">
-        Seasons
-      </Text>
+      <SectionTitle title="Seasons" />
 
       <FlashList
         horizontal

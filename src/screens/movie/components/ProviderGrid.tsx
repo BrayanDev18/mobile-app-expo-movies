@@ -1,9 +1,8 @@
-import { Text } from '@/components';
+import { SectionTitle } from '@/components';
 import { useStreamingProviders } from '@/hooks';
 import { MediaType } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
+import { IMAGE_PLACEHOLDER, openDiscover } from '@/utils';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { Dimensions, Pressable, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -26,7 +25,7 @@ export const ProviderGrid = ({ title, mediaType = 'movie' }: ProviderGridProps) 
 
   return (
     <View className="gap-3 px-4">
-      {title && <Text className="px-1 !text-[18px] font-semibold">{title}</Text>}
+      {title && <SectionTitle title={title} className="px-1" />}
 
       <View className="flex-row flex-wrap" style={{ gap: GAP }}>
         {providers.map((provider) => (
@@ -34,12 +33,7 @@ export const ProviderGrid = ({ title, mediaType = 'movie' }: ProviderGridProps) 
             key={provider.id}
             accessibilityRole="button"
             accessibilityLabel={`Browse ${mediaLabel} on ${provider.name}`}
-            onPress={() =>
-              router.push({
-                pathname: mediaType === 'tv' ? '/(root)/tv/discover' : '/(root)/movie/discover',
-                params: { providerId: provider.id, title: provider.name },
-              })
-            }>
+            onPress={() => openDiscover(mediaType, { providerId: provider.id, title: provider.name })}>
             <Image
               source={{ uri: provider.logo ?? undefined }}
               style={{ width: TILE_SIZE, height: TILE_SIZE, borderRadius: 16 }}

@@ -1,4 +1,4 @@
-import { Text } from '@/components';
+import { SectionTitle, Text } from '@/components';
 import { MovieProvidersProps, RegionWatchProvidersProps } from '@/interfaces';
 import { tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
@@ -24,7 +24,7 @@ export const MovieWatchProviders = ({
 
   return (
     <View className="gap-3">
-      <Text className="!text-lg font-bold">Where to watch</Text>
+      <SectionTitle title="Where to watch" />
 
       <View className="w-full gap-4">
         {groups.map((group, index) => {

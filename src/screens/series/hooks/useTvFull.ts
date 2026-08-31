@@ -61,18 +61,28 @@ export const useTvFull = (seriesId: number) => {
         },
       });
 
+      const videos = mapVideos(data.videos?.results);
+      const similar = mapTvShows(data.similar?.results);
+      const recommendations = mapTvShows(data.recommendations?.results);
+      const images = {
+        backdrops: mapImages(data.images?.backdrops),
+        logos: mapImages(data.images?.logos),
+        posters: mapImages(data.images?.posters),
+      };
+
       return {
         details: mapTvDetails(data),
-        videos: mapVideos(data.videos?.results),
+        videos,
+        trailers: videos.filter((video) => video.type === 'Trailer' || video.type === 'Teaser'),
         cast: mapCastMembers(data.credits?.cast),
-        images: {
-          backdrops: mapImages(data.images?.backdrops),
-          logos: mapImages(data.images?.logos),
-          posters: mapImages(data.images?.posters),
-        },
+        images,
+        hasGallery: Boolean(
+          images.backdrops.length || images.logos.length || images.posters.length
+        ),
         reviews: mapReviews(data.reviews?.results),
-        similar: mapTvShows(data.similar?.results),
-        recommendations: mapTvShows(data.recommendations?.results),
+        similar,
+        recommendations,
+        related: recommendations.length ? recommendations : similar,
         creator: data.created_by?.length
           ? {
               id: data.created_by[0].id,

@@ -1,11 +1,11 @@
-import { Loader, Screen, Text } from '@/components';
+import { ErrorState, Loader } from '@/components';
 import { useTvFull } from '@/hooks';
 import {
   MediaActionsBar,
+  MediaDetailShell,
   MovieCastAndCrew,
   MovieComments,
   MovieGallery,
-  MovieHeader,
   MovieHorizontalList,
   MovieTrailers,
   MovieWatchProviders,
@@ -16,130 +16,75 @@ import {
   SeriesFacts,
   SeriesInfo,
 } from '@/screens/series/components';
-import { useViewedSeriesStore } from '@/stores';
-import { Ionicons } from '@expo/vector-icons';
+import { useViewedMediaStore } from '@/stores';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, View } from 'react-native';
-import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 
 const SeriesDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
-  const recordView = useViewedSeriesStore((state) => state.recordView);
-
-  const scrollY = useSharedValue(0);
-  const onScroll = useAnimatedScrollHandler((event) => {
-    scrollY.value = event.contentOffset.y;
-  });
+  const recordView = useViewedMediaStore((state) => state.recordView);
 
   const { series, isLoading, isError, refetch } = useTvFull(+id);
   const details = series?.details;
 
   useEffect(() => {
     if (details?.id && details.title) {
-      recordView({ id: details.id, title: details.title });
+      recordView({ id: details.id, title: details.title, mediaType: 'tv' });
     }
   }, [details?.id, details?.title, recordView]);
 
   if (isLoading) return <Loader />;
 
   if (isError || !series || !details) {
-    return (
-      <Screen canGoBack preset="fixed" safeAreaEdges={['top', 'bottom']}>
-        <View className="flex-1 items-center justify-center gap-4 px-10">
-          <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-          <Text className="!text-neutral-400">Something went wrong</Text>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Retry loading series details"
-            onPress={() => refetch()}
-            className="rounded-full bg-blue-500/15 px-6 py-2">
-            <Text className="font-medium !text-blue-400">Retry</Text>
-          </Pressable>
-        </View>
-      </Screen>
-    );
+    return <ErrorState retryLabel="Retry loading series details" onRetry={() => refetch()} />;
   }
 
-  const { videos, cast, images, reviews, similar, recommendations, watchProviders, creator } =
-    series;
-
-  const trailers = videos.filter((video) => video.type === 'Trailer' || video.type === 'Teaser');
-  const hasGallery = images.backdrops.length || images.logos.length || images.posters.length;
-  const related = recommendations.length ? recommendations : similar;
+  const { trailers, cast, images, hasGallery, reviews, related, watchProviders, creator } = series;
 
   return (
-    <Screen canGoBack safeAreaEdges={['bottom']}>
-      <Animated.ScrollView
-        showsVerticalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}>
-        <MovieHeader poster={details.poster} scrollY={scrollY} />
+    <MediaDetailShell poster={details.poster}>
+      <SeriesInfo series={details} certification={series.certification} />
 
-        <View className="-mt-16 rounded-t-3xl bg-neutral-900 backdrop-blur-xl">
-          <View className="items-center py-3">
-            <View className="h-1.5 w-12 rounded-full bg-white/30" />
-          </View>
+      <MediaActionsBar
+        movie={{
+          id: details.id,
+          title: details.title,
+          overview: details.overview,
+          poster: details.poster,
+          backdrop: details.backdrop,
+          rating: details.rating,
+          releaseDate: details.firstAirDate ?? '',
+          mediaType: 'tv',
+        }}
+      />
 
-          <View className="gap-6 px-4">
-            <SeriesInfo series={details} certification={series.certification} />
+      {details.nextEpisode && <NextEpisodeBanner nextEpisode={details.nextEpisode} />}
 
-            <MediaActionsBar
-              movie={{
-                id: details.id,
-                title: details.title,
-                overview: details.overview,
-                poster: details.poster,
-                backdrop: details.backdrop,
-                rating: details.rating,
-                releaseDate: details.firstAirDate ?? '',
-                mediaType: 'tv',
-              }}
-            />
+      <MovieWatchProviders providers={watchProviders} />
 
-            {details.nextEpisode && <NextEpisodeBanner nextEpisode={details.nextEpisode} />}
+      {trailers.length > 0 && <MovieTrailers videos={trailers} mediaType="tv" />}
 
-            <MovieWatchProviders providers={watchProviders} />
+      {(cast.length > 0 || creator) && (
+        <MovieCastAndCrew movieId={details.id} cast={cast} director={creator} mediaType="tv" />
+      )}
 
-            {trailers.length > 0 && <MovieTrailers videos={trailers} mediaType="tv" />}
+      <SeasonsList seriesId={details.id} seriesTitle={details.title} seasons={details.seasons} />
 
-            {(cast.length > 0 || creator) && (
-              <MovieCastAndCrew
-                movieId={details.id}
-                cast={cast}
-                director={creator}
-                mediaType="tv"
-              />
-            )}
+      {hasGallery ? <MovieGallery movieId={details.id} gallery={images} mediaType="tv" /> : null}
 
-            <SeasonsList
-              seriesId={details.id}
-              seriesTitle={details.title}
-              seasons={details.seasons}
-            />
+      <SeriesFacts series={details} />
 
-            {hasGallery ? (
-              <MovieGallery movieId={details.id} gallery={images} mediaType="tv" />
-            ) : null}
+      {reviews.length > 0 && <MovieComments comments={reviews} />}
 
-            <SeriesFacts series={details} />
-
-            {reviews.length > 0 && <MovieComments comments={reviews} />}
-
-            {related.length > 0 && (
-              <MovieHorizontalList
-                title="You might also like"
-                movies={related.slice(0, 10)}
-                cardWidth={145}
-                cardHeight={200}
-              />
-            )}
-          </View>
-        </View>
-      </Animated.ScrollView>
-    </Screen>
+      {related.length > 0 && (
+        <MovieHorizontalList
+          title="You might also like"
+          movies={related.slice(0, 10)}
+          cardWidth={145}
+          cardHeight={200}
+        />
+      )}
+    </MediaDetailShell>
   );
 };
 

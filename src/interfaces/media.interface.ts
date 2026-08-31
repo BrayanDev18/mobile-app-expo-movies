@@ -12,6 +12,8 @@ export interface HomeSection {
     providerId?: number;
     networkId?: number;
     originalLanguage?: string;
+    yearFrom?: number;
+    yearTo?: number;
     showType?: number;
     minVotes?: number;
   };

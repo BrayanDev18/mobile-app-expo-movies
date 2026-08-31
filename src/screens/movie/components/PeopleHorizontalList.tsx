@@ -1,9 +1,8 @@
-import { Text } from '@/components';
+import { SectionTitle, Text } from '@/components';
 import { PersonProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
+import { IMAGE_PLACEHOLDER, openPersonDetails } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -22,7 +21,7 @@ export const PeopleHorizontalList = ({ title, people }: PeopleHorizontalListProp
         accessibilityLabel={`View details for ${item.name}`}
         style={{ width: AVATAR_SIZE }}
         className="items-center gap-2"
-        onPress={() => router.push(`/movie/cast/${item.id}`)}>
+        onPress={() => openPersonDetails(item.id)}>
         <Image
           source={{ uri: item.avatar ?? undefined }}
           style={{ width: AVATAR_SIZE, height: AVATAR_SIZE, borderRadius: 500 }}
@@ -50,11 +49,7 @@ export const PeopleHorizontalList = ({ title, people }: PeopleHorizontalListProp
 
   return (
     <View className="gap-3">
-      {title && (
-        <View className="flex-row justify-between px-1">
-          <Text className="!text-[18px] font-semibold">{title}</Text>
-        </View>
-      )}
+      {title && <SectionTitle title={title} className="px-1" />}
 
       <FlashList
         horizontal

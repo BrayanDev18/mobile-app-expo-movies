@@ -1,11 +1,9 @@
-import { Text } from '@/components';
+import { SectionTitle, Text } from '@/components';
 import { MediaType, MovieCastProps } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
-import { Ionicons } from '@expo/vector-icons';
+import { IMAGE_PLACEHOLDER, openCastList, openPersonDetails } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { Pressable, TouchableHighlight, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 interface MovieCastAndCrewProps {
   movieId: number;
@@ -21,23 +19,10 @@ export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
 
   return (
     <View className="gap-1">
-      <View className="flex-row items-center justify-between">
-        <Text className="!text-lg font-bold">Cast & Crew</Text>
-
-        {cast?.length > 5 ? (
-          <TouchableHighlight
-            className="h-12 w-12 items-center justify-center rounded-full"
-            underlayColor="#404040"
-            onPress={() =>
-              router.push({
-                pathname: '/(root)/movie/cast/castList',
-                params: { id: movieId, type: mediaType },
-              })
-            }>
-            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </TouchableHighlight>
-        ) : null}
-      </View>
+      <SectionTitle
+        title="Cast & Crew"
+        onSeeAll={cast?.length > 5 ? () => openCastList(movieId, mediaType) : undefined}
+      />
 
       <FlashList
         horizontal
@@ -51,7 +36,7 @@ export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
             accessibilityRole="button"
             accessibilityLabel={`View details for ${cast.name}`}
             className="w-[145px] items-center gap-1.5"
-            onPress={() => router.push(`/movie/cast/${cast.id}`)}>
+            onPress={() => openPersonDetails(cast.id)}>
             <Image
               source={{ uri: cast.avatar || undefined }}
               style={{ width: '100%', height: 180, borderRadius: 12 }}

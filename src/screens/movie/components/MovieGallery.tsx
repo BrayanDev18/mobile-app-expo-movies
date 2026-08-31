@@ -1,12 +1,10 @@
-import { ImagePreviewModal, Text } from '@/components';
+import { ImagePreviewModal, SectionTitle } from '@/components';
 import { MediaType, MovieImages, MovieImagesResponse } from '@/interfaces';
-import { IMAGE_PLACEHOLDER } from '@/utils';
-import { Ionicons } from '@expo/vector-icons';
+import { IMAGE_PLACEHOLDER, openGallery } from '@/utils';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
-import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, TouchableHighlight, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 export const MovieGallery = ({
   movieId,
@@ -32,23 +30,10 @@ export const MovieGallery = ({
   return (
     <>
       <View className="gap-3">
-        <View className="flex-row items-center justify-between">
-          <Text className="!text-lg font-bold">Gallery</Text>
-
-          {totalImages > 1 && (
-            <TouchableHighlight
-              className="h-12 w-12 items-center justify-center rounded-full"
-              underlayColor="#404040"
-              onPress={() =>
-                router.push({
-                  pathname: '/(root)/movie/gallery',
-                  params: { id: movieId, type: mediaType },
-                })
-              }>
-              <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-            </TouchableHighlight>
-          )}
-        </View>
+        <SectionTitle
+          title="Gallery"
+          onSeeAll={totalImages > 1 ? () => openGallery(movieId, mediaType) : undefined}
+        />
 
         {previewImages.length > 0 && (
           <FlashList

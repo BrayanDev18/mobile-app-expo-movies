@@ -1,13 +1,9 @@
 import { BlurView, Tab } from '@/components';
+import { MEDIA_SCOPES } from '@/constants';
 import { MediaType } from '@/interfaces';
 import * as Haptics from 'expo-haptics';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-const SCOPES: { key: MediaType; label: string }[] = [
-  { key: 'movie', label: 'Movies' },
-  { key: 'tv', label: 'Series' },
-];
 
 interface MediaScopeTabsProps {
   scope: MediaType;
@@ -19,7 +15,7 @@ export const MediaScopeTabs = ({ scope, onChange }: MediaScopeTabsProps) => {
 
   return (
     <View style={{ paddingTop: top + 15 }} className="w-full flex-row gap-2 px-4 pb-6">
-      {SCOPES.map((item) => (
+      {MEDIA_SCOPES.map((item) => (
         <BlurView
           key={item.key}
           intensity={80}

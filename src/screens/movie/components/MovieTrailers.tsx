@@ -1,4 +1,4 @@
-import { Text } from '@/components';
+import { SectionTitle, Text } from '@/components';
 import { MediaType, MovieVideosProps } from '@/interfaces';
 import { formatDate, IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, TouchableHighlight, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
 
 const CARD_WIDTH = 270;
@@ -24,25 +24,16 @@ export const MovieTrailers = ({
 
   return (
     <View className="gap-1">
-      <View className="flex-row items-center justify-between">
-        <Text className="!text-lg font-bold">Trailers & Teasers</Text>
-
-        {videos.length > 3 ? (
-          <TouchableHighlight
-            onPress={() =>
-              router.push({
-                pathname: '/(root)/movie/videos',
-                params: { id, type: mediaType },
-              })
-            }
-            accessibilityRole="button"
-            accessibilityLabel="See all trailers and teasers"
-            className="h-12 w-12 items-center justify-center rounded-full"
-            underlayColor="#404040">
-            <Ionicons name="chevron-forward" color="rgba(255,255,255,0.6)" size={20} />
-          </TouchableHighlight>
-        ) : null}
-      </View>
+      <SectionTitle
+        title="Trailers & Teasers"
+        seeAllLabel="See all trailers and teasers"
+        onSeeAll={
+          videos.length > 3
+            ? () =>
+                router.push({ pathname: '/(root)/movie/videos', params: { id, type: mediaType } })
+            : undefined
+        }
+      />
 
       <FlashList
         horizontal

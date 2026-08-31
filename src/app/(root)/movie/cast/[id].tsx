@@ -1,5 +1,6 @@
 import {
   CustomTabs,
+  ErrorState,
   Loader,
   RowBack,
   Screen,
@@ -45,23 +46,7 @@ const CastDescriptionScreen = () => {
   if (isLoading) return <Loader />;
 
   if (isError || !castDetails) {
-    return (
-      <Screen canGoBack preset="fixed" safeAreaEdges={['top', 'bottom']}>
-        <View className="flex-1 items-center justify-center gap-4 px-10">
-          <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-          <Text className="!text-neutral-400">Something went wrong</Text>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Retry loading person details"
-            onPress={() => refetch()}
-            className="rounded-full bg-blue-500/15 px-6 py-2">
-            <Text className="font-medium !text-blue-400">Retry</Text>
-          </Pressable>
-        </View>
-      </Screen>
-    );
+    return <ErrorState retryLabel="Retry loading person details" onRetry={() => refetch()} />;
   }
 
   const age = computeAge(castDetails.birthday, castDetails.deathday);

@@ -1,10 +1,9 @@
-import { Text } from '@/components';
+import { RatingBadge, Text } from '@/components';
 import { MovieProps } from '@/interfaces';
 import { cn, formatDate, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Star } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 interface MovieCardProps {
@@ -62,8 +61,7 @@ export const MovieCard = (props: MovieCardProps) => {
             overflow: 'hidden',
             gap: 4,
           }}>
-          <Star color="yellow" size={12} fill="yellow" />
-          <Text className="!text-xs">{movie.rating.toFixed(1)}</Text>
+          <RatingBadge value={movie.rating} size="sm" />
         </BlurView>
       )}
 

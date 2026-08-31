@@ -1,9 +1,8 @@
 import { Text } from '@/components';
-import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
+import { IMAGE_PLACEHOLDER, openCollection, tmdbImage } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Href, router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 interface MovieCollectionBannerProps {
@@ -14,7 +13,7 @@ export const MovieCollectionBanner = ({ collection }: MovieCollectionBannerProps
   <Pressable
     accessibilityRole="button"
     accessibilityLabel={`View ${collection.name}`}
-    onPress={() => router.push(`/(root)/movie/collection/${collection.id}` as Href)}>
+    onPress={() => openCollection(collection.id)}>
     <View className="overflow-hidden rounded-2xl border border-white/10">
       <Image
         source={{ uri: tmdbImage(collection.backdrop, 'w780') ?? undefined }}

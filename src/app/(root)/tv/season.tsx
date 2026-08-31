@@ -1,14 +1,12 @@
-import { Loader, Screen, Text } from '@/components';
+import { EmptyState, ErrorState, Loader, RatingBadge, Screen, Text } from '@/components';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
 import { formatDate, formatDuration, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
-import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import { Star } from 'lucide-react-native';
 import { useCallback } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 const episodeDuration = (runtime: number | null) => {
@@ -45,15 +43,7 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
 
             {meta ? <Text className="!text-[13px] !text-neutral-400">{meta}</Text> : null}
 
-            {episode.rating > 0 && (
-              <View className="flex-row items-center gap-1">
-                <Star color="yellow" fill="yellow" size={12} />
-
-                <Text className="!text-[13px] font-medium text-white/60">
-                  {episode.rating.toFixed(1)}
-                </Text>
-              </View>
-            )}
+            {episode.rating > 0 && <RatingBadge value={episode.rating} size="sm" />}
           </View>
         </View>
 
@@ -86,23 +76,7 @@ const SeasonScreen = () => {
   if (isLoading) return <Loader />;
 
   if (isError || !seasonDetails) {
-    return (
-      <Screen canGoBack preset="fixed" safeAreaEdges={['top', 'bottom']}>
-        <View className="flex-1 items-center justify-center gap-4 px-10">
-          <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-          <Text className="!text-neutral-400">Something went wrong</Text>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Retry loading season details"
-            onPress={() => refetch()}
-            className="rounded-full bg-blue-500/15 px-6 py-2">
-            <Text className="font-medium !text-blue-400">Retry</Text>
-          </Pressable>
-        </View>
-      </Screen>
-    );
+    return <ErrorState retryLabel="Retry loading season details" onRetry={() => refetch()} />;
   }
 
   const year = seasonDetails.airDate?.slice(0, 4);
@@ -154,13 +128,7 @@ const SeasonScreen = () => {
               ) : null}
             </View>
           }
-          ListEmptyComponent={
-            <View className="items-center gap-3 py-12">
-              <Ionicons name="film-outline" size={48} color="rgba(255,255,255,0.3)" />
-
-              <Text className="!text-neutral-400">No episodes yet</Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyState icon="Film" message="No episodes yet" />}
           renderItem={renderItem}
         />
       </View>

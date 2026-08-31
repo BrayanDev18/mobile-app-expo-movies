@@ -1,4 +1,4 @@
-import { Text } from '@/components';
+import { RatingBadge, SectionTitle, Text } from '@/components';
 import { MovieReviewProps } from '@/interfaces';
 import { formatDate, getAvatarColor, tmdbImage } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +13,7 @@ export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) =>
   return (
     <>
       <View className="gap-3">
-        <Text className="!text-lg font-bold">Reviews</Text>
+        <SectionTitle title="Reviews" />
 
         <FlashList
           horizontal
@@ -136,11 +136,7 @@ const CommentItem = ({ review, onPress }: { review: MovieReviewProps; onPress: (
 
       {review?.author_details?.rating != null && (
         <View className="rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-1">
-          <View className="flex-row items-center gap-1">
-            <Ionicons name="star" size={12} color="#fbbf24" />
-
-            <Text className="font-semibold">{review?.author_details?.rating}</Text>
-          </View>
+          <RatingBadge value={review.author_details.rating} size="sm" precise={false} />
         </View>
       )}
     </View>
