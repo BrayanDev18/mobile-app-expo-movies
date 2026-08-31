@@ -1,6 +1,6 @@
 import { MovieApiRoutes } from '@/constants';
 import { TrendingResultProps, TrendingWindow } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { mapTrendingMedia } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -14,7 +14,7 @@ export const useTrending = (
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['trending', mediaType, window],
+    queryKey: tmdbKey('trending', mediaType, window),
     queryFn: async () => {
       const { data } = await moviesApi.get<{ results: TrendingResultProps[] }>(
         MovieApiRoutes.trending(mediaType, window)

@@ -3,7 +3,7 @@ import { changeLanguage, i18n } from '@/translate';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -20,20 +20,13 @@ const queryClient = new QueryClient({
 
 export default function RootLayout() {
   const language = useLanguageStore((state) => state.language);
-  const previousLanguage = useRef(language);
 
+  // TMDB queries carry the language inside their queryKey (see tmdbKey), so a
+  // language change resolves to fresh cache entries without any invalidation.
   useEffect(() => {
-    // Skip mount and store-rehydration passes — only react to a real change
-    if (previousLanguage.current === language) return;
-
-    previousLanguage.current = language;
-
     if (language && language !== i18n.locale) {
       changeLanguage(language);
     }
-
-    // TMDB responses are language-dependent — refetch everything on language change
-    queryClient.invalidateQueries();
   }, [language]);
 
   return (

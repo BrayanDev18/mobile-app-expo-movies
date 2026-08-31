@@ -1,13 +1,7 @@
-import { MediaType, MovieImages, MovieImagesProps } from '@/interfaces';
-import { tmdbImage } from '@/utils';
-import { moviesApi, tmdbImageLanguages } from '@/services';
+import { MediaType, MovieImages } from '@/interfaces';
+import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import { mapImages } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
-
-const mapImages = (images: MovieImages[] = []): MovieImagesProps[] =>
-  images.map((image) => ({
-    url: tmdbImage(image.file_path),
-    aspectRatio: image.aspect_ratio,
-  }));
 
 interface MediaImagesResponse {
   backdrops: MovieImages[];
@@ -16,8 +10,13 @@ interface MediaImagesResponse {
 }
 
 export const useMovieImages = (movieId: number, mediaType: MediaType = 'movie') => {
-  const { data: movieImages, isLoading: isMovieImagesLoading } = useQuery({
-    queryKey: ['movieImages', mediaType, movieId],
+  const {
+    data: movieImages,
+    isLoading: isMovieImagesLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: tmdbKey('movieImages', mediaType, movieId),
     enabled: Number.isFinite(movieId),
     queryFn: async () => {
       const { data } = await moviesApi.get<MediaImagesResponse>(
@@ -33,8 +32,5 @@ export const useMovieImages = (movieId: number, mediaType: MediaType = 'movie') 
     },
   });
 
-  return {
-    movieImages: movieImages,
-    isMovieImagesLoading,
-  };
+  return { movieImages, isMovieImagesLoading, isError, refetch };
 };

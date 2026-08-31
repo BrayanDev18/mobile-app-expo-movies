@@ -1,6 +1,5 @@
 import { useHomeSections, useMoviesByCategory, usePullToRefresh, useTrendingPeople } from '@/hooks';
-import { MovieProps } from '@/interfaces';
-import { HomeSection } from '@/screens/movie/hooks';
+import { HomeSection, MovieProps } from '@/interfaces';
 import { tmdbResize } from '@/utils';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';

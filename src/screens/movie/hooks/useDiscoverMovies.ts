@@ -1,10 +1,8 @@
 import { MovieApiRoutes } from '@/constants';
-import { MovieProps, MoviesByCategoryResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
-import { mapMovies, mediaKey } from '@/utils';
+import { MoviesByCategoryResponse } from '@/interfaces';
+import { moviesApi, tmdbKey } from '@/services';
+import { dedupeMedia, deviceRegion, mapMovies } from '@/utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
-
-import * as Localization from 'expo-localization';
 
 export interface DiscoverMoviesFilters {
   genreId?: number;
@@ -13,23 +11,8 @@ export interface DiscoverMoviesFilters {
   yearTo?: number;
 }
 
-export const deviceRegion = () => Localization.getLocales()[0]?.regionCode ?? 'US';
-
 // TMDB rejects page numbers above 500
 const MAX_PAGES = 500;
-
-export const dedupeMedia = (movies: MovieProps[]) => {
-  const seen = new Set<string>();
-
-  return movies.filter((movie) => {
-    const key = mediaKey(movie);
-
-    if (seen.has(key)) return false;
-
-    seen.add(key);
-    return true;
-  });
-};
 
 const discoverMoviesParams = (
   { genreId, providerId, yearFrom, yearTo }: DiscoverMoviesFilters,
@@ -43,14 +26,14 @@ const discoverMoviesParams = (
 });
 
 export const discoverMoviesQuery = (filters: DiscoverMoviesFilters, region: string) => ({
-  queryKey: [
+  queryKey: tmdbKey(
     'discoverMovies',
     filters.genreId,
     filters.providerId,
     filters.yearFrom,
     filters.yearTo,
     region,
-  ],
+  ),
   queryFn: async () => {
     const { data } = await moviesApi.get<MoviesByCategoryResponse>(MovieApiRoutes.discoverMovies, {
       params: discoverMoviesParams(filters, region),
@@ -65,14 +48,14 @@ export const useDiscoverMoviesInfinite = (filters: DiscoverMoviesFilters) => {
 
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: [
+      queryKey: tmdbKey(
         'discoverMoviesInfinite',
         filters.genreId,
         filters.providerId,
         filters.yearFrom,
         filters.yearTo,
         region,
-      ],
+      ),
       initialPageParam: 1,
       queryFn: async ({ pageParam }) => {
         const { data } = await moviesApi.get<MoviesByCategoryResponse>(

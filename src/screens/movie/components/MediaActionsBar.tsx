@@ -1,6 +1,7 @@
 import { Text } from '@/components';
 import { MovieProps, MyListFlag } from '@/interfaces';
 import { useMyListStore } from '@/stores';
+import { sameMedia } from '@/utils';
 import * as Haptics from 'expo-haptics';
 import { Bookmark, Eye, Heart, LucideIcon, Star } from 'lucide-react-native';
 import { useState } from 'react';
@@ -112,11 +113,7 @@ export const MediaActionsBar = ({ movie }: { movie: MovieProps }) => {
   const [isRatingOpen, setIsRatingOpen] = useState(false);
   const toggleFlag = useMyListStore((state) => state.toggleFlag);
   const setRating = useMyListStore((state) => state.setRating);
-  const item = useMyListStore((state) =>
-    state.items.find(
-      (saved) => saved.id === movie.id && (saved.mediaType ?? 'movie') === (movie.mediaType ?? 'movie')
-    )
-  );
+  const item = useMyListStore((state) => state.items.find((saved) => sameMedia(saved, movie)));
 
   const onToggle = (flag: MyListFlag) => {
     Haptics.selectionAsync();

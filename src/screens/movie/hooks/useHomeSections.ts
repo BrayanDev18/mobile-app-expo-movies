@@ -1,29 +1,12 @@
 import { HOME_GENRES, HOME_PROVIDERS } from '@/constants';
-import { MovieProps } from '@/interfaces';
+import { HomeSection } from '@/interfaces';
 import { useTrending } from '../../../hooks/useTrending';
 import { useViewedMoviesStore } from '@/stores';
-import { claimUnique } from '@/utils';
+import { claimUnique, deviceRegion } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
-import { deviceRegion, discoverMoviesQuery } from './useDiscoverMovies';
+import { discoverMoviesQuery } from './useDiscoverMovies';
 import { useMovieRecommendations } from './useMovieRecommendations';
 import { useMoviesByCategory } from './useMoviesByCategory';
-
-export interface HomeSection {
-  key: string;
-  title: string;
-  movies: MovieProps[];
-  variant?: 'poster' | 'backdrop';
-  cardWidth?: number;
-  ranked?: boolean;
-  seeAll?: {
-    genreId?: number;
-    providerId?: number;
-    networkId?: number;
-    originalLanguage?: string;
-    showType?: number;
-    minVotes?: number;
-  };
-}
 
 export const useHomeSections = () => {
   const { trending: heroMedia, isLoading: isHeroLoading } = useTrending('all', 'day');

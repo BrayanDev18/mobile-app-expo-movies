@@ -1,6 +1,6 @@
 import { MovieApiRoutes } from '@/constants';
 import { MoviesByCategoryResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { mapMovies } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,7 +11,7 @@ export const useMovieRecommendations = (movieId?: number) => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['movieRecommendations', movieId],
+    queryKey: tmdbKey('movieRecommendations', movieId),
     enabled: !!movieId,
     queryFn: async () => {
       const { data } = await moviesApi.get<MoviesByCategoryResponse>(

@@ -1,10 +1,8 @@
 import { MovieProps, MyListFlag, SavedMediaProps } from '@/interfaces';
+import { mediaKey } from '@/utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
-const keyOf = (movie: Pick<MovieProps, 'id' | 'mediaType'>) =>
-  `${movie.mediaType ?? 'movie'}-${movie.id}`;
 
 const asSavedItem = (movie: MovieProps): SavedMediaProps => ({
   id: movie.id,
@@ -39,7 +37,8 @@ export const useMyListStore = create<MyListState>()(
       items: [],
       toggleFlag: (movie, flag) =>
         set((state) => {
-          const existing = state.items.find((item) => keyOf(item) === keyOf(movie));
+          const key = mediaKey(movie);
+          const existing = state.items.find((item) => mediaKey(item) === key);
 
           if (!existing) {
             return { items: [{ ...asSavedItem(movie), [flag]: true }, ...state.items] };
@@ -49,13 +48,14 @@ export const useMyListStore = create<MyListState>()(
 
           return {
             items: isEmptyItem(updated)
-              ? state.items.filter((item) => keyOf(item) !== keyOf(movie))
-              : state.items.map((item) => (keyOf(item) === keyOf(movie) ? updated : item)),
+              ? state.items.filter((item) => mediaKey(item) !== key)
+              : state.items.map((item) => (mediaKey(item) === key ? updated : item)),
           };
         }),
       setRating: (movie, userRating) =>
         set((state) => {
-          const existing = state.items.find((item) => keyOf(item) === keyOf(movie));
+          const key = mediaKey(movie);
+          const existing = state.items.find((item) => mediaKey(item) === key);
 
           if (!existing) {
             if (userRating === null) return state;
@@ -67,14 +67,16 @@ export const useMyListStore = create<MyListState>()(
 
           return {
             items: isEmptyItem(updated)
-              ? state.items.filter((item) => keyOf(item) !== keyOf(movie))
-              : state.items.map((item) => (keyOf(item) === keyOf(movie) ? updated : item)),
+              ? state.items.filter((item) => mediaKey(item) !== key)
+              : state.items.map((item) => (mediaKey(item) === key ? updated : item)),
           };
         }),
       removeItem: (movie) =>
-        set((state) => ({
-          items: state.items.filter((item) => keyOf(item) !== keyOf(movie)),
-        })),
+        set((state) => {
+          const key = mediaKey(movie);
+
+          return { items: state.items.filter((item) => mediaKey(item) !== key) };
+        }),
       clearAll: () => set({ items: [] }),
     }),
     {

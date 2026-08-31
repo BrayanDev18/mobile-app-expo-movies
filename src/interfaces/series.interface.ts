@@ -1,4 +1,4 @@
-import { GenreProps, SpokenLanguageProps } from './movie.interface';
+import { GenreProps, SpokenLanguageProps, TmdbPaginated } from './movie.interface';
 
 export interface TvResultProps {
   id: number;
@@ -11,11 +11,7 @@ export interface TvResultProps {
   first_air_date: string;
 }
 
-export interface TvByCategoryResponse {
-  results: TvResultProps[];
-  total_pages: number;
-  total_results: number;
-}
+export type TvByCategoryResponse = TmdbPaginated<TvResultProps>;
 
 export interface TvNetworkProps {
   id: number;

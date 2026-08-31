@@ -1,9 +1,8 @@
 import { MovieApiRoutes } from '@/constants';
 import { TvByCategoryResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
-import { mapTvShows } from '@/utils';
+import { moviesApi, tmdbKey } from '@/services';
+import { dedupeMedia, deviceRegion, mapTvShows } from '@/utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { dedupeMedia, deviceRegion } from '../../movie/hooks/useDiscoverMovies';
 
 export interface DiscoverTvFilters {
   genreId?: number;
@@ -67,7 +66,7 @@ export const discoverTvQuery = (filters: DiscoverTvFilters) => {
   const region = deviceRegion();
 
   return {
-    queryKey: ['discoverTv', ...filtersKey(filters, region)],
+    queryKey: tmdbKey('discoverTv', ...filtersKey(filters, region)),
     queryFn: async () => {
       const { data } = await moviesApi.get<TvByCategoryResponse>(MovieApiRoutes.discoverTv, {
         params: discoverTvParams(filters, region),
@@ -83,7 +82,7 @@ export const useDiscoverTvInfinite = (filters: DiscoverTvFilters) => {
 
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ['discoverTvInfinite', ...filtersKey(filters, region)],
+      queryKey: tmdbKey('discoverTvInfinite', ...filtersKey(filters, region)),
       initialPageParam: 1,
       queryFn: async ({ pageParam }) => {
         const { data } = await moviesApi.get<TvByCategoryResponse>(MovieApiRoutes.discoverTv, {

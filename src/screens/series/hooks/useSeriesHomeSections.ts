@@ -3,7 +3,7 @@ import { useViewedSeriesStore } from '@/stores';
 import { claimUnique } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
 import { useTrending } from '../../../hooks/useTrending';
-import { HomeSection } from '../../movie/hooks/useHomeSections';
+import { HomeSection } from '@/interfaces';
 import { discoverTvQuery } from './useDiscoverTv';
 import { useTvByCategory } from './useTvByCategory';
 import { useTvRecommendations } from './useTvRecommendations';

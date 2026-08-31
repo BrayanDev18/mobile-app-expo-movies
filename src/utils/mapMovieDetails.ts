@@ -1,7 +1,7 @@
 import { MovieDetails, MovieDetailsProps } from '@/interfaces';
 import { tmdbImage } from './tmdbImage';
 
-export const mapMovieToDb = (data: MovieDetails): MovieDetailsProps => ({
+export const mapMovieDetails = (data: MovieDetails): MovieDetailsProps => ({
   id: data.id,
   title: data.title,
   originalTitle: data.original_title,

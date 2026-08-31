@@ -1,5 +1,5 @@
 import { MoviesByCategoryResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { mapMovies } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -10,7 +10,7 @@ export const useSimilarMovies = (movieId: number) => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['movieSimilar', movieId],
+    queryKey: tmdbKey('movieSimilar', movieId),
     enabled: Number.isFinite(movieId),
     queryFn: async () => {
       const { data } = await moviesApi.get<MoviesByCategoryResponse>(

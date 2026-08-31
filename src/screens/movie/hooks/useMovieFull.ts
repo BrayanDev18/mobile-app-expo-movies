@@ -3,16 +3,25 @@ import {
   MovieCast,
   MovieDetails,
   MovieImages,
-  MovieImagesProps,
   MovieReviewsResponse,
   MovieVideoResponse,
   MoviesByCategoryResponse,
   RegionWatchProvidersProps,
 } from '@/interfaces';
-import { moviesApi, tmdbImageLanguages } from '@/services';
-import { mapMovies, mapMovieToDb, tmdbImage } from '@/utils';
+import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import {
+  deviceRegion,
+  mapCastMembers,
+  mapImages,
+  mapMovieDetails,
+  mapMovies,
+  mapReviews,
+  mapVideos,
+  pickCertification,
+  pickRegion,
+  tmdbImage,
+} from '@/utils';
 import { useQuery } from '@tanstack/react-query';
-import * as Localization from 'expo-localization';
 
 const APPEND_TO_RESPONSE =
   'videos,credits,images,reviews,similar,recommendations,release_dates,watch/providers';
@@ -46,12 +55,6 @@ interface MovieFullResponse extends MovieDetails {
   'watch/providers'?: { results: Record<string, RegionWatchProvidersProps> };
 }
 
-const mapImages = (images: MovieImages[] = []): MovieImagesProps[] =>
-  images.map((image) => ({
-    url: tmdbImage(image.file_path),
-    aspectRatio: image.aspect_ratio,
-  }));
-
 const mapDirector = (crew?: CrewMemberProps[]) => {
   const director = crew?.find((member) => member.job === 'Director');
 
@@ -65,20 +68,8 @@ const mapDirector = (crew?: CrewMemberProps[]) => {
   };
 };
 
-const certificationFor = (
-  releaseDates: MovieFullResponse['release_dates'],
-  region: string
-): string | null => {
-  const results = releaseDates?.results ?? [];
-  const entry =
-    results.find((item) => item.iso_3166_1 === region) ??
-    results.find((item) => item.iso_3166_1 === 'US');
-
-  return entry?.release_dates?.find((date) => date.certification)?.certification || null;
-};
-
 export const useMovieFull = (movieId: number) => {
-  const region = Localization.getLocales()[0]?.regionCode ?? 'US';
+  const region = deviceRegion();
 
   const {
     data: movie,
@@ -86,7 +77,7 @@ export const useMovieFull = (movieId: number) => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['movieFull', movieId],
+    queryKey: tmdbKey('movieFull', movieId),
     enabled: !!movieId,
     queryFn: async () => {
       const { data } = await moviesApi.get<MovieFullResponse>(MovieApiRoutes.details(movieId), {
@@ -97,38 +88,15 @@ export const useMovieFull = (movieId: number) => {
       });
 
       return {
-        details: mapMovieToDb(data),
-        videos: (data.videos?.results ?? []).map((video) => ({
-          key: video.key,
-          name: video.name,
-          site: video.site,
-          type: video.type,
-          size: video.size ?? 0,
-          movie_id: movieId,
-          official: video.official ?? false,
-          published_at: video.published_at ?? null,
-          last_updated: Math.floor(Date.now() / 1000),
-        })),
-        cast: (data.credits?.cast ?? []).map((member) => ({
-          id: member.id,
-          name: member.name ?? '',
-          character: member.character ?? '',
-          avatar: tmdbImage(member.profile_path, 'w342') ?? '',
-        })),
+        details: mapMovieDetails(data),
+        videos: mapVideos(data.videos?.results),
+        cast: mapCastMembers(data.credits?.cast),
         images: {
           backdrops: mapImages(data.images?.backdrops),
           logos: mapImages(data.images?.logos),
           posters: mapImages(data.images?.posters),
         },
-        reviews: (data.reviews?.results ?? []).map((review) => ({
-          id: review.id,
-          movie_id: movieId,
-          author: review.author,
-          author_details: review.author_details,
-          content: review.content,
-          created_at: review.created_at,
-          url: review.url,
-        })),
+        reviews: mapReviews(data.reviews?.results),
         similar: mapMovies(data.similar?.results),
         recommendations: mapMovies(data.recommendations?.results),
         collection: data.belongs_to_collection
@@ -142,11 +110,10 @@ export const useMovieFull = (movieId: number) => {
             }
           : null,
         director: mapDirector(data.credits?.crew),
-        certification: certificationFor(data.release_dates, region),
-        watchProviders:
-          data['watch/providers']?.results?.[region] ??
-          data['watch/providers']?.results?.US ??
-          null,
+        certification: pickCertification(data.release_dates?.results, region, (entry) =>
+          entry.release_dates?.find((date) => date.certification)?.certification
+        ),
+        watchProviders: pickRegion(data['watch/providers']?.results, region),
       };
     },
   });

@@ -1,9 +1,8 @@
 import { MovieApiRoutes } from '@/constants';
 import { MediaType, StreamingProviderProps, WatchProvidersResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
-import { tmdbImage } from '@/utils';
+import { moviesApi, tmdbKey } from '@/services';
+import { deviceRegion, tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
-import { deviceRegion } from './useDiscoverMovies';
 
 const PROVIDERS_LIMIT = 8;
 
@@ -19,7 +18,7 @@ export const useStreamingProviders = (mediaType: MediaType = 'movie') => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['streamingProviders', mediaType, region],
+    queryKey: tmdbKey('streamingProviders', mediaType, region),
     queryFn: async () => {
       const { data } = await moviesApi.get<WatchProvidersResponse>(
         MovieApiRoutes.watchProvidersByMedia(mediaType),

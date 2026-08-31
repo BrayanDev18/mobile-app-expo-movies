@@ -48,18 +48,6 @@ export const mapTrendingMedia = (results: TrendingResultProps[] = []): MovieProp
       mediaType: item.media_type,
     }));
 
-export const mediaKey = ({ id, mediaType = 'movie' }: MovieProps) => `${mediaType}-${id}`;
-
-export const claimUnique = (movies: MovieProps[], claimed: Set<string>) =>
-  movies.filter((movie) => {
-    const key = mediaKey(movie);
-
-    if (claimed.has(key)) return false;
-
-    claimed.add(key);
-    return true;
-  });
-
 export const mapTrendingPeople = (results: TrendingResultProps[] = []): PersonProps[] =>
   results
     .filter((item) => item.media_type === 'person')

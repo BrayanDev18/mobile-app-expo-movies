@@ -1,6 +1,6 @@
 import { MovieApiRoutes } from '@/constants';
 import { CollectionDetailsResponse, CollectionProps } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { mapMovies, tmdbImage } from '@/utils';
 import { useQueries, useQuery } from '@tanstack/react-query';
 
@@ -16,7 +16,7 @@ const mapCollection = (data: CollectionDetailsResponse): CollectionProps => ({
 });
 
 const collectionQuery = (id: number) => ({
-  queryKey: ['collection', id],
+  queryKey: tmdbKey('collection', id),
   queryFn: async () => {
     const { data } = await moviesApi.get<CollectionDetailsResponse>(MovieApiRoutes.collection(id));
 

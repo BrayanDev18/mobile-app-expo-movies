@@ -2,17 +2,26 @@ import { MovieApiRoutes } from '@/constants';
 import {
   MovieCast,
   MovieImages,
-  MovieImagesProps,
   MovieReviewsResponse,
   MovieVideoResponse,
   RegionWatchProvidersProps,
   TvByCategoryResponse,
   TvDetails,
 } from '@/interfaces';
-import { moviesApi, tmdbImageLanguages } from '@/services';
-import { mapTvShows, mapTvToDb, tmdbImage } from '@/utils';
+import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import {
+  deviceRegion,
+  mapCastMembers,
+  mapImages,
+  mapReviews,
+  mapTvDetails,
+  mapTvShows,
+  mapVideos,
+  pickCertification,
+  pickRegion,
+  tmdbImage,
+} from '@/utils';
 import { useQuery } from '@tanstack/react-query';
-import * as Localization from 'expo-localization';
 
 const APPEND_TO_RESPONSE =
   'videos,credits,images,reviews,similar,recommendations,content_ratings,watch/providers';
@@ -33,26 +42,8 @@ interface TvFullResponse extends TvDetails {
   'watch/providers'?: { results: Record<string, RegionWatchProvidersProps> };
 }
 
-const mapImages = (images: MovieImages[] = []): MovieImagesProps[] =>
-  images.map((image) => ({
-    url: tmdbImage(image.file_path),
-    aspectRatio: image.aspect_ratio,
-  }));
-
-const certificationFor = (
-  contentRatings: TvFullResponse['content_ratings'],
-  region: string
-): string | null => {
-  const results = contentRatings?.results ?? [];
-  const entry =
-    results.find((item) => item.iso_3166_1 === region) ??
-    results.find((item) => item.iso_3166_1 === 'US');
-
-  return entry?.rating || null;
-};
-
 export const useTvFull = (seriesId: number) => {
-  const region = Localization.getLocales()[0]?.regionCode ?? 'US';
+  const region = deviceRegion();
 
   const {
     data: series,
@@ -60,7 +51,7 @@ export const useTvFull = (seriesId: number) => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['tvFull', seriesId],
+    queryKey: tmdbKey('tvFull', seriesId),
     enabled: !!seriesId,
     queryFn: async () => {
       const { data } = await moviesApi.get<TvFullResponse>(MovieApiRoutes.tvDetails(seriesId), {
@@ -71,38 +62,15 @@ export const useTvFull = (seriesId: number) => {
       });
 
       return {
-        details: mapTvToDb(data),
-        videos: (data.videos?.results ?? []).map((video) => ({
-          key: video.key,
-          name: video.name,
-          site: video.site,
-          type: video.type,
-          size: video.size ?? 0,
-          movie_id: seriesId,
-          official: video.official ?? false,
-          published_at: video.published_at ?? null,
-          last_updated: Math.floor(Date.now() / 1000),
-        })),
-        cast: (data.credits?.cast ?? []).map((member) => ({
-          id: member.id,
-          name: member.name ?? '',
-          character: member.character ?? '',
-          avatar: tmdbImage(member.profile_path, 'w342') ?? '',
-        })),
+        details: mapTvDetails(data),
+        videos: mapVideos(data.videos?.results),
+        cast: mapCastMembers(data.credits?.cast),
         images: {
           backdrops: mapImages(data.images?.backdrops),
           logos: mapImages(data.images?.logos),
           posters: mapImages(data.images?.posters),
         },
-        reviews: (data.reviews?.results ?? []).map((review) => ({
-          id: review.id,
-          movie_id: seriesId,
-          author: review.author,
-          author_details: review.author_details,
-          content: review.content,
-          created_at: review.created_at,
-          url: review.url,
-        })),
+        reviews: mapReviews(data.reviews?.results),
         similar: mapTvShows(data.similar?.results),
         recommendations: mapTvShows(data.recommendations?.results),
         creator: data.created_by?.length
@@ -113,11 +81,12 @@ export const useTvFull = (seriesId: number) => {
               avatar: tmdbImage(data.created_by[0].profile_path, 'w342') ?? '',
             }
           : null,
-        certification: certificationFor(data.content_ratings, region),
-        watchProviders:
-          data['watch/providers']?.results?.[region] ??
-          data['watch/providers']?.results?.US ??
-          null,
+        certification: pickCertification(
+          data.content_ratings?.results,
+          region,
+          (entry) => entry.rating
+        ),
+        watchProviders: pickRegion(data['watch/providers']?.results, region),
       };
     },
   });

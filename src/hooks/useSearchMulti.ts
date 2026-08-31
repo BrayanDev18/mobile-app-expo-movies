@@ -1,6 +1,6 @@
 import { MovieApiRoutes } from '@/constants';
 import { TrendingResultProps } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { mapTrendingMedia, mapTrendingPeople } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,7 +11,7 @@ export const useSearchMulti = (query: string) => {
   const enabled = trimmed.length >= MIN_QUERY_LENGTH;
 
   const { data, isFetching, isError, refetch } = useQuery({
-    queryKey: ['searchMulti', trimmed],
+    queryKey: tmdbKey('searchMulti', trimmed),
     enabled,
     queryFn: async () => {
       const { data } = await moviesApi.get<{ results: TrendingResultProps[] }>(

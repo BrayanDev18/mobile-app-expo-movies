@@ -5,7 +5,7 @@ import {
   CastImagesResponse,
   PersonSocialLinkProps,
 } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -98,7 +98,7 @@ const mapFilmography = (
 
 export const useCastDetails = (castId: number) => {
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ['castFull', castId],
+    queryKey: tmdbKey('castFull', castId),
     enabled: !!castId,
     queryFn: async () => {
       const { data } = await moviesApi.get<PersonFullResponse>(`/person/${castId}`, {

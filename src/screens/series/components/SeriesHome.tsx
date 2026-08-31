@@ -1,12 +1,11 @@
 import { usePullToRefresh } from '@/hooks';
-import { MovieProps } from '@/interfaces';
+import { HomeSection, MovieProps } from '@/interfaces';
 import {
   HomeSkeleton,
   MovieHorizontalList,
   MoviesHeader,
   RankedCarousel,
 } from '@/screens/movie/components';
-import { HomeSection } from '@/screens/movie/hooks';
 import { useSeriesHomeSections, useTvByCategory } from '@/screens/series/hooks';
 import { tmdbResize } from '@/utils';
 import { Image } from 'expo-image';

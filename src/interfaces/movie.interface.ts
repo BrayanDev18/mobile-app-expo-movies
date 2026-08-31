@@ -45,8 +45,18 @@ export interface PersonProps {
   knownFor?: string;
 }
 
+export interface TmdbVideo {
+  key: string;
+  name: string | null;
+  site: string | null;
+  type: string | null;
+  size: number | null;
+  official: boolean | null;
+  published_at: string | null;
+}
+
 export interface MovieVideoResponse {
-  results: MovieVideosProps[];
+  results: TmdbVideo[];
 }
 
 export interface MovieVideosProps {
@@ -54,11 +64,16 @@ export interface MovieVideosProps {
   name: string | null;
   site: string | null;
   type: string | null;
-  size: number | null;
-  movie_id: number;
-  official: boolean | null;
-  published_at: number | null;
-  last_updated: number;
+  size: number;
+  official: boolean;
+  published_at: string | null;
+}
+
+export interface ReviewAuthorDetails {
+  name: string;
+  username: string;
+  avatar_path: string | null;
+  rating: number | null;
 }
 
 export interface MovieReviewsResponse {
@@ -68,11 +83,10 @@ export interface MovieReviewsResponse {
 export interface MovieReviewProps {
   id: string;
   author: string | null;
-  author_details: string | any;
+  author_details: ReviewAuthorDetails | null;
   content: string | null;
-  created_at: number | null;
+  created_at: string | null;
   url: string | null;
-  movie_id: number;
 }
 
 export interface MovieImagesResponse {
@@ -93,7 +107,7 @@ export interface MovieImagesProps {
 
 export interface MovieDetails {
   adult: boolean;
-  backdrop_path: string;
+  backdrop_path: string | null;
   budget: number;
   genres?: GenreProps[];
   homepage: string;
@@ -103,7 +117,7 @@ export interface MovieDetails {
   original_title: string;
   overview: string;
   popularity: number;
-  poster_path: string;
+  poster_path: string | null;
   production_companies: ProductionCompanyProps[];
   production_countries: ProductionCountryProps[];
   release_date: string;
@@ -186,11 +200,14 @@ export interface MovieCrewProps extends MovieCastProps {
   job: string;
 }
 
-export interface MoviesByCategoryResponse {
-  results: MovieByCategoryProps[];
+export interface TmdbPaginated<T> {
+  page?: number;
+  results: T[];
   total_pages: number;
   total_results: number;
 }
+
+export type MoviesByCategoryResponse = TmdbPaginated<MovieByCategoryProps>;
 
 export interface MovieByCategoryProps {
   id: number;

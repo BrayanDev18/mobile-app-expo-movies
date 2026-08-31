@@ -1,6 +1,6 @@
 import { MovieApiRoutes } from '@/constants';
 import { TvByCategoryResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { mapTvShows } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -13,7 +13,7 @@ export const useTvByCategory = (category: TvCategory) => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['tv', category],
+    queryKey: tmdbKey('tv', category),
     queryFn: async () => {
       const { data } = await moviesApi.get<TvByCategoryResponse>(
         MovieApiRoutes.tvByCategory(category)

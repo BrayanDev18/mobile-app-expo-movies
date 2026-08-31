@@ -31,3 +31,14 @@ moviesApi.interceptors.request.use((config) => {
 
   return config;
 });
+
+// Normalize failures so consumers see TMDB's own message instead of a raw AxiosError
+moviesApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message =
+      error?.response?.data?.status_message ?? error?.message ?? 'Something went wrong';
+
+    return Promise.reject(Object.assign(new Error(message), { status: error?.response?.status }));
+  }
+);

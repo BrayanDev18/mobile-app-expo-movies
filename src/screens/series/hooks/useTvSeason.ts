@@ -1,6 +1,6 @@
 import { MovieApiRoutes } from '@/constants';
 import { TvSeasonDetailsProps, TvSeasonDetailsResponse } from '@/interfaces';
-import { moviesApi } from '@/services';
+import { moviesApi, tmdbKey } from '@/services';
 import { tmdbImage } from '@/utils';
 import { useQuery } from '@tanstack/react-query';
 
@@ -11,7 +11,7 @@ export const useTvSeason = (seriesId: number, seasonNumber: number) => {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['tvSeason', seriesId, seasonNumber],
+    queryKey: tmdbKey('tvSeason', seriesId, seasonNumber),
     enabled: !!seriesId && seasonNumber >= 0,
     queryFn: async (): Promise<TvSeasonDetailsProps> => {
       const { data } = await moviesApi.get<TvSeasonDetailsResponse>(
