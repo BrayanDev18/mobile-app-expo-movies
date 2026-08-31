@@ -11,7 +11,7 @@ interface CreditsResponse {
 export const useMovieCast = (movieId: number, mediaType: MediaType = 'movie') => {
   const {
     data,
-    isLoading: isMovieCastLoading,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
@@ -35,7 +35,7 @@ export const useMovieCast = (movieId: number, mediaType: MediaType = 'movie') =>
   return {
     movieCast: data?.cast ?? [],
     movieCrew: data?.crew ?? [],
-    isMovieCastLoading,
+    isLoading,
     isError,
     refetch,
   };

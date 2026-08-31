@@ -1,7 +1,6 @@
-import { ErrorState, Loader, Screen, Text } from '@/components';
+import { ErrorState, FlashList, Loader, Screen, Text } from '@/components';
 import { useMovieVideos } from '@/hooks';
 import { formatDate } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams } from 'expo-router';
 import React, { useRef } from 'react';
 import { View } from 'react-native';
@@ -20,12 +19,12 @@ const VideosScreen = () => {
   const { id, type } = useLocalSearchParams();
   const videoRef = useRef<YoutubeIframeRef | null>(null);
 
-  const { movieVideos, isMovieVideosLoading, isError, refetch } = useMovieVideos(
+  const { movieVideos, isLoading, isError, refetch } = useMovieVideos(
     +id,
     type === 'tv' ? 'tv' : 'movie'
   );
 
-  if (isMovieVideosLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   if (isError) {
     return <ErrorState retryLabel="Retry loading videos" onRetry={() => refetch()} />;

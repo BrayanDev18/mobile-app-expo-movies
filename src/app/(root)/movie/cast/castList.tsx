@@ -1,9 +1,8 @@
-import { ChipRow, EmptyState, Loader, Screen, Text } from '@/components';
+import { ChipRow, EmptyState, FlashList, Loader, Screen, Text } from '@/components';
 import { useMovieCast } from '@/hooks';
 import { MovieCastProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openPersonDetails } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
@@ -36,7 +35,7 @@ const CastList = () => {
   const { id, type } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState<CastTab>('actors');
 
-  const { movieCast, movieCrew, isMovieCastLoading } = useMovieCast(
+  const { movieCast, movieCrew, isLoading } = useMovieCast(
     +id,
     type === 'tv' ? 'tv' : 'movie'
   );
@@ -60,7 +59,7 @@ const CastList = () => {
     []
   );
 
-  if (isMovieCastLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="gap-4 px-4">

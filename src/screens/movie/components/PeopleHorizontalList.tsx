@@ -1,7 +1,6 @@
-import { SectionTitle, Text } from '@/components';
+import { FlashList, SectionTitle, Text } from '@/components';
 import { PersonProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openPersonDetails } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';

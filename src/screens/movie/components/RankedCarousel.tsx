@@ -1,7 +1,6 @@
-import { Text, TmdbImage } from '@/components';
+import { FlashList, Text, TmdbImage } from '@/components';
 import { MovieProps } from '@/interfaces';
 import { openMediaDetails } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 

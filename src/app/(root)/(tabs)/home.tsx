@@ -4,7 +4,8 @@ import { useMediaScopeStore } from '@/stores';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 const HomeScreen = () => {
-  const { scope, setScope } = useMediaScopeStore();
+  const scope = useMediaScopeStore((state) => state.scope);
+  const setScope = useMediaScopeStore((state) => state.setScope);
 
   const scopeTabs = <MediaScopeTabs scope={scope} onChange={setScope} />;
 

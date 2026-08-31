@@ -23,6 +23,25 @@ const asSavedItem = (movie: MovieProps): SavedMediaProps => ({
 const isEmptyItem = (item: SavedMediaProps) =>
   !item.watchlist && !item.watched && !item.favorite && item.userRating === null;
 
+// Shared upsert: apply a patch to the existing item (or a fresh base), prune
+// when nothing is left, keep newest-first insertion for new items.
+const upsertItem = (
+  items: SavedMediaProps[],
+  movie: MovieProps,
+  patch: (current: SavedMediaProps) => Partial<SavedMediaProps>
+): SavedMediaProps[] => {
+  const key = mediaKey(movie);
+  const existing = items.find((item) => mediaKey(item) === key);
+  const base = existing ?? asSavedItem(movie);
+  const updated = { ...base, ...patch(base) };
+
+  if (isEmptyItem(updated)) return items.filter((item) => mediaKey(item) !== key);
+
+  if (!existing) return [updated, ...items];
+
+  return items.map((item) => (mediaKey(item) === key ? updated : item));
+};
+
 interface MyListState {
   items: SavedMediaProps[];
   toggleFlag: (movie: MovieProps, flag: MyListFlag) => void;
@@ -36,41 +55,13 @@ export const useMyListStore = create<MyListState>()(
     (set) => ({
       items: [],
       toggleFlag: (movie, flag) =>
-        set((state) => {
-          const key = mediaKey(movie);
-          const existing = state.items.find((item) => mediaKey(item) === key);
-
-          if (!existing) {
-            return { items: [{ ...asSavedItem(movie), [flag]: true }, ...state.items] };
-          }
-
-          const updated = { ...existing, [flag]: !existing[flag] };
-
-          return {
-            items: isEmptyItem(updated)
-              ? state.items.filter((item) => mediaKey(item) !== key)
-              : state.items.map((item) => (mediaKey(item) === key ? updated : item)),
-          };
-        }),
+        set((state) => ({
+          items: upsertItem(state.items, movie, (current) => ({ [flag]: !current[flag] })),
+        })),
       setRating: (movie, userRating) =>
-        set((state) => {
-          const key = mediaKey(movie);
-          const existing = state.items.find((item) => mediaKey(item) === key);
-
-          if (!existing) {
-            if (userRating === null) return state;
-
-            return { items: [{ ...asSavedItem(movie), userRating }, ...state.items] };
-          }
-
-          const updated = { ...existing, userRating };
-
-          return {
-            items: isEmptyItem(updated)
-              ? state.items.filter((item) => mediaKey(item) !== key)
-              : state.items.map((item) => (mediaKey(item) === key ? updated : item)),
-          };
-        }),
+        set((state) => ({
+          items: upsertItem(state.items, movie, () => ({ userRating })),
+        })),
       removeItem: (movie) =>
         set((state) => {
           const key = mediaKey(movie);

@@ -1,15 +1,16 @@
+import { ErrorState } from '@/components';
 import { usePullToRefresh } from '@/hooks';
 import { HomeSection, MediaType, MovieProps } from '@/interfaces';
 import { openDiscover } from '@/utils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ReactNode } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
-import { useSharedValue } from 'react-native-reanimated';
+import { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CrossfadeBackdrop } from './CrossfadeBackdrop';
 import { HomeSkeleton } from './HomeSkeleton';
 import { MovieHorizontalList } from './MovieHorizontalList';
-import { MoviesHeader } from './MoviesHeader';
+import { HERO_ITEM_SIZE, MoviesHeader } from './MoviesHeader';
 import { RankedCarousel } from './RankedCarousel';
 
 interface MediaHomeProps {
@@ -18,6 +19,8 @@ interface MediaHomeProps {
   hero: MovieProps[];
   sections: HomeSection[];
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   topRated: MovieProps[];
   extraSections?: ReactNode;
 }
@@ -25,13 +28,28 @@ interface MediaHomeProps {
 // The shared frame of the Movies and Series homes: crossfading hero backdrop,
 // scope tabs, hero carousel, and the section rails.
 export const MediaHome = (props: MediaHomeProps) => {
-  const { mediaType, header, hero, sections, isLoading, topRated, extraSections } = props;
+  const { mediaType, header, hero, sections, isLoading, isError, onRetry, topRated, extraSections } =
+    props;
 
   const scrollX = useSharedValue(0);
   const { bottom } = useSafeAreaInsets();
   const { refreshing, onRefresh } = usePullToRefresh();
 
+  const onHeroScroll = useAnimatedScrollHandler((event) => {
+    scrollX.value = event.contentOffset.x / HERO_ITEM_SIZE;
+  });
+
   if (isLoading) return <HomeSkeleton header={header} />;
+
+  if (isError && hero.length === 0 && onRetry) {
+    return (
+      <View className="flex-1 bg-neutral-900">
+        {header}
+
+        <ErrorState fullScreen={false} onRetry={onRetry} />
+      </View>
+    );
+  }
 
   return (
     <>
@@ -56,7 +74,7 @@ export const MediaHome = (props: MediaHomeProps) => {
             tintColor="rgba(255,255,255,0.6)"
           />
         }>
-        <MoviesHeader movies={hero} scrollX={scrollX} />
+        <MoviesHeader movies={hero} scrollX={scrollX} onScroll={onHeroScroll} />
 
         <View style={{ paddingBottom: bottom + 80 }} className="gap-8 p-3">
           {sections.map((section) =>

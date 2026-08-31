@@ -160,9 +160,6 @@ function useAutoPreset(props: AutoScreenProps): {
     updateScrollState();
   }
 
-  // update scroll state on every render
-  if (preset === 'auto') updateScrollState();
-
   return {
     scrollEnabled: preset === 'auto' ? scrollEnabled : true,
     onContentSizeChange,

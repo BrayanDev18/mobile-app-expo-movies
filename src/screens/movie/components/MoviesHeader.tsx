@@ -16,6 +16,7 @@ import Animated, {
 interface MoviesHeaderProps {
   movies: MovieProps[];
   scrollX: SharedValue<number>;
+  onScroll: ReturnType<typeof useAnimatedScrollHandler>;
 }
 
 interface ImageItemProps {
@@ -31,18 +32,17 @@ const IMAGE_WIDTH = width * 0.6;
 const IMAGE_HEIGHT = IMAGE_WIDTH * 1.5;
 const SPACING = 20;
 
-export const MoviesHeader = (props: MoviesHeaderProps) => {
-  const { movies, scrollX } = props;
+// Snap interval of the hero carousel — parents use it to normalize scrollX
+export const HERO_ITEM_SIZE = IMAGE_WIDTH + SPACING;
 
-  const onScroll = useAnimatedScrollHandler((e) => {
-    scrollX.value = e.contentOffset.x / (IMAGE_WIDTH + SPACING);
-  });
+export const MoviesHeader = (props: MoviesHeaderProps) => {
+  const { movies, scrollX, onScroll } = props;
 
   return (
     <Animated.FlatList
       keyExtractor={(item) => item.id.toString()}
       horizontal
-      snapToInterval={IMAGE_WIDTH + SPACING}
+      snapToInterval={HERO_ITEM_SIZE}
       decelerationRate="fast"
       style={{ flexGrow: 0 }}
       showsHorizontalScrollIndicator={false}

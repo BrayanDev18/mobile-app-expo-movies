@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 export const useMovieVideos = (movieId: number, mediaType: MediaType = 'movie') => {
   const {
     data: movieVideos = [],
-    isLoading: isMovieVideosLoading,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
@@ -21,5 +21,5 @@ export const useMovieVideos = (movieId: number, mediaType: MediaType = 'movie') 
     },
   });
 
-  return { movieVideos, isMovieVideosLoading, isError, refetch };
+  return { movieVideos, isLoading, isError, refetch };
 };

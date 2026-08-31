@@ -1,6 +1,5 @@
-import { SectionTitle, Text, TmdbImage } from '@/components';
+import { FlashList, SectionTitle, Text, TmdbImage } from '@/components';
 import { TvSeasonProps } from '@/interfaces';
-import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 

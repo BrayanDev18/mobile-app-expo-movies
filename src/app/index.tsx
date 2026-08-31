@@ -1,9 +1,11 @@
 import { Button, Icon, Text } from '@/components';
 import { useTrending } from '@/hooks';
+import { useProfileStore } from '@/stores';
 import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -39,6 +41,15 @@ const splitIntoColumns = (uris: string[]) => {
 
 const MainIndex = () => {
   const { bottom } = useSafeAreaInsets();
+  const hasOnboarded = useProfileStore((state) => state.hasOnboarded);
+  const completeOnboarding = useProfileStore((state) => state.completeOnboarding);
+
+  // The store rehydrates from AsyncStorage asynchronously — wait for it so
+  // returning users don't see the welcome screen flash before the redirect.
+  const [hydrated, setHydrated] = useState(useProfileStore.persist.hasHydrated());
+
+  useEffect(() => useProfileStore.persist.onFinishHydration(() => setHydrated(true)), []);
+
   const { trending } = useTrending('all', 'day');
 
   const images = trending
@@ -47,6 +58,10 @@ const MainIndex = () => {
     .slice(0, 21);
 
   const columns = splitIntoColumns(images);
+
+  if (!hydrated) return <View className="flex-1 bg-dark-700" />;
+
+  if (hasOnboarded) return <Redirect href="/(root)/(tabs)/home" />;
 
   return (
     <View className="flex-1 bg-dark-700">
@@ -109,7 +124,13 @@ const MainIndex = () => {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(650).duration(500)} className="gap-3">
-          <Button title="Get started" onPress={() => router.replace('/(root)/(tabs)/home')} />
+          <Button
+            title="Get started"
+            onPress={() => {
+              completeOnboarding();
+              router.replace('/(root)/(tabs)/home');
+            }}
+          />
 
           <Text className="text-center !text-[11px] !text-neutral-400">Powered by TMDB</Text>
         </Animated.View>

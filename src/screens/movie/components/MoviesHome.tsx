@@ -4,7 +4,7 @@ import { MediaHome } from './MediaHome';
 import { PeopleHorizontalList } from './PeopleHorizontalList';
 
 export const MoviesHome = ({ header }: { header: ReactNode }) => {
-  const { heroMovies, sections, isHeroLoading } = useHomeSections();
+  const { heroMovies, sections, isHeroLoading, isHeroError, refetchHero } = useHomeSections();
   const { people: trendingPeople } = useTrendingPeople();
   const { movies: topRated } = useMoviesByCategory('top_rated');
 
@@ -15,6 +15,8 @@ export const MoviesHome = ({ header }: { header: ReactNode }) => {
       hero={heroMovies}
       sections={sections}
       isLoading={isHeroLoading}
+      isError={isHeroError}
+      onRetry={refetchHero}
       topRated={topRated}
       extraSections={
         trendingPeople.length > 0 ? (

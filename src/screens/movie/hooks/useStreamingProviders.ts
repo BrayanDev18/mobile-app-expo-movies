@@ -19,6 +19,7 @@ export const useStreamingProviders = (mediaType: MediaType = 'movie') => {
     refetch,
   } = useQuery({
     queryKey: tmdbKey('streamingProviders', mediaType, region),
+    staleTime: Infinity,
     queryFn: async () => {
       const { data } = await moviesApi.get<WatchProvidersResponse>(
         MovieApiRoutes.watchProvidersByMedia(mediaType),

@@ -1,9 +1,8 @@
-import { SectionTitle, Text } from '@/components';
+import { FlashList, SectionTitle, Text } from '@/components';
 import { EXPLORE_COLLECTIONS } from '@/constants';
 import { useCollections } from '@/hooks';
 import { CollectionProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openCollection, tmdbImage } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback } from 'react';

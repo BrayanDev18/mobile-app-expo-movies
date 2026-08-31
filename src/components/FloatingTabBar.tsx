@@ -55,7 +55,7 @@ export const FloatingTabBar = ({ state, descriptors, navigation }: BottomTabBarP
 
       <View
         pointerEvents="box-none"
-        style={{ position: 'absolute', left: 20, right: 20, bottom: bottom - 10 }}>
+        style={{ position: 'absolute', left: 20, right: 20, bottom: Math.max(bottom - 10, 12) }}>
         <BlurView
           tint="dark"
           intensity={50}
@@ -114,7 +114,8 @@ export const FloatingTabBar = ({ state, descriptors, navigation }: BottomTabBarP
                       style={{ width: 24, height: 24 }}
                       contentFit="contain"
                       tintColor={isFocused ? '#FFFFFF' : '#9CA3AF'}
-                      accessibilityLabel={`${label} tab icon`}
+                      accessibilityElementsHidden
+                      importantForAccessibility="no-hide-descendants"
                     />
 
                     {isFocused && (

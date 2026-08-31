@@ -33,7 +33,11 @@ export const Loader = () => {
 
   return (
     <Screen>
-      <View className="h-full w-full items-center justify-center">
+      <View
+        accessibilityRole="progressbar"
+        accessibilityLabel="Loading"
+        accessibilityLiveRegion="polite"
+        className="h-full w-full items-center justify-center">
         <Svg width={SIZE} height={SIZE}>
           <Circle
             stroke="#d3d3d3"

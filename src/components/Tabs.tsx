@@ -44,6 +44,9 @@ export const Tab = (props: TabsProps) => {
     <AnimatedPressable
       style={animatedStyle}
       onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityLabel={title}
+      accessibilityState={{ selected: isActive }}
       className={cn(
         className,
         adaptableWidth ? 'px-5' : 'flex-1',

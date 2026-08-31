@@ -1,7 +1,6 @@
-import { SectionTitle, Text } from '@/components';
+import { FlashList, SectionTitle, Text } from '@/components';
 import { MediaType, MovieCastProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openCastList, openPersonDetails } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { Pressable, View } from 'react-native';
 

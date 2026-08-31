@@ -28,7 +28,9 @@ const ExploreScreen = () => {
   const { media, people, isSearching, hasQuery } = useSearchMulti(query);
   const { trending: topPicks } = useTrending(scope, 'day');
   const { trending: trendingAll } = useTrending('all', 'week');
-  const { searches, addSearch, clearSearches } = useRecentSearchesStore();
+  const searches = useRecentSearchesStore((state) => state.searches);
+  const addSearch = useRecentSearchesStore((state) => state.addSearch);
+  const clearSearches = useRecentSearchesStore((state) => state.clearSearches);
   const { refreshing, onRefresh } = usePullToRefresh();
 
   const rankedTrending = trendingAll.slice(0, 5);

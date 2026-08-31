@@ -9,7 +9,12 @@ import { useMovieRecommendations } from './useMovieRecommendations';
 import { useMoviesByCategory } from './useMoviesByCategory';
 
 export const useHomeSections = () => {
-  const { trending: heroMedia, isLoading: isHeroLoading } = useTrending('all', 'day');
+  const {
+    trending: heroMedia,
+    isLoading: isHeroLoading,
+    isError: isHeroError,
+    refetch: refetchHero,
+  } = useTrending('all', 'day');
   const { trending: trendingMovies } = useTrending('movie', 'week');
   const { trending: trendingSeries } = useTrending('tv', 'week');
   const { movies: nowPlayingMovies } = useMoviesByCategory('now_playing');
@@ -70,5 +75,5 @@ export const useHomeSections = () => {
     },
   ].filter((section) => section.movies.length > 0);
 
-  return { heroMovies, sections, isHeroLoading };
+  return { heroMovies, sections, isHeroLoading, isHeroError, refetchHero };
 };

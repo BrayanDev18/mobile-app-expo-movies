@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   NativeSyntheticEvent,
   TextLayoutEventData,
@@ -20,11 +20,16 @@ export const ExpandableText = (props: ExpandableTextProps) => {
   const [showToggle, setShowToggle] = useState(false);
   const [measured, setMeasured] = useState(false);
 
-  useEffect(() => {
+  // Reset measurement state when the content changes — adjusted during render
+  // (the React-sanctioned pattern) instead of a cascading effect.
+  const [prevChildren, setPrevChildren] = useState(children);
+
+  if (prevChildren !== children) {
+    setPrevChildren(children);
     setExpanded(false);
     setShowToggle(false);
     setMeasured(false);
-  }, [children]);
+  }
 
   const onMeasure = (event: NativeSyntheticEvent<TextLayoutEventData>) => {
     setShowToggle(event.nativeEvent.lines.length > numberOfLines);
@@ -50,9 +55,13 @@ export const ExpandableText = (props: ExpandableTextProps) => {
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel={expanded ? 'Show less' : 'Show more'}
+          accessibilityState={{ expanded }}
+          hitSlop={8}
           onPress={() => setExpanded((prev) => !prev)}
           className="self-end">
-          <Text className="font-semibold !text-blue-500" tx={expanded ? 'Show less' : 'Show more'} />
+          <Text className="font-semibold !text-blue-500">
+            {expanded ? 'Show less' : 'Show more'}
+          </Text>
         </TouchableOpacity>
       )}
     </View>

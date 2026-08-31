@@ -12,7 +12,7 @@ interface MediaImagesResponse {
 export const useMovieImages = (movieId: number, mediaType: MediaType = 'movie') => {
   const {
     data: movieImages,
-    isLoading: isMovieImagesLoading,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
@@ -32,5 +32,5 @@ export const useMovieImages = (movieId: number, mediaType: MediaType = 'movie') 
     },
   });
 
-  return { movieImages, isMovieImagesLoading, isError, refetch };
+  return { movieImages, isLoading, isError, refetch };
 };

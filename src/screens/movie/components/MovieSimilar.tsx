@@ -1,7 +1,6 @@
-import { SectionTitle } from '@/components';
+import { FlashList, SectionTitle } from '@/components';
 import { MovieProps } from '@/interfaces';
 import { openMediaDetails } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { View } from 'react-native';

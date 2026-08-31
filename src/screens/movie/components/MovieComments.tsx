@@ -1,8 +1,7 @@
-import { RatingBadge, SectionTitle, Text } from '@/components';
+import { FlashList, RatingBadge, SectionTitle, Text } from '@/components';
 import { MovieReviewProps } from '@/interfaces';
 import { formatDate, getAvatarColor, tmdbImage } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';

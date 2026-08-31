@@ -1,8 +1,7 @@
-import { Loader, Screen, Text } from '@/components';
+import { FlashList, Loader, Screen, Text } from '@/components';
 import { useSimilarMovies } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { formatSpecialDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
@@ -11,14 +10,14 @@ import { Pressable, View } from 'react-native';
 const SimilarMovies = () => {
   const { id } = useLocalSearchParams();
 
-  const { similarMovies, isSimilarMoviesLoading } = useSimilarMovies(+id);
+  const { similarMovies, isLoading } = useSimilarMovies(+id);
 
   const renderItem = useCallback(
     ({ item: movie }: { item: MovieProps }) => <SimiliarMovieItem movie={movie} />,
     []
   );
 
-  if (isSimilarMoviesLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <Screen preset="auto" safeAreaEdges={['top', 'bottom']} canGoBack>

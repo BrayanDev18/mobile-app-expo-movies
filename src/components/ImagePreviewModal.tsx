@@ -12,7 +12,7 @@ type PreviewImage = MovieImagesProps | CastImageProfileProps;
 interface ImagePreviewModalProps {
   visible: boolean;
   onHide: () => void;
-  image: PreviewImage;
+  image?: PreviewImage;
 }
 
 const imageUri = (image?: PreviewImage): string | null => {
@@ -49,8 +49,8 @@ export const ImagePreviewModal = (props: ImagePreviewModalProps) => {
         style={{ backgroundColor: 'rgba(0,0,0,0.50)' }}>
         <Pressable
           style={StyleSheet.absoluteFill}
-          accessibilityRole="button"
-          accessibilityLabel="Close image preview"
+          accessibilityElementsHidden
+          importantForAccessibility="no"
           onPress={onHide}
         />
 

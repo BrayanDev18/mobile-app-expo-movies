@@ -1,8 +1,7 @@
-import { EmptyState, ErrorState, Loader, RatingBadge, Screen, Text } from '@/components';
+import { EmptyState, ErrorState, FlashList, Loader, RatingBadge, Screen, Text } from '@/components';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
 import { formatDate, formatDuration, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';

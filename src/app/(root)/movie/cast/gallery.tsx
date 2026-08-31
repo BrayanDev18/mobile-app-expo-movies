@@ -11,7 +11,7 @@ const CastGallery = () => {
   const { id } = useLocalSearchParams();
 
   const [openModalGallery, setOpenModalGallery] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<CastImageProfileProps | null>();
+  const [selectedImage, setSelectedImage] = useState<CastImageProfileProps>();
 
   const { castImages, isLoading } = useCastDetails(+id);
 
@@ -21,7 +21,7 @@ const CastGallery = () => {
   };
 
   const handleHideModal = () => {
-    setSelectedImage(null);
+    setSelectedImage(undefined);
     setOpenModalGallery(false);
   };
 
@@ -64,7 +64,7 @@ const CastGallery = () => {
 
       <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as any}
+        image={selectedImage}
         onHide={handleHideModal}
       />
     </Screen>

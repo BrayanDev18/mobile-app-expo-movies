@@ -17,7 +17,12 @@ const newSeasonStartDate = () => {
 };
 
 export const useSeriesHomeSections = () => {
-  const { trending: heroMedia, isLoading: isHeroLoading } = useTrending('tv', 'day');
+  const {
+    trending: heroMedia,
+    isLoading: isHeroLoading,
+    isError: isHeroError,
+    refetch: refetchHero,
+  } = useTrending('tv', 'day');
   const { trending: trendingSeries } = useTrending('tv', 'week');
   const { series: airingToday } = useTvByCategory('airing_today');
   const { series: onTheAir } = useTvByCategory('on_the_air');
@@ -98,5 +103,5 @@ export const useSeriesHomeSections = () => {
     },
   ].filter((section) => section.movies.length > 0);
 
-  return { heroSeries, sections, isHeroLoading };
+  return { heroSeries, sections, isHeroLoading, isHeroError, refetchHero };
 };

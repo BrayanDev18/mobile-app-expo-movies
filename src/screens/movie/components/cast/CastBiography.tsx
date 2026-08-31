@@ -1,8 +1,7 @@
-import { ExpandableText, ImagePreviewModal, SectionTitle } from '@/components';
+import { ExpandableText, FlashList, ImagePreviewModal, SectionTitle } from '@/components';
 import { Text } from '@/components/Text';
 import { CastDetailsProps, CastImageProfileProps } from '@/interfaces';
 import { formatDate } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
@@ -97,7 +96,7 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
 
       <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as any}
+        image={selectedImage}
         onHide={handleHideModal}
       />
     </>

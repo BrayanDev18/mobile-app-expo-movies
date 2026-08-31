@@ -31,7 +31,12 @@ export const useCollections = (ids: number[]) => {
     .map((query) => query.data)
     .filter((collection): collection is CollectionProps => !!collection);
 
-  return { collections, isLoading: queries.some((query) => query.isLoading) };
+  return {
+    collections,
+    isLoading: queries.some((query) => query.isLoading),
+    isError: queries.length > 0 && queries.every((query) => query.isError),
+    refetch: () => queries.forEach((query) => query.refetch()),
+  };
 };
 
 export const useCollection = (id?: number) => {

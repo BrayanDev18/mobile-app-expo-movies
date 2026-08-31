@@ -4,13 +4,16 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface ProfileState {
   name: string;
+  hasOnboarded: boolean;
   setName: (name: string) => void;
+  completeOnboarding: () => void;
 }
 
 export const useProfileStore = create<ProfileState>()(
   persist(
     (set) => ({
       name: 'Guest',
+      hasOnboarded: false,
       setName: (name) => {
         const trimmed = name.trim();
 
@@ -18,6 +21,7 @@ export const useProfileStore = create<ProfileState>()(
 
         set({ name: trimmed });
       },
+      completeOnboarding: () => set({ hasOnboarded: true }),
     }),
     {
       name: 'flixora-profile-store',

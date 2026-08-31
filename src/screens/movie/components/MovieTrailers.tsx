@@ -1,8 +1,7 @@
-import { SectionTitle, Text } from '@/components';
+import { FlashList, SectionTitle, Text } from '@/components';
 import { MediaType, MovieVideosProps } from '@/interfaces';
 import { formatDate, IMAGE_PLACEHOLDER } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
-import { FlashList } from '@shopify/flash-list';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';

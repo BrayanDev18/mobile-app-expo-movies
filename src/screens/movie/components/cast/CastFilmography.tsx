@@ -1,6 +1,6 @@
+import { FlashList } from '@/components';
 import { CastCreditProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback } from 'react';

@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 export const useSimilarMovies = (movieId: number) => {
   const {
     data: similarMovies = [],
-    isLoading: isSimilarMoviesLoading,
+    isLoading,
     isError,
     refetch,
   } = useQuery({
@@ -21,5 +21,5 @@ export const useSimilarMovies = (movieId: number) => {
     },
   });
 
-  return { similarMovies, isSimilarMoviesLoading, isError, refetch };
+  return { similarMovies, isLoading, isError, refetch };
 };

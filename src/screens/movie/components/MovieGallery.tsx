@@ -1,7 +1,6 @@
-import { ImagePreviewModal, SectionTitle } from '@/components';
-import { MediaType, MovieImages, MovieImagesResponse } from '@/interfaces';
+import { FlashList, ImagePreviewModal, SectionTitle } from '@/components';
+import { MediaType, MovieImagesProps, MovieImagesResponse } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openGallery } from '@/utils';
-import { FlashList } from '@shopify/flash-list';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -16,13 +15,13 @@ export const MovieGallery = ({
   mediaType?: MediaType;
 }) => {
   const [openModalGallery, setOpenModalGallery] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<MovieImages | null>(null);
+  const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
 
   const previewImages = [...(gallery.backdrops ?? []), ...(gallery.posters ?? [])].slice(0, 5);
 
   const totalImages = gallery.backdrops.length + gallery.logos.length + gallery.posters.length;
 
-  const handleOpenModal = (image: MovieImages) => {
+  const handleOpenModal = (image: MovieImagesProps) => {
     setSelectedImage(image);
     setOpenModalGallery(true);
   };
@@ -43,7 +42,7 @@ export const MovieGallery = ({
             keyExtractor={(_, index) => `${movieId}-${index}`}
             ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
             renderItem={({ item }) => (
-              <Pressable onPress={() => handleOpenModal(item as any)}>
+              <Pressable onPress={() => handleOpenModal(item)}>
                 <Image
                   source={{ uri: item.url as string }}
                   style={{
@@ -63,7 +62,7 @@ export const MovieGallery = ({
 
       <ImagePreviewModal
         visible={openModalGallery}
-        image={selectedImage as any}
+        image={selectedImage}
         onHide={() => setOpenModalGallery(false)}
       />
     </>

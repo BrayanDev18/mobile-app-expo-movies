@@ -41,7 +41,8 @@ const initialsOf = (name: string) =>
     .toUpperCase();
 
 const ProfileHeader = () => {
-  const { name, setName } = useProfileStore();
+  const name = useProfileStore((state) => state.name);
+  const setName = useProfileStore((state) => state.setName);
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(name);
 
@@ -164,11 +165,14 @@ const SettingsRow = (props: SettingsRowProps) => {
 
 const ProfileScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
-  const { language, setLanguage } = useLanguageStore();
-  const { items: savedItems, clearAll: clearSavedItems } = useMyListStore();
+  const language = useLanguageStore((state) => state.language);
+  const setLanguage = useLanguageStore((state) => state.setLanguage);
+  const savedItems = useMyListStore((state) => state.items);
+  const clearSavedItems = useMyListStore((state) => state.clearAll);
   const viewed = useViewedMediaStore((state) => state.viewed);
   const clearViewed = useViewedMediaStore((state) => state.clearViewed);
-  const { searches, clearSearches } = useRecentSearchesStore();
+  const searches = useRecentSearchesStore((state) => state.searches);
+  const clearSearches = useRecentSearchesStore((state) => state.clearSearches);
 
   const viewedCount = viewed.length;
   const version = Constants.expoConfig?.version;

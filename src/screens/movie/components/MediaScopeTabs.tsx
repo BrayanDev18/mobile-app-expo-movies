@@ -1,4 +1,5 @@
-import { BlurView, Tab } from '@/components';
+import { Tab } from '@/components';
+import { BlurView } from 'expo-blur';
 import { MEDIA_SCOPES } from '@/constants';
 import { MediaType } from '@/interfaces';
 import * as Haptics from 'expo-haptics';
@@ -20,7 +21,7 @@ export const MediaScopeTabs = ({ scope, onChange }: MediaScopeTabsProps) => {
           key={item.key}
           intensity={80}
           tint="dark"
-          className="overflow-hidden rounded-full">
+          style={{ overflow: 'hidden', borderRadius: 999 }}>
           <Tab
             title={item.label}
             isActive={scope === item.key}

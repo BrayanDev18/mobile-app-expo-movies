@@ -11,6 +11,7 @@ export const useMovieGenres = (mediaType: MediaType = 'movie') => {
     refetch,
   } = useQuery({
     queryKey: tmdbKey('movieGenres', mediaType),
+    staleTime: Infinity,
     queryFn: async () => {
       const { data } = await moviesApi.get<{ genres: GenreProps[] }>(
         MovieApiRoutes.genres(mediaType)

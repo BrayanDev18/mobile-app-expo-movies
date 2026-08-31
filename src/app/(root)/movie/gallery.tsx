@@ -23,7 +23,7 @@ const MovieGallery = () => {
   const [visible, setVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
 
-  const { movieImages, isMovieImagesLoading } = useMovieImages(
+  const { movieImages, isLoading } = useMovieImages(
     +id,
     type === 'tv' ? 'tv' : 'movie'
   );
@@ -58,7 +58,7 @@ const MovieGallery = () => {
     []
   );
 
-  if (isMovieImagesLoading) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <Screen preset="fixed" safeAreaEdges={['top', 'bottom']} canGoBack>
@@ -76,7 +76,7 @@ const MovieGallery = () => {
       </View>
 
       <ImagePreviewModal
-        image={selectedImage as MovieImagesProps}
+        image={selectedImage}
         visible={visible}
         onHide={() => setVisible(false)}
       />
