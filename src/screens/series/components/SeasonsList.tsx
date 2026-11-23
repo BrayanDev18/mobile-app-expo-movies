@@ -2,6 +2,7 @@ import { FlashList, SectionTitle, Text, TmdbImage } from '@/components';
 import { TvSeasonProps } from '@/interfaces';
 import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 interface SeasonsListProps {
   seriesId: number;
@@ -10,6 +11,8 @@ interface SeasonsListProps {
 }
 
 export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps) => {
+  const { t } = useTranslate();
+
   const visibleSeasons = seasons.filter(
     (season) => season.seasonNumber > 0 && season.episodeCount > 0
   );
@@ -18,7 +21,7 @@ export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps
 
   return (
     <View className="gap-3">
-      <SectionTitle title="Seasons" />
+      <SectionTitle title={t('detail.seasons')} />
 
       <FlashList
         horizontal
@@ -32,7 +35,7 @@ export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps
           return (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`View episodes of ${item.name}`}
+              accessibilityLabel={t('detail.viewEpisodes', { name: item.name })}
               className="w-[120px] gap-1.5"
               onPress={() =>
                 router.push({
@@ -45,7 +48,7 @@ export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps
                 size="w185"
                 style={{ width: 120, height: 180, borderRadius: 12 }}
                 contentFit="cover"
-                accessibilityLabel={`${item.name} poster`}
+                accessibilityLabel={t('common.poster', { title: item.name })}
               />
 
               <View className="gap-0.5 px-0.5">
@@ -54,7 +57,9 @@ export const SeasonsList = ({ seriesId, seriesTitle, seasons }: SeasonsListProps
                 </Text>
 
                 <Text numberOfLines={1} className="!text-[13px] !text-neutral-400">
-                  {[year, `${item.episodeCount} episodes`].filter(Boolean).join(' · ')}
+                  {[year, t('common.episodeCount', { count: item.episodeCount })]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </Text>
               </View>
             </Pressable>

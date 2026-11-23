@@ -16,9 +16,12 @@ import {
 import { useViewedMediaStore } from '@/stores';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
+import { useTranslate } from '@/translate';
 
 const MovieDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
+  const { t } = useTranslate();
+
   const recordView = useViewedMediaStore((state) => state.recordView);
 
   const { movie, isLoading, isError, refetch } = useMovieFull(+id);
@@ -33,7 +36,7 @@ const MovieDescriptionScreen = () => {
   if (isLoading) return <Loader />;
 
   if (isError || !movie || !details) {
-    return <ErrorState retryLabel="Retry loading movie details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retryMovie')} onRetry={() => refetch()} />;
   }
 
   const { trailers, cast, images, hasGallery, reviews, related, watchProviders } = movie;

@@ -1,5 +1,6 @@
 import { TvDetailsProps } from '@/interfaces';
 import { InfoMetaItem, MediaInfoShell } from '@/screens/movie/components';
+import { useTranslate } from '@/translate';
 
 interface SeriesInfoProps {
   series: TvDetailsProps;
@@ -19,6 +20,8 @@ const yearRange = (series: TvDetailsProps) => {
 };
 
 export const SeriesInfo = ({ series, certification }: SeriesInfoProps) => {
+  const { t } = useTranslate();
+
   const years = yearRange(series);
   const creators = series.createdBy.map((creator) => creator.name).join(', ');
 
@@ -29,14 +32,14 @@ export const SeriesInfo = ({ series, certification }: SeriesInfoProps) => {
       rating={series.rating}
       certification={certification}
       genres={series.genres}
-      credit={creators ? { label: 'Created by', names: creators } : null}
+      credit={creators ? { label: t('detail.createdBy'), names: creators } : null}
       overview={series.overview}
       metaItems={
         <>
           {years ? <InfoMetaItem icon="calendar-outline">{years}</InfoMetaItem> : null}
 
           <InfoMetaItem icon="albums-outline">
-            {series.numberOfSeasons} {series.numberOfSeasons === 1 ? 'season' : 'seasons'}
+            {t('common.seasonCount', { count: series.numberOfSeasons })}
           </InfoMetaItem>
         </>
       }

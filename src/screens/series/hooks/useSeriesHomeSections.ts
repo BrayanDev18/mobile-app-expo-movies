@@ -1,5 +1,6 @@
 import { SERIES_GENRES, SERIES_NETWORKS } from '@/constants';
 import { selectLastViewed, useViewedMediaStore } from '@/stores';
+import { useTranslate } from '@/translate';
 import { claimUnique } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
 import { useTrending } from '../../../hooks/useTrending';
@@ -17,6 +18,7 @@ const newSeasonStartDate = () => {
 };
 
 export const useSeriesHomeSections = () => {
+  const { t } = useTranslate();
   const {
     trending: heroMedia,
     isLoading: isHeroLoading,
@@ -51,53 +53,53 @@ export const useSeriesHomeSections = () => {
   const sections: HomeSection[] = [
     {
       key: 'recommended',
-      title: lastViewed ? `Because you watched ${lastViewed.title}` : '',
+      title: lastViewed ? t('home.becauseYouWatched', { title: lastViewed.title }) : '',
       movies: lastViewed ? claimUnique(recommendedSeries, claimed) : [],
     },
     {
       key: 'trending',
-      title: 'Trending This Week',
+      title: t('home.trendingThisWeek'),
       movies: claimUnique(trendingSeries, claimed),
       ranked: true,
     },
     {
       key: 'airingToday',
-      title: 'New Episodes Today',
+      title: t('home.newEpisodesToday'),
       movies: claimUnique(airingToday, claimed),
     },
     {
       key: 'onTheAir',
-      title: 'On The Air This Week',
+      title: t('home.onTheAirThisWeek'),
       movies: claimUnique(onTheAir, claimed),
     },
     {
       key: 'newSeason',
-      title: 'New This Season',
+      title: t('home.newThisSeason'),
       movies: claimUnique(newSeasonRow.data ?? [], claimed),
       variant: 'backdrop' as const,
       cardWidth: 310,
     },
     ...SERIES_NETWORKS.map((network, index) => ({
       key: `network-${network.id}`,
-      title: network.title,
+      title: t(network.titleKey),
       movies: claimUnique(discoverRows[index].data ?? [], claimed),
       seeAll: { networkId: network.id },
     })),
     ...SERIES_GENRES.map((genre, index) => ({
       key: `genre-${genre.id}`,
-      title: genre.title,
+      title: t(genre.titleKey),
       movies: claimUnique(discoverRows[SERIES_NETWORKS.length + index].data ?? [], claimed),
       seeAll: { genreId: genre.id },
     })),
     {
       key: 'anime',
-      title: 'Anime',
+      title: t('home.anime'),
       movies: claimUnique(animeRow.data ?? [], claimed),
       seeAll: { genreId: 16, originalLanguage: 'ja', minVotes: 300 },
     },
     {
       key: 'limited',
-      title: 'Limited Series',
+      title: t('home.limitedSeries'),
       movies: claimUnique(limitedRow.data ?? [], claimed),
       seeAll: { showType: 2, minVotes: 200 },
     },

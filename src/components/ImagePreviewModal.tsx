@@ -6,6 +6,7 @@ import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslate } from '@/translate';
 
 type PreviewImage = MovieImagesProps | CastImageProfileProps;
 
@@ -32,6 +33,8 @@ const imageRatio = (image?: PreviewImage): number => {
 };
 
 export const ImagePreviewModal = (props: ImagePreviewModalProps) => {
+  const { t } = useTranslate();
+
   const { visible, onHide, image } = props;
   const { top } = useSafeAreaInsets();
 
@@ -67,7 +70,7 @@ export const ImagePreviewModal = (props: ImagePreviewModalProps) => {
         <View style={{ position: 'absolute', top: top + 8, right: 16 }}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close image preview"
+            accessibilityLabel={t('common.closeImagePreview')}
             onPress={onHide}>
             <BlurView
               tint="dark"

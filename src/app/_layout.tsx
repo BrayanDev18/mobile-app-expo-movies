@@ -1,9 +1,6 @@
-import { useLanguageStore } from '@/stores';
-import { changeLanguage, i18n } from '@/translate';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -19,16 +16,9 @@ const queryClient = new QueryClient({
 });
 
 export default function RootLayout() {
-  const language = useLanguageStore((state) => state.language);
-
-  // TMDB queries carry the language inside their queryKey (see tmdbKey), so a
-  // language change resolves to fresh cache entries without any invalidation.
-  useEffect(() => {
-    if (language && language !== i18n.locale) {
-      changeLanguage(language);
-    }
-  }, [language]);
-
+  // Language: useLanguageStore keeps i18n.locale in sync (set + rehydrate); TMDB
+  // queries carry the language in their queryKey (see tmdbKey) and UI copy re-renders
+  // through useTranslate(), so a switch needs no invalidation or restart.
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>

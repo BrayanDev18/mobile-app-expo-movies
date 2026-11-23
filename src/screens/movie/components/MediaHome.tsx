@@ -12,6 +12,7 @@ import { HomeSkeleton } from './HomeSkeleton';
 import { MovieHorizontalList } from './MovieHorizontalList';
 import { HERO_ITEM_SIZE, MoviesHeader } from './MoviesHeader';
 import { RankedCarousel } from './RankedCarousel';
+import { useTranslate } from '@/translate';
 
 interface MediaHomeProps {
   mediaType: MediaType;
@@ -28,10 +29,21 @@ interface MediaHomeProps {
 // The shared frame of the Movies and Series homes: crossfading hero backdrop,
 // scope tabs, hero carousel, and the section rails.
 export const MediaHome = (props: MediaHomeProps) => {
-  const { mediaType, header, hero, sections, isLoading, isError, onRetry, topRated, extraSections } =
-    props;
+  const {
+    mediaType,
+    header,
+    hero,
+    sections,
+    isLoading,
+    isError,
+    onRetry,
+    topRated,
+    extraSections,
+  } = props;
 
   const scrollX = useSharedValue(0);
+  const { t } = useTranslate();
+
   const { bottom } = useSafeAreaInsets();
   const { refreshing, onRefresh } = usePullToRefresh();
 
@@ -102,7 +114,7 @@ export const MediaHome = (props: MediaHomeProps) => {
 
           {extraSections}
 
-          <RankedCarousel title="All-Time Greats" movies={topRated.slice(0, 10)} />
+          <RankedCarousel title={t('home.allTimeGreats')} movies={topRated.slice(0, 10)} />
         </View>
       </ScrollView>
     </>

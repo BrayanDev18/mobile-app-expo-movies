@@ -1,16 +1,18 @@
+import type { TxKeyPath } from '@/translate';
+
 export interface DecadeProps {
-  label: string;
+  labelKey: TxKeyPath;
   from: number;
   to: number;
 }
 
 export const EXPLORE_DECADES: DecadeProps[] = [
-  { label: '2020s', from: 2020, to: 2029 },
-  { label: '2010s', from: 2010, to: 2019 },
-  { label: '2000s', from: 2000, to: 2009 },
-  { label: '90s', from: 1990, to: 1999 },
-  { label: '80s', from: 1980, to: 1989 },
-  { label: '70s', from: 1970, to: 1979 },
+  { labelKey: 'explore.decades.d2020s', from: 2020, to: 2029 },
+  { labelKey: 'explore.decades.d2010s', from: 2010, to: 2019 },
+  { labelKey: 'explore.decades.d2000s', from: 2000, to: 2009 },
+  { labelKey: 'explore.decades.d1990s', from: 1990, to: 1999 },
+  { labelKey: 'explore.decades.d1980s', from: 1980, to: 1989 },
+  { labelKey: 'explore.decades.d1970s', from: 1970, to: 1979 },
 ];
 
 // TMDB collection ids — curated sagas for the Explore screen

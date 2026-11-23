@@ -5,6 +5,7 @@ import {
   useProfileStore,
   useRecentSearchesStore,
   useViewedMediaStore,
+  hasCustomName,
 } from '@/stores';
 import { getAvatarColor } from '@/utils';
 import Constants from 'expo-constants';
@@ -13,6 +14,7 @@ import { ReactNode, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { translate, useTranslate } from '@/translate';
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
@@ -21,9 +23,9 @@ const LANGUAGES = [
 
 const confirmClear = (title: string, message: string, onConfirm: () => void) =>
   Alert.alert(title, message, [
-    { text: 'Cancel', style: 'cancel' },
+    { text: translate('common.cancel'), style: 'cancel' },
     {
-      text: 'Clear',
+      text: translate('common.clear'),
       style: 'destructive',
       onPress: () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -43,8 +45,11 @@ const initialsOf = (name: string) =>
 const ProfileHeader = () => {
   const name = useProfileStore((state) => state.name);
   const setName = useProfileStore((state) => state.setName);
+  const { t } = useTranslate();
+
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(name);
+  const displayName = hasCustomName(name) ? name : t('profile.guest');
 
   const onSave = () => {
     Haptics.selectionAsync();
@@ -56,8 +61,8 @@ const ProfileHeader = () => {
     <View className="items-center gap-4 pb-10 pt-2">
       <View
         className="items-center justify-center rounded-full"
-        style={{ width: 92, height: 92, backgroundColor: getAvatarColor(name) }}>
-        <Text className="!text-[32px] font-black">{initialsOf(name)}</Text>
+        style={{ width: 92, height: 92, backgroundColor: getAvatarColor(displayName) }}>
+        <Text className="!text-[32px] font-black">{initialsOf(displayName)}</Text>
       </View>
 
       {isEditing ? (
@@ -69,7 +74,7 @@ const ProfileHeader = () => {
             autoFocus
             maxLength={24}
             returnKeyType="done"
-            placeholder="Your name"
+            placeholder={t('profile.yourName')}
             placeholderTextColor="#9ca3af"
             className="h-11 flex-1 rounded-xl bg-white/10 px-4 text-center font-satoshi text-[17px] font-bold text-white"
           />
@@ -79,7 +84,7 @@ const ProfileHeader = () => {
             size={18}
             color="rgba(255,255,255,0.7)"
             className="h-11 w-11 items-center justify-center rounded-full border border-white/15"
-            accessibilityLabel="Save name"
+            accessibilityLabel={t('profile.saveName')}
             onPress={onSave}
           />
         </View>
@@ -88,7 +93,7 @@ const ProfileHeader = () => {
           <View className="w-11" />
 
           <Text numberOfLines={1} className="!text-2xl font-bold">
-            {name}
+            {displayName}
           </Text>
 
           <Icon
@@ -96,9 +101,9 @@ const ProfileHeader = () => {
             size={14}
             color="rgba(255,255,255,0.5)"
             className="h-11 w-11 items-center justify-center"
-            accessibilityLabel="Edit name"
+            accessibilityLabel={t('profile.editName')}
             onPress={() => {
-              setDraft(name);
+              setDraft(hasCustomName(name) ? name : '');
               setIsEditing(true);
             }}
           />
@@ -110,8 +115,10 @@ const ProfileHeader = () => {
 
 const SettingsGroup = ({ title, children }: { title: string; children: ReactNode }) => (
   <View className="gap-2 pb-7">
-    <Text className="px-2 !text-[12px] font-semibold !text-neutral-400" style={{ letterSpacing: 1.2 }}>
-      {title.toUpperCase()}
+    <Text
+      className="px-2 !text-[12px] font-semibold !text-neutral-400"
+      style={{ letterSpacing: 1.2 }}>
+      {title.toLocaleUpperCase()}
     </Text>
 
     <View
@@ -144,15 +151,10 @@ const SettingsRow = (props: SettingsRowProps) => {
       <View
         className="items-center justify-center rounded-lg"
         style={{ width: 30, height: 30, backgroundColor: 'rgba(255,255,255,0.08)' }}>
-        <Icon
-          name={icon}
-          size={16}
-          color={destructive ? '#f87171' : 'rgba(255,255,255,0.7)'}
-        />
+        <Icon name={icon} size={16} color={destructive ? '#f87171' : 'rgba(255,255,255,0.7)'} />
       </View>
 
-      <Text
-        className={`flex-1 !text-[15px] font-medium ${destructive ? '!text-red-400' : ''}`}>
+      <Text className={`flex-1 !text-[15px] font-medium ${destructive ? '!text-red-400' : ''}`}>
         {label}
       </Text>
 
@@ -165,6 +167,8 @@ const SettingsRow = (props: SettingsRowProps) => {
 
 const ProfileScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
+  const { t } = useTranslate();
+
   const language = useLanguageStore((state) => state.language);
   const setLanguage = useLanguageStore((state) => state.setLanguage);
   const savedItems = useMyListStore((state) => state.items);
@@ -177,12 +181,12 @@ const ProfileScreen = () => {
   const viewedCount = viewed.length;
   const version = Constants.expoConfig?.version;
   const activeLanguage =
-    LANGUAGES.find((item) => language.startsWith(item.code))?.label ?? 'English';
+    LANGUAGES.find((item) => language.startsWith(item.code))?.label ?? LANGUAGES[0].label;
 
   const placeholder = () => Haptics.selectionAsync();
 
   const chooseLanguage = () =>
-    Alert.alert('Language', 'Choose the app language.', [
+    Alert.alert(t('profile.language'), t('profile.chooseLanguage'), [
       ...LANGUAGES.map((item) => ({
         text: item.label,
         onPress: () => {
@@ -190,7 +194,7 @@ const ProfileScreen = () => {
           setLanguage(item.code);
         },
       })),
-      { text: 'Cancel', style: 'cancel' as const },
+      { text: t('common.cancel'), style: 'cancel' as const },
     ]);
 
   return (
@@ -202,36 +206,55 @@ const ProfileScreen = () => {
         <Animated.View entering={FadeIn.duration(300)} className="px-4">
           <View className="pb-4">
             <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
-              Settings
+              {t('profile.title')}
             </Text>
           </View>
 
           <ProfileHeader />
 
-          <SettingsGroup title="Preferences">
+          <SettingsGroup title={t('profile.groups.preferences')}>
             <SettingsRow
               icon="Languages"
-              label="Language"
+              label={t('profile.language')}
               meta={activeLanguage}
               onPress={chooseLanguage}
             />
 
-            <SettingsRow icon="Bell" label="Notifications" meta="Soon" showChevron={false} onPress={placeholder} />
+            <SettingsRow
+              icon="Bell"
+              label={t('profile.notifications')}
+              meta={t('profile.soon')}
+              showChevron={false}
+              onPress={placeholder}
+            />
 
-            <SettingsRow icon="Moon" label="Appearance" meta="Dark" showChevron={false} onPress={placeholder} />
+            <SettingsRow
+              icon="Moon"
+              label={t('profile.appearance')}
+              meta={t('profile.dark')}
+              showChevron={false}
+              onPress={placeholder}
+            />
 
-            <SettingsRow icon="Play" label="Autoplay trailers" meta="Soon" showChevron={false} onPress={placeholder} isLast />
+            <SettingsRow
+              icon="Play"
+              label={t('profile.autoplayTrailers')}
+              meta={t('profile.soon')}
+              showChevron={false}
+              onPress={placeholder}
+              isLast
+            />
           </SettingsGroup>
 
-          <SettingsGroup title="Data">
+          <SettingsGroup title={t('profile.groups.data')}>
             <SettingsRow
               icon="History"
-              label="Clear search history"
+              label={t('profile.clearSearchHistory')}
               meta={searches.length ? `${searches.length}` : undefined}
               onPress={() =>
                 confirmClear(
-                  'Clear search history',
-                  'Your recent searches will be removed.',
+                  t('profile.clearSearchHistory'),
+                  t('profile.clearSearchHistoryMessage'),
                   clearSearches
                 )
               }
@@ -239,12 +262,12 @@ const ProfileScreen = () => {
 
             <SettingsRow
               icon="EyeOff"
-              label="Clear recently viewed"
+              label={t('profile.clearRecentlyViewed')}
               meta={viewedCount ? `${viewedCount}` : undefined}
               onPress={() =>
                 confirmClear(
-                  'Clear recently viewed',
-                  'Your viewing history will be removed.',
+                  t('profile.clearRecentlyViewed'),
+                  t('profile.clearRecentlyViewedMessage'),
                   clearViewed
                 )
               }
@@ -252,12 +275,12 @@ const ProfileScreen = () => {
 
             <SettingsRow
               icon="BookmarkX"
-              label="Clear My List"
+              label={t('profile.clearMyList')}
               meta={savedItems.length ? `${savedItems.length}` : undefined}
               onPress={() =>
                 confirmClear(
-                  'Clear My List',
-                  'Your watchlist, watched titles, favorites, and ratings will be removed.',
+                  t('profile.clearMyList'),
+                  t('profile.clearMyListMessage'),
                   clearSavedItems
                 )
               }
@@ -265,38 +288,49 @@ const ProfileScreen = () => {
 
             <SettingsRow
               icon="Trash2"
-              label="Erase all local data"
+              label={t('profile.eraseAll')}
               destructive
               onPress={() =>
-                confirmClear(
-                  'Erase all local data',
-                  'Removes your lists, ratings, viewing history, and searches permanently.',
-                  () => {
-                    clearSearches();
-                    clearViewed();
-                    clearSavedItems();
-                  }
-                )
+                confirmClear(t('profile.eraseAll'), t('profile.eraseAllMessage'), () => {
+                  clearSearches();
+                  clearViewed();
+                  clearSavedItems();
+                })
               }
               isLast
             />
           </SettingsGroup>
 
-          <SettingsGroup title="About">
+          <SettingsGroup title={t('profile.groups.about')}>
             <SettingsRow
               icon="Clapperboard"
-              label="Powered by TMDB"
+              label={t('common.poweredByTmdb')}
               onPress={() => Linking.openURL('https://www.themoviedb.org/')}
             />
 
-            <SettingsRow icon="MessageSquare" label="Send feedback" meta="Soon" showChevron={false} onPress={placeholder} />
+            <SettingsRow
+              icon="MessageSquare"
+              label={t('profile.sendFeedback')}
+              meta={t('profile.soon')}
+              showChevron={false}
+              onPress={placeholder}
+            />
 
-            <SettingsRow icon="Shield" label="Privacy policy" meta="Soon" showChevron={false} onPress={placeholder} isLast />
+            <SettingsRow
+              icon="Shield"
+              label={t('profile.privacyPolicy')}
+              meta={t('profile.soon')}
+              showChevron={false}
+              onPress={placeholder}
+              isLast
+            />
           </SettingsGroup>
 
           <View className="items-center pt-1">
             {version && (
-              <Text className="!text-[11px] !text-neutral-400">Flixora v{version}</Text>
+              <Text className="!text-[11px] !text-neutral-400">
+                {t('profile.version', { version })}
+              </Text>
             )}
           </View>
         </Animated.View>

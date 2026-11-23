@@ -4,6 +4,7 @@ import { IMAGE_PLACEHOLDER, openGallery } from '@/utils';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export const MovieGallery = ({
   movieId,
@@ -18,6 +19,7 @@ export const MovieGallery = ({
   const [selectedImage, setSelectedImage] = useState<MovieImagesProps>();
 
   const previewImages = [...(gallery.backdrops ?? []), ...(gallery.posters ?? [])].slice(0, 5);
+  const { t } = useTranslate();
 
   const totalImages = gallery.backdrops.length + gallery.logos.length + gallery.posters.length;
 
@@ -30,7 +32,7 @@ export const MovieGallery = ({
     <>
       <View className="gap-3">
         <SectionTitle
-          title="Gallery"
+          title={t('common.gallery')}
           onSeeAll={totalImages > 1 ? () => openGallery(movieId, mediaType) : undefined}
         />
 

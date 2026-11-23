@@ -5,14 +5,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) => {
   const [selectedReview, setSelectedReview] = useState<MovieReviewProps | null>(null);
+  const { t } = useTranslate();
 
   return (
     <>
       <View className="gap-3">
-        <SectionTitle title="Reviews" />
+        <SectionTitle title={t('detail.reviews')} />
 
         <FlashList
           horizontal
@@ -37,7 +39,7 @@ export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) =>
           <Pressable
             style={StyleSheet.absoluteFill}
             accessibilityRole="button"
-            accessibilityLabel="Close review"
+            accessibilityLabel={t('detail.closeReview')}
             onPress={() => setSelectedReview(null)}
           />
           <View
@@ -54,7 +56,7 @@ export const MovieComments = ({ comments }: { comments: MovieReviewProps[] }) =>
 
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Close review"
+                    accessibilityLabel={t('detail.closeReview')}
                     className="h-11 w-11 items-center justify-center rounded-full"
                     onPress={() => setSelectedReview(null)}>
                     <Ionicons name="close" size={22} color="rgba(255,255,255,0.6)" />
@@ -84,6 +86,8 @@ const avatarUrl = (path?: string | null): string | null => {
 };
 
 const ReviewAuthor = ({ review }: { review: MovieReviewProps }) => {
+  const { t } = useTranslate();
+
   const avatarColor = useMemo(() => getAvatarColor(review.author ?? 'Undefined'), [review.author]);
   const avatar = avatarUrl(review?.author_details?.avatar_path);
 
@@ -95,7 +99,7 @@ const ReviewAuthor = ({ review }: { review: MovieReviewProps }) => {
           style={{ width: 48, height: 48, borderRadius: 24 }}
           contentFit="cover"
           cachePolicy="memory-disk"
-          accessibilityLabel={`${review.author} avatar`}
+          accessibilityLabel={t('common.avatar', { name: review.author })}
         />
       ) : (
         <View
@@ -124,26 +128,30 @@ const ReviewAuthor = ({ review }: { review: MovieReviewProps }) => {
   );
 };
 
-const CommentItem = ({ review, onPress }: { review: MovieReviewProps; onPress: () => void }) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityLabel={`Read full review by ${review.author}`}
-    onPress={onPress}
-    className="w-[300px] gap-4 rounded-2xl border border-white/10 p-4">
-    <View className="flex-row items-start justify-between gap-2">
-      <ReviewAuthor review={review} />
+const CommentItem = ({ review, onPress }: { review: MovieReviewProps; onPress: () => void }) => {
+  const { t } = useTranslate();
 
-      {review?.author_details?.rating != null && (
-        <View className="rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-1">
-          <RatingBadge value={review.author_details.rating} size="sm" precise={false} />
-        </View>
-      )}
-    </View>
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('detail.readFullReview', { author: review.author })}
+      onPress={onPress}
+      className="w-[300px] gap-4 rounded-2xl border border-white/10 p-4">
+      <View className="flex-row items-start justify-between gap-2">
+        <ReviewAuthor review={review} />
 
-    <Text numberOfLines={4} className="!text-[14px] leading-6 !text-neutral-400">
-      {review.content}
-    </Text>
+        {review?.author_details?.rating != null && (
+          <View className="rounded-lg border border-amber-500/40 bg-amber-500/20 px-3 py-1">
+            <RatingBadge value={review.author_details.rating} size="sm" precise={false} />
+          </View>
+        )}
+      </View>
 
-    <Text className="!text-[12px] font-medium !text-blue-400">Read more</Text>
-  </Pressable>
-);
+      <Text numberOfLines={4} className="!text-[14px] leading-6 !text-neutral-400">
+        {review.content}
+      </Text>
+
+      <Text className="!text-[12px] font-medium !text-blue-400">{t('detail.readMore')}</Text>
+    </Pressable>
+  );
+};

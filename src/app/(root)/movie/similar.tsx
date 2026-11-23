@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 const SimilarMovies = () => {
   const { id } = useLocalSearchParams();
@@ -36,10 +37,12 @@ const SimilarMovies = () => {
 };
 
 const SimiliarMovieItem = ({ movie }: { movie: MovieProps }) => {
+  const { t } = useTranslate();
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`View details for ${movie.title}`}
+      accessibilityLabel={t('common.viewDetails', { title: movie.title })}
       onPress={() => openMediaDetails(movie)}
       className="m-2 flex-1 rounded-bl-2xl rounded-br-2xl bg-neutral-950/30">
       <Image

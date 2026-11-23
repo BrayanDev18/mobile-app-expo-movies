@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
 import { Linking, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { translateTmdbValue, useTranslate } from '@/translate';
 
 const computeAge = (birthday?: string | null, deathday?: string | null): number | null => {
   if (!birthday) return null;
@@ -39,6 +40,7 @@ const CastDescriptionScreen = () => {
   const { id } = useLocalSearchParams();
   const { height } = useWindowDimensions();
   const { top } = useSafeAreaInsets();
+  const { t } = useTranslate();
 
   const { castDetails, castImages, castCredits, socials, isLoading, isError, refetch } =
     useCastDetails(+id);
@@ -46,23 +48,30 @@ const CastDescriptionScreen = () => {
   if (isLoading) return <Loader />;
 
   if (isError || !castDetails) {
-    return <ErrorState retryLabel="Retry loading person details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retryPerson')} onRetry={() => refetch()} />;
   }
 
   const age = computeAge(castDetails.birthday, castDetails.deathday);
 
+  const ageLabel = age != null ? ` · ${t('person.age', { count: age })}` : '';
+
   const lifeline = castDetails.birthday
     ? castDetails.deathday
-      ? `${castDetails.birthday.slice(0, 4)} – ${castDetails.deathday.slice(0, 4)}${
-          age != null ? ` · ${age} years` : ''
-        }`
-      : `${formatDate(castDetails.birthday)}${age != null ? ` · ${age} years` : ''}`
+      ? `${castDetails.birthday.slice(0, 4)} – ${castDetails.deathday.slice(0, 4)}${ageLabel}`
+      : `${formatDate(castDetails.birthday)}${ageLabel}`
     : null;
 
   const iconLinks = [
     ...socials,
     ...(castDetails.homepage
-      ? [{ key: 'website', icon: 'globe-outline', label: 'Official website', url: castDetails.homepage }]
+      ? [
+          {
+            key: 'website',
+            icon: 'globe-outline',
+            label: t('common.officialWebsite'),
+            url: castDetails.homepage,
+          },
+        ]
       : []),
   ];
 
@@ -101,7 +110,7 @@ const CastDescriptionScreen = () => {
             cachePolicy="memory-disk"
             contentFit="cover"
             placeholder={IMAGE_PLACEHOLDER}
-            accessibilityLabel={`${castDetails.name} portrait`}
+            accessibilityLabel={t('common.portrait', { name: castDetails.name })}
           />
 
           <View className="items-center gap-1">
@@ -111,7 +120,7 @@ const CastDescriptionScreen = () => {
 
             {castDetails?.known_for_department ? (
               <Text className="!text-[12px] !text-neutral-400">
-                {castDetails.known_for_department}
+                {translateTmdbValue(castDetails.known_for_department, t)}
               </Text>
             ) : null}
 
@@ -125,7 +134,7 @@ const CastDescriptionScreen = () => {
                   <Pressable
                     key={link.key}
                     accessibilityRole="link"
-                    accessibilityLabel={`Open ${link.label}`}
+                    accessibilityLabel={t('person.openLink', { label: link.label })}
                     hitSlop={10}
                     onPress={() => Linking.openURL(link.url)}>
                     <Ionicons name={link.icon as any} size={20} color="rgba(255,255,255,0.7)" />
@@ -140,8 +149,8 @@ const CastDescriptionScreen = () => {
       <CustomTabs defaultValue="castCredits">
         <View className="flex-1 gap-4 px-4">
           <TabsList>
-            <TabsTrigger value="castCredits">Filmography</TabsTrigger>
-            <TabsTrigger value="biography">Biography</TabsTrigger>
+            <TabsTrigger value="castCredits">{t('person.filmography')}</TabsTrigger>
+            <TabsTrigger value="biography">{t('person.biography')}</TabsTrigger>
           </TabsList>
 
           <Screen safeAreaEdges={['bottom']}>

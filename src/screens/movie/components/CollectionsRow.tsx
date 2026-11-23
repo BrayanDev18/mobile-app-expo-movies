@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 const CARD_WIDTH = 280;
 
@@ -15,13 +16,15 @@ interface CollectionsRowProps {
 }
 
 export const CollectionsRow = ({ title }: CollectionsRowProps) => {
+  const { t } = useTranslate();
+
   const { collections } = useCollections(EXPLORE_COLLECTIONS);
 
   const renderItem = useCallback(
     ({ item }: { item: CollectionProps }) => (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`View the ${item.name} saga`}
+        accessibilityLabel={t('explore.viewSaga', { name: item.name })}
         onPress={() => openCollection(item.id)}>
         <View style={{ width: CARD_WIDTH }}>
           <Image
@@ -30,7 +33,7 @@ export const CollectionsRow = ({ title }: CollectionsRowProps) => {
             contentFit="cover"
             cachePolicy="memory-disk"
             placeholder={IMAGE_PLACEHOLDER}
-            accessibilityLabel={`${item.name} backdrop`}
+            accessibilityLabel={t('common.backdrop', { name: item.name })}
           />
 
           <LinearGradient
@@ -45,12 +48,14 @@ export const CollectionsRow = ({ title }: CollectionsRowProps) => {
               {item.name}
             </Text>
 
-            <Text className="!text-[11px] !text-neutral-400">{item.parts.length} movies</Text>
+            <Text className="!text-[11px] !text-neutral-400">
+              {t('common.movieCount', { count: item.parts.length })}
+            </Text>
           </View>
         </View>
       </Pressable>
     ),
-    []
+    [t]
   );
 
   if (!collections.length) return null;

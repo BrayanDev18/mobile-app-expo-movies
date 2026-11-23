@@ -1,5 +1,6 @@
 import { SectionTitle, Text } from '@/components';
 import { View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export interface FactItem {
   label: string;
@@ -7,13 +8,15 @@ export interface FactItem {
 }
 
 export const FactsGrid = ({ facts }: { facts: FactItem[] }) => {
+  const { t } = useTranslate();
+
   const visibleFacts = facts.filter((fact) => fact.value);
 
   if (!visibleFacts.length) return null;
 
   return (
     <View className="gap-3">
-      <SectionTitle title="Details" />
+      <SectionTitle title={t('common.details')} />
 
       <View className="flex-row flex-wrap">
         {visibleFacts.map((fact) => (

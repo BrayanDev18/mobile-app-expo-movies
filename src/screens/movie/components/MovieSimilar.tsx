@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useCallback } from 'react';
 import { View } from 'react-native';
 import { MovieCard } from './MovieCard';
+import { useTranslate } from '@/translate';
 
 interface MovieSimilarProps {
   movieId: number;
@@ -12,11 +13,9 @@ interface MovieSimilarProps {
   title?: string;
 }
 
-export const MovieSimilar = ({
-  movieId,
-  similarMovies,
-  title = 'You might also like',
-}: MovieSimilarProps) => {
+export const MovieSimilar = ({ movieId, similarMovies, title }: MovieSimilarProps) => {
+  const { t } = useTranslate();
+
   const renderItem = useCallback(
     ({ item: movie }: { item: MovieProps }) => (
       <MovieCard
@@ -33,7 +32,7 @@ export const MovieSimilar = ({
   return (
     <View className="gap-3">
       <SectionTitle
-        title={title}
+        title={title ?? t('detail.youMightAlsoLike')}
         onSeeAll={
           similarMovies.length > 5
             ? () => router.push({ pathname: '/(root)/movie/similar', params: { id: movieId } })

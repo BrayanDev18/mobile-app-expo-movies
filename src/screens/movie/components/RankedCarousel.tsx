@@ -3,6 +3,7 @@ import { MovieProps } from '@/interfaces';
 import { openMediaDetails } from '@/utils';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 const POSTER_WIDTH = 150;
 const POSTER_HEIGHT = 220;
@@ -13,11 +14,13 @@ interface RankedCarouselProps {
 }
 
 export const RankedCarousel = ({ title, movies }: RankedCarouselProps) => {
+  const { t } = useTranslate();
+
   const renderItem = useCallback(
     ({ item, index }: { item: MovieProps; index: number }) => (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`View details for ${item.title}, ranked ${index + 1}`}
+        accessibilityLabel={t('common.rankedViewDetails', { title: item.title, rank: index + 1 })}
         className="flex-row items-end"
         onPress={() => openMediaDetails(item)}>
         <Text
@@ -34,14 +37,13 @@ export const RankedCarousel = ({ title, movies }: RankedCarouselProps) => {
             height: POSTER_HEIGHT,
             borderRadius: 12,
             marginLeft: -6,
-
           }}
           contentFit="cover"
-          accessibilityLabel={`${item.title} poster`}
+          accessibilityLabel={t('common.poster', { title: item.title })}
         />
       </Pressable>
     ),
-    []
+    [t]
   );
 
   if (!movies.length) return null;

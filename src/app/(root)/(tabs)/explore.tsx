@@ -17,9 +17,12 @@ import { useForm, useWatch } from 'react-hook-form';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslate } from '@/translate';
 
 const ExploreScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
+  const { t } = useTranslate();
+
   const [scope, setScope] = useState<MediaType>('movie');
   const { control, setValue } = useForm({ defaultValues: { search: '' } });
   const search = useWatch({ control, name: 'search' });
@@ -54,7 +57,7 @@ const ExploreScreen = () => {
         }>
         <View className="px-4 pb-5">
           <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
-            Explore
+            {t('explore.title')}
           </Text>
         </View>
 
@@ -64,7 +67,7 @@ const ExploreScreen = () => {
               iconName="Search"
               name="search"
               control={control}
-              placeholder="Search movies, series, people…"
+              placeholder={t('explore.searchPlaceholder')}
               returnKeyType="search"
               autoCapitalize="none"
               autoCorrect={false}
@@ -88,10 +91,10 @@ const ExploreScreen = () => {
 
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel="Clear recent searches"
+                  accessibilityLabel={t('explore.clearRecentSearches')}
                   className="h-11 items-center justify-center px-3"
                   onPress={clearSearches}>
-                  <Text className="!text-[13px] !text-neutral-400">Clear</Text>
+                  <Text className="!text-[13px] !text-neutral-400">{t('common.clear')}</Text>
                 </Pressable>
               </View>
             </ScrollView>
@@ -103,14 +106,16 @@ const ExploreScreen = () => {
             {isSearching && <ActivityIndicator className="py-12" color="rgba(255,255,255,0.6)" />}
 
             {showEmptyState && (
-              <EmptyState icon="Search" message={`No results for “${query.trim()}”`} />
+              <EmptyState icon="Search" message={t('explore.noResults', { query: query.trim() })} />
             )}
 
-            {people.length > 0 && <PeopleHorizontalList title="People" people={people} />}
+            {people.length > 0 && (
+              <PeopleHorizontalList title={t('explore.people')} people={people} />
+            )}
 
             {media.length > 0 && (
               <View>
-                <SectionTitle title="Movies & Series" className="px-1" />
+                <SectionTitle title={t('explore.moviesAndSeries')} className="px-1" />
 
                 <View className="mt-2">
                   {media.map((item) => (
@@ -124,7 +129,11 @@ const ExploreScreen = () => {
           </View>
         ) : (
           <Animated.View entering={FadeIn.duration(300)} style={{ gap: 32 }}>
-            <ChipRow items={MEDIA_SCOPES} active={scope} onSelect={setScope} />
+            <ChipRow
+              items={MEDIA_SCOPES.map((item) => ({ key: item.key, label: t(item.labelKey) }))}
+              active={scope}
+              onSelect={setScope}
+            />
 
             <Animated.View key={scope} entering={FadeIn.duration(250)} style={{ gap: 32 }}>
               <View className="gap-3">
@@ -135,19 +144,22 @@ const ExploreScreen = () => {
 
               {topPicks.length > 0 && (
                 <View className="px-4">
-                  <RankedCarousel title="Trending today" movies={topPicks.slice(0, 10)} />
+                  <RankedCarousel
+                    title={t('explore.trendingToday')}
+                    movies={topPicks.slice(0, 10)}
+                  />
                 </View>
               )}
 
-              <ProviderGrid title="Browse by service" mediaType={scope} />
+              <ProviderGrid title={t('explore.browseByService')} mediaType={scope} />
 
               {rankedTrending.length > 0 && (
                 <View className="px-4">
-                  <RankedCarousel title="Top 5 this week" movies={rankedTrending} />
+                  <RankedCarousel title={t('explore.topFiveThisWeek')} movies={rankedTrending} />
                 </View>
               )}
 
-              {scope === 'movie' && <CollectionsRow title="Sagas & collections" />}
+              {scope === 'movie' && <CollectionsRow title={t('explore.sagas')} />}
             </Animated.View>
           </Animated.View>
         )}

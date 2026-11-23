@@ -4,6 +4,7 @@ import { MediaType } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openDiscover } from '@/utils';
 import { Image } from 'expo-image';
 import { Dimensions, Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 const { width } = Dimensions.get('window');
 
@@ -18,10 +19,11 @@ interface ProviderGridProps {
 
 export const ProviderGrid = ({ title, mediaType = 'movie' }: ProviderGridProps) => {
   const { providers } = useStreamingProviders(mediaType);
+  const { t } = useTranslate();
 
   if (!providers.length) return null;
 
-  const mediaLabel = mediaType === 'tv' ? 'series' : 'movies';
+  const browseKey = mediaType === 'tv' ? 'explore.browseSeriesOn' : 'explore.browseMoviesOn';
 
   return (
     <View className="gap-3 px-4">
@@ -32,15 +34,17 @@ export const ProviderGrid = ({ title, mediaType = 'movie' }: ProviderGridProps) 
           <Pressable
             key={provider.id}
             accessibilityRole="button"
-            accessibilityLabel={`Browse ${mediaLabel} on ${provider.name}`}
-            onPress={() => openDiscover(mediaType, { providerId: provider.id, title: provider.name })}>
+            accessibilityLabel={t(browseKey, { provider: provider.name })}
+            onPress={() =>
+              openDiscover(mediaType, { providerId: provider.id, title: provider.name })
+            }>
             <Image
               source={{ uri: provider.logo ?? undefined }}
               style={{ width: TILE_SIZE, height: TILE_SIZE, borderRadius: 16 }}
               contentFit="cover"
               cachePolicy="memory-disk"
               placeholder={IMAGE_PLACEHOLDER}
-              accessibilityLabel={`${provider.name} logo`}
+              accessibilityLabel={t('common.logo', { name: provider.name })}
             />
           </Pressable>
         ))}

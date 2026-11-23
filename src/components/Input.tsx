@@ -5,6 +5,7 @@ import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { Pressable, TextInput, TextInputProps, View } from 'react-native';
 import { Icon, IconName } from './Icon';
 import { Text } from './Text';
+import { useTranslate } from '@/translate';
 
 interface InputProps<T extends FieldValues> extends TextInputProps {
   label?: string;
@@ -27,6 +28,8 @@ export const Input = <T extends FieldValues>({
   iconName,
   ...props
 }: InputProps<T>) => {
+  const { t } = useTranslate();
+
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -34,7 +37,7 @@ export const Input = <T extends FieldValues>({
     <Controller
       name={name}
       control={control}
-      rules={required ? { required: { value: true, message: 'Required field' } } : {}}
+      rules={required ? { required: { value: true, message: t('common.requiredField') } } : {}}
       render={({ field: { onChange, onBlur, value }, fieldState }) => {
         const errorMessage = fieldState.error?.message ?? error;
 
@@ -48,7 +51,11 @@ export const Input = <T extends FieldValues>({
               className={cn(
                 className,
                 `flex-row items-center gap-3 rounded-2xl border-2 bg-neutral-800 px-4 ${
-                  errorMessage ? 'border-red-400' : isFocused ? 'border-blue-500' : 'border-transparent'
+                  errorMessage
+                    ? 'border-red-400'
+                    : isFocused
+                      ? 'border-blue-500'
+                      : 'border-transparent'
                 }`
               )}>
               {iconName ? <Icon name={iconName} color="gray" size={20} /> : null}
@@ -71,7 +78,9 @@ export const Input = <T extends FieldValues>({
               {isPassword && (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                  accessibilityLabel={
+                    showPassword ? t('common.hidePassword') : t('common.showPassword')
+                  }
                   hitSlop={8}
                   onPress={() => setShowPassword(!showPassword)}>
                   <MaterialCommunityIcons

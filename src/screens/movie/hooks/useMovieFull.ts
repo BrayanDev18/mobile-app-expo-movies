@@ -9,6 +9,7 @@ import {
   RegionWatchProvidersProps,
 } from '@/interfaces';
 import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import { translate } from '@/translate';
 import {
   deviceRegion,
   mapCastMembers,
@@ -63,7 +64,7 @@ const mapDirector = (crew?: CrewMemberProps[]) => {
   return {
     id: director.id,
     name: director.name ?? '',
-    character: 'Director',
+    character: translate('detail.director'),
     avatar: tmdbImage(director.profile_path, 'w342') ?? '',
   };
 };
@@ -120,8 +121,10 @@ export const useMovieFull = (movieId: number) => {
             }
           : null,
         director: mapDirector(data.credits?.crew),
-        certification: pickCertification(data.release_dates?.results, region, (entry) =>
-          entry.release_dates?.find((date) => date.certification)?.certification
+        certification: pickCertification(
+          data.release_dates?.results,
+          region,
+          (entry) => entry.release_dates?.find((date) => date.certification)?.certification
         ),
         watchProviders: pickRegion(data['watch/providers']?.results, region),
       };
