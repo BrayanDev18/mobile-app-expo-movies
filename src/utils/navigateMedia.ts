@@ -36,3 +36,19 @@ export const openGallery = (mediaId: number, mediaType: MediaType = 'movie') =>
     pathname: '/(root)/movie/gallery',
     params: { id: mediaId, type: mediaType },
   });
+
+export const openEpisode = (params: {
+  seriesId: number;
+  seasonNumber: number;
+  episodeNumber: number;
+  seriesTitle?: string;
+}) =>
+  router.push({
+    pathname: '/(root)/tv/episode',
+    params: {
+      id: params.seriesId,
+      season: params.seasonNumber,
+      episode: params.episodeNumber,
+      ...(params.seriesTitle ? { seriesTitle: params.seriesTitle } : {}),
+    },
+  });

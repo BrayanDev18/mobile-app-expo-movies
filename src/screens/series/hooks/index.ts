@@ -4,3 +4,4 @@ export * from './useTvByCategory';
 export * from './useTvFull';
 export * from './useTvRecommendations';
 export * from './useTvSeason';
+export * from './useTvEpisode';

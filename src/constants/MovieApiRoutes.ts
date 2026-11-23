@@ -15,5 +15,7 @@ export const MovieApiRoutes = {
   discoverTv: '/discover/tv',
   tvDetails: (id: number) => `/tv/${id}`,
   tvSeason: (id: number, seasonNumber: number) => `/tv/${id}/season/${seasonNumber}`,
+  tvEpisode: (id: number, seasonNumber: number, episodeNumber: number) =>
+    `/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}`,
   tvRecommendations: (id: number) => `/tv/${id}/recommendations`,
 } as const;
