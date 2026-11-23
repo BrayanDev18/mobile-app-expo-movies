@@ -1,6 +1,6 @@
 import { SERIES_GENRES, SERIES_NETWORKS } from '@/constants';
 import { selectLastViewed, useViewedMediaStore } from '@/stores';
-import { claimUnique } from '@/utils';
+import { claimUnique, lazyRail } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
 import { useTrending } from '../../../hooks/useTrending';
 import { HomeSection } from '@/interfaces';
@@ -16,27 +16,36 @@ const newSeasonStartDate = () => {
   return date.toISOString().slice(0, 10);
 };
 
-export const useSeriesHomeSections = () => {
+export const useSeriesHomeSections = (activeRails: ReadonlySet<string>) => {
   const {
     trending: heroMedia,
     isLoading: isHeroLoading,
     isError: isHeroError,
     refetch: refetchHero,
   } = useTrending('tv', 'day');
-  const { trending: trendingSeries } = useTrending('tv', 'week');
-  const { series: airingToday } = useTvByCategory('airing_today');
-  const { series: onTheAir } = useTvByCategory('on_the_air');
+  const { trending: trendingSeries, isLoading: isTrendingLoading } = useTrending('tv', 'week');
+  const { series: airingToday, isLoading: isAiringTodayLoading } = useTvByCategory('airing_today');
+  const { series: onTheAir, isLoading: isOnTheAirLoading } = useTvByCategory('on_the_air');
 
   const lastViewed = useViewedMediaStore(selectLastViewed('tv'));
-  const { series: recommendedSeries } = useTvRecommendations(lastViewed?.id);
+  const { series: recommendedSeries, isLoading: isRecommendedLoading } = useTvRecommendations(
+    lastViewed?.id
+  );
+
+  // Below-the-fold rails: each fetches only once MediaHome activates its key
+  const lazy = <T>(query: T, key: string) => ({ ...query, enabled: activeRails.has(key) });
 
   const discoverRows = useQueries({
     queries: [
-      ...SERIES_NETWORKS.map((network) => discoverTvQuery({ networkId: network.id })),
-      ...SERIES_GENRES.map((genre) => discoverTvQuery({ genreId: genre.id })),
-      discoverTvQuery({ genreId: 16, originalLanguage: 'ja', minVotes: 300 }),
-      discoverTvQuery({ showType: 2, minVotes: 200 }),
-      discoverTvQuery({ firstAirDateFrom: newSeasonStartDate() }),
+      ...SERIES_NETWORKS.map((network) =>
+        lazy(discoverTvQuery({ networkId: network.id }), `network-${network.id}`)
+      ),
+      ...SERIES_GENRES.map((genre) =>
+        lazy(discoverTvQuery({ genreId: genre.id }), `genre-${genre.id}`)
+      ),
+      lazy(discoverTvQuery({ genreId: 16, originalLanguage: 'ja', minVotes: 300 }), 'anime'),
+      lazy(discoverTvQuery({ showType: 2, minVotes: 200 }), 'limited'),
+      lazy(discoverTvQuery({ firstAirDateFrom: newSeasonStartDate() }), 'newSeason'),
     ],
   });
 
@@ -53,55 +62,59 @@ export const useSeriesHomeSections = () => {
       key: 'recommended',
       title: lastViewed ? `Because you watched ${lastViewed.title}` : '',
       movies: lastViewed ? claimUnique(recommendedSeries, claimed) : [],
+      isPending: isRecommendedLoading,
     },
     {
       key: 'trending',
       title: 'Trending This Week',
       movies: claimUnique(trendingSeries, claimed),
       ranked: true,
+      isPending: isTrendingLoading,
     },
     {
       key: 'airingToday',
       title: 'New Episodes Today',
       movies: claimUnique(airingToday, claimed),
+      isPending: isAiringTodayLoading,
     },
     {
       key: 'onTheAir',
       title: 'On The Air This Week',
       movies: claimUnique(onTheAir, claimed),
+      isPending: isOnTheAirLoading,
     },
     {
       key: 'newSeason',
       title: 'New This Season',
-      movies: claimUnique(newSeasonRow.data ?? [], claimed),
+      ...lazyRail(newSeasonRow, claimed),
       variant: 'backdrop' as const,
       cardWidth: 310,
     },
     ...SERIES_NETWORKS.map((network, index) => ({
       key: `network-${network.id}`,
       title: network.title,
-      movies: claimUnique(discoverRows[index].data ?? [], claimed),
+      ...lazyRail(discoverRows[index], claimed),
       seeAll: { networkId: network.id },
     })),
     ...SERIES_GENRES.map((genre, index) => ({
       key: `genre-${genre.id}`,
       title: genre.title,
-      movies: claimUnique(discoverRows[SERIES_NETWORKS.length + index].data ?? [], claimed),
+      ...lazyRail(discoverRows[SERIES_NETWORKS.length + index], claimed),
       seeAll: { genreId: genre.id },
     })),
     {
       key: 'anime',
       title: 'Anime',
-      movies: claimUnique(animeRow.data ?? [], claimed),
+      ...lazyRail(animeRow, claimed),
       seeAll: { genreId: 16, originalLanguage: 'ja', minVotes: 300 },
     },
     {
       key: 'limited',
       title: 'Limited Series',
-      movies: claimUnique(limitedRow.data ?? [], claimed),
+      ...lazyRail(limitedRow, claimed),
       seeAll: { showType: 2, minVotes: 200 },
     },
-  ].filter((section) => section.movies.length > 0);
+  ].filter((section: HomeSection) => section.isPending || section.movies.length > 0);
 
   return { heroSeries, sections, isHeroLoading, isHeroError, refetchHero };
 };

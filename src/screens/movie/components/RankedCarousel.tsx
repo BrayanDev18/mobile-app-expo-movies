@@ -1,4 +1,5 @@
 import { FlashList, Text, TmdbImage } from '@/components';
+import { prefetchMediaDetails } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { openMediaDetails } from '@/utils';
 import { useCallback } from 'react';
@@ -19,6 +20,7 @@ export const RankedCarousel = ({ title, movies }: RankedCarouselProps) => {
         accessibilityRole="button"
         accessibilityLabel={`View details for ${item.title}, ranked ${index + 1}`}
         className="flex-row items-end"
+        onPressIn={() => prefetchMediaDetails(item)}
         onPress={() => openMediaDetails(item)}>
         <Text
           className="font-black !text-white/25"

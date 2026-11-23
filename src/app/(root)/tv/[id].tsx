@@ -1,8 +1,9 @@
-import { ErrorState, Loader } from '@/components';
+import { ErrorState } from '@/components';
 import { useTvFull } from '@/hooks';
 import {
   MediaActionsBar,
   MediaDetailShell,
+  MediaDetailSkeleton,
   MovieCastAndCrew,
   MovieComments,
   MovieGallery,
@@ -21,7 +22,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 
 const SeriesDescriptionScreen = () => {
-  const { id } = useLocalSearchParams();
+  const { id, poster } = useLocalSearchParams<{ id: string; poster?: string }>();
   const recordView = useViewedMediaStore((state) => state.recordView);
 
   const { series, isLoading, isError, refetch } = useTvFull(+id);
@@ -33,7 +34,14 @@ const SeriesDescriptionScreen = () => {
     }
   }, [details?.id, details?.title, recordView]);
 
-  if (isLoading) return <Loader />;
+  // Same shell as the loaded state, so the header stays mounted when data lands
+  if (isLoading) {
+    return (
+      <MediaDetailShell poster={poster ?? null}>
+        <MediaDetailSkeleton />
+      </MediaDetailShell>
+    );
+  }
 
   if (isError || !series || !details) {
     return <ErrorState retryLabel="Retry loading series details" onRetry={() => refetch()} />;

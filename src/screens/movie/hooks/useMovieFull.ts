@@ -21,7 +21,7 @@ import {
   pickRegion,
   tmdbImage,
 } from '@/utils';
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
 const APPEND_TO_RESPONSE =
   'videos,credits,images,reviews,similar,recommendations,release_dates,watch/providers';
@@ -68,17 +68,13 @@ const mapDirector = (crew?: CrewMemberProps[]) => {
   };
 };
 
-export const useMovieFull = (movieId: number) => {
+// Shared by the hook and by prefetchMediaDetails, so a press-in prefetch lands
+// in exactly the cache entry the detail screen reads.
+export const movieFullQuery = (movieId: number) => {
   const region = deviceRegion();
 
-  const {
-    data: movie,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  return queryOptions({
     queryKey: tmdbKey('movieFull', movieId),
-    enabled: !!movieId,
     queryFn: async () => {
       const { data } = await moviesApi.get<MovieFullResponse>(MovieApiRoutes.details(movieId), {
         params: {
@@ -127,6 +123,15 @@ export const useMovieFull = (movieId: number) => {
       };
     },
   });
+};
+
+export const useMovieFull = (movieId: number) => {
+  const {
+    data: movie,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({ ...movieFullQuery(movieId), enabled: !!movieId });
 
   return { movie, isLoading, isError, refetch };
 };

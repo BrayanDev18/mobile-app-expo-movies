@@ -1,4 +1,5 @@
 import { Text } from '@/components';
+import { prefetchMediaDetails } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { formatDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
@@ -88,6 +89,7 @@ const ImageItem = (props: ImageItemProps) => {
 
   return (
     <Pressable
+      onPressIn={() => prefetchMediaDetails(image)}
       onPress={() => openMediaDetails(image)}
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
       <Animated.View style={[{ flex: 1 }, imageStyle]}>

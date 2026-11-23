@@ -1,5 +1,6 @@
 import { Text, TmdbImage } from '@/components';
 import { MovieProps } from '@/interfaces';
+import { prefetchMediaDetails } from '@/hooks';
 import { openMediaDetails } from '@/utils';
 import { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
@@ -42,6 +43,7 @@ export const MediaListRow = ({ movie, rank, subtitle, trailing }: MediaListRowPr
       accessibilityRole="button"
       accessibilityLabel={`View details for ${movie.title}`}
       className="flex-row items-center py-3"
+      onPressIn={() => prefetchMediaDetails(movie)}
       onPress={() => openMediaDetails(movie)}>
       {rank !== undefined && (
         <Text

@@ -11,3 +11,5 @@ export * from './useMoviesByCategory';
 export * from './useMovieVideos';
 export * from './useSimilarMovies';
 export * from './useStreamingProviders';
+export * from './useLazyRails';
+export * from './prefetchMediaDetails';

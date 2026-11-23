@@ -19,7 +19,9 @@
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@shopify/flash-list": "2.0.2",
+    "@tanstack/query-async-storage-persister": "5.90.8",
     "@tanstack/react-query": "^5.90.8",
+    "@tanstack/react-query-persist-client": "5.90.8",
     "@tudp/rn-image-zoom": "^0.1.0",
     "axios": "^1.20.0",
     "babel-plugin-module-resolver": "^5.0.2",
@@ -74,7 +76,8 @@
     "typescript": "~6.0.3"
   },
   "overrides": {
-    "lightningcss": "1.30.1"
+    "lightningcss": "1.30.1",
+    "@tanstack/query-core": "5.90.8"
   },
   "private": true
 }
