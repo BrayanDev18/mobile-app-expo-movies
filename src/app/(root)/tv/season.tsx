@@ -2,17 +2,25 @@ import { EmptyState, ErrorState, FlashList, Loader, RatingBadge, Screen, Text } 
 import { EASE_OUT } from '@/constants';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
-import { formatDate, formatDuration, IMAGE_PLACEHOLDER, openEpisode, tmdbImage } from '@/utils';
+import {
+  formatDate,
+  formatDuration,
+  formatMinutes,
+  IMAGE_PLACEHOLDER,
+  openEpisode,
+  tmdbImage,
+} from '@/utils';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useTranslate } from '@/translate';
 
 const episodeDuration = (runtime: number | null) => {
   if (!runtime) return null;
 
-  return runtime < 60 ? `${runtime}m` : formatDuration(runtime);
+  return runtime < 60 ? formatMinutes(runtime) : formatDuration(runtime);
 };
 
 interface EpisodeRowProps {
@@ -22,6 +30,7 @@ interface EpisodeRowProps {
 }
 
 const EpisodeRow = ({ episode, index, onPress }: EpisodeRowProps) => {
+  const { t } = useTranslate();
   const meta = [
     episode.airDate ? formatDate(episode.airDate) : null,
     episodeDuration(episode.runtime),
@@ -36,8 +45,11 @@ const EpisodeRow = ({ episode, index, onPress }: EpisodeRowProps) => {
         .easing(EASE_OUT)}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Episode ${episode.episodeNumber}: ${episode.name}`}
-        accessibilityHint="Opens episode details"
+        accessibilityLabel={t('detail.episodeRow', {
+          number: episode.episodeNumber,
+          name: episode.name,
+        })}
+        accessibilityHint={t('detail.opensEpisode')}
         onPress={() => onPress(episode)}
         className="min-h-11 gap-2.5 py-4 active:opacity-70">
         <View className="flex-row items-center gap-3">
@@ -47,7 +59,7 @@ const EpisodeRow = ({ episode, index, onPress }: EpisodeRowProps) => {
             contentFit="cover"
             cachePolicy="memory-disk"
             placeholder={IMAGE_PLACEHOLDER}
-            accessibilityLabel={`${episode.name} still`}
+            accessibilityLabel={t('common.still', { name: episode.name })}
           />
 
           <View className="flex-1 gap-1">
@@ -77,6 +89,7 @@ const SeasonScreen = () => {
     season: string;
     seriesTitle?: string;
   }>();
+  const { t } = useTranslate();
 
   const { season: seasonDetails, isLoading, isError, refetch } = useTvSeason(+id, +season);
 
@@ -101,7 +114,7 @@ const SeasonScreen = () => {
   if (isLoading) return <Loader />;
 
   if (isError || !seasonDetails) {
-    return <ErrorState retryLabel="Retry loading season details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retrySeason')} onRetry={() => refetch()} />;
   }
 
   const year = seasonDetails.airDate?.slice(0, 4);
@@ -124,7 +137,7 @@ const SeasonScreen = () => {
                   contentFit="cover"
                   cachePolicy="memory-disk"
                   placeholder={IMAGE_PLACEHOLDER}
-                  accessibilityLabel={`${seasonDetails.name} poster`}
+                  accessibilityLabel={t('common.poster', { title: seasonDetails.name })}
                 />
 
                 <View className="flex-1 gap-1">
@@ -139,7 +152,7 @@ const SeasonScreen = () => {
                   </Text>
 
                   <Text className="!text-[13px] !text-neutral-400">
-                    {[year, `${seasonDetails.episodes.length} episodes`]
+                    {[year, t('common.episodeCount', { count: seasonDetails.episodes.length })]
                       .filter(Boolean)
                       .join(' · ')}
                   </Text>
@@ -153,7 +166,7 @@ const SeasonScreen = () => {
               ) : null}
             </View>
           }
-          ListEmptyComponent={<EmptyState icon="Film" message="No episodes yet" />}
+          ListEmptyComponent={<EmptyState icon="Film" message={t('detail.noEpisodes')} />}
           renderItem={renderItem}
         />
       </View>

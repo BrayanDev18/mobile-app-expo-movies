@@ -12,7 +12,8 @@ import { useTvEpisode } from '@/hooks';
 import { MovieCastProps, PersonProps } from '@/interfaces';
 import { InfoMetaItem, MovieTrailers, PeopleHorizontalList } from '@/screens/movie/components';
 import { EpisodeHero, EpisodeSkeleton, EpisodeStills } from '@/screens/series/components';
-import { formatDate, formatDuration } from '@/utils';
+import { useTranslate } from '@/translate';
+import { formatDate, formatDuration, formatMinutes } from '@/utils';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
@@ -30,17 +31,23 @@ const toPeople = <T extends MovieCastProps>(members: T[], subtitle: (member: T) 
 const episodeRuntime = (runtime: number | null) => {
   if (!runtime) return null;
 
-  return runtime < 60 ? `${runtime}m` : formatDuration(runtime);
+  return runtime < 60 ? formatMinutes(runtime) : formatDuration(runtime);
 };
 
 const EpisodeScreen = () => {
-  const { id, season, episode: episodeParam, seriesTitle } = useLocalSearchParams<{
+  const {
+    id,
+    season,
+    episode: episodeParam,
+    seriesTitle,
+  } = useLocalSearchParams<{
     id: string;
     season: string;
     episode: string;
     seriesTitle?: string;
   }>();
   const { bottom } = useSafeAreaInsets();
+  const { t } = useTranslate();
 
   const seasonNumber = Number(season);
   const episodeNumber = Number(episodeParam);
@@ -77,9 +84,9 @@ const EpisodeScreen = () => {
         <View className="flex-1 justify-center">
           <EmptyState
             icon="Clapperboard"
-            title="Episode not found"
-            message="This episode isn't listed on TMDB anymore."
-            action={{ title: 'Go back', onPress: () => router.back() }}
+            title={t('detail.episodeNotFound')}
+            message={t('detail.episodeGone')}
+            action={{ title: t('common.goBack'), onPress: () => router.back() }}
           />
         </View>
       </Screen>
@@ -87,7 +94,7 @@ const EpisodeScreen = () => {
   }
 
   if (isError || !episode) {
-    return <ErrorState retryLabel="Retry loading episode details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('detail.retryEpisode')} onRetry={() => refetch()} />;
   }
 
   const { guestStars, crew, stills, videos } = episode;
@@ -117,10 +124,13 @@ const EpisodeScreen = () => {
               <View className="flex-row items-center gap-2">
                 <View
                   accessible
-                  accessibilityLabel={`Season ${seasonNumber}, episode ${episodeNumber}`}
+                  accessibilityLabel={t('detail.seasonEpisode', {
+                    season: seasonNumber,
+                    episode: episodeNumber,
+                  })}
                   className="rounded-full bg-white/10 px-2.5 py-1">
                   <Text className="text-xs font-semibold">
-                    S{seasonNumber} E{episodeNumber}
+                    {t('detail.episodeCode', { season: seasonNumber, episode: episodeNumber })}
                   </Text>
                 </View>
 
@@ -156,7 +166,7 @@ const EpisodeScreen = () => {
             <>
               {episode.overview ? (
                 <View className="gap-2">
-                  <SectionTitle title="Overview" />
+                  <SectionTitle title={t('detail.overview')} />
 
                   <ExpandableText
                     numberOfLines={4}
@@ -168,23 +178,20 @@ const EpisodeScreen = () => {
 
               {crew.length > 0 && (
                 <PeopleHorizontalList
-                  title="Directed & Written by"
+                  title={t('detail.directedWrittenBy')}
                   people={toPeople(crew, (member) => member.job)}
                 />
               )}
 
               {guestStars.length > 0 && (
                 <PeopleHorizontalList
-                  title="Guest Stars"
+                  title={t('detail.guestStars')}
                   people={toPeople(guestStars, (member) => member.character)}
                 />
               )}
             </>
           ) : (
-            <EmptyState
-              icon="Clapperboard"
-              message="Details for this episode aren't available yet."
-            />
+            <EmptyState icon="Clapperboard" message={t('detail.episodeUnavailable')} />
           )}
 
           {videos.length > 0 && <MovieTrailers videos={videos.slice(0, 3)} mediaType="tv" />}

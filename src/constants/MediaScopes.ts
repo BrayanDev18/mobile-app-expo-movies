@@ -1,6 +1,7 @@
 import { MediaType } from '@/interfaces';
+import type { TxKeyPath } from '@/translate';
 
-export const MEDIA_SCOPES: { key: MediaType; label: string }[] = [
-  { key: 'movie', label: 'Movies' },
-  { key: 'tv', label: 'Series' },
+export const MEDIA_SCOPES: { key: MediaType; labelKey: TxKeyPath }[] = [
+  { key: 'movie', labelKey: 'common.movies' },
+  { key: 'tv', labelKey: 'common.series' },
 ];

@@ -1,4 +1,5 @@
 import { useLanguageStore } from '@/stores';
+import { translate } from '@/translate';
 import axios from 'axios';
 
 const TMDB_LANGUAGES: Record<string, string> = {
@@ -37,7 +38,7 @@ moviesApi.interceptors.response.use(
   (response) => response,
   (error) => {
     const message =
-      error?.response?.data?.status_message ?? error?.message ?? 'Something went wrong';
+      error?.response?.data?.status_message ?? error?.message ?? translate('errors.generic');
 
     return Promise.reject(Object.assign(new Error(message), { status: error?.response?.status }));
   }

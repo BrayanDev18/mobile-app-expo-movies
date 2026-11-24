@@ -9,6 +9,7 @@ import {
   TvDetails,
 } from '@/interfaces';
 import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import { translate } from '@/translate';
 import {
   deviceRegion,
   mapCastMembers,
@@ -83,7 +84,7 @@ export const tvFullQuery = (seriesId: number) => {
           ? {
               id: data.created_by[0].id,
               name: data.created_by[0].name ?? '',
-              character: 'Creator',
+              character: translate('detail.creator'),
               avatar: tmdbImage(data.created_by[0].profile_path, 'w342') ?? '',
             }
           : null,

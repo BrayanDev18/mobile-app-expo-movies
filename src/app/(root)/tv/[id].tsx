@@ -20,9 +20,11 @@ import {
 import { useViewedMediaStore } from '@/stores';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
+import { useTranslate } from '@/translate';
 
 const SeriesDescriptionScreen = () => {
   const { id, poster } = useLocalSearchParams<{ id: string; poster?: string }>();
+  const { t } = useTranslate();
   const recordView = useViewedMediaStore((state) => state.recordView);
 
   const { series, isLoading, isError, refetch } = useTvFull(+id);
@@ -44,7 +46,7 @@ const SeriesDescriptionScreen = () => {
   }
 
   if (isError || !series || !details) {
-    return <ErrorState retryLabel="Retry loading series details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retrySeries')} onRetry={() => refetch()} />;
   }
 
   const { trailers, cast, images, hasGallery, reviews, related, watchProviders, creator } = series;
@@ -86,7 +88,7 @@ const SeriesDescriptionScreen = () => {
 
       {related.length > 0 && (
         <MovieHorizontalList
-          title="You might also like"
+          title={t('detail.youMightAlsoLike')}
           movies={related.slice(0, 10)}
           cardWidth={145}
           cardHeight={200}

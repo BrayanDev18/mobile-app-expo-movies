@@ -1,11 +1,7 @@
 import React, { useState } from 'react';
-import {
-  NativeSyntheticEvent,
-  TextLayoutEventData,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { NativeSyntheticEvent, TextLayoutEventData, TouchableOpacity, View } from 'react-native';
 import { Text } from './Text';
+import { useTranslate } from '@/translate';
 
 interface ExpandableTextProps {
   children: React.ReactNode;
@@ -14,6 +10,8 @@ interface ExpandableTextProps {
 }
 
 export const ExpandableText = (props: ExpandableTextProps) => {
+  const { t } = useTranslate();
+
   const { children, numberOfLines = 2, textClassname = '' } = props;
 
   const [expanded, setExpanded] = useState(false);
@@ -54,13 +52,13 @@ export const ExpandableText = (props: ExpandableTextProps) => {
       {showToggle && (
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel={expanded ? 'Show less' : 'Show more'}
+          accessibilityLabel={expanded ? t('common.showLess') : t('common.showMore')}
           accessibilityState={{ expanded }}
           hitSlop={8}
           onPress={() => setExpanded((prev) => !prev)}
           className="self-end">
           <Text className="font-semibold !text-blue-500">
-            {expanded ? 'Show less' : 'Show more'}
+            {expanded ? t('common.showLess') : t('common.showMore')}
           </Text>
         </TouchableOpacity>
       )}

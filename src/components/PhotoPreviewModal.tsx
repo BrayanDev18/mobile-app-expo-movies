@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslate } from '@/translate';
 
 interface PhotoPreviewModalProps {
   visible: boolean;
@@ -15,6 +16,7 @@ interface PhotoPreviewModalProps {
 export const PhotoPreviewModal = (props: PhotoPreviewModalProps) => {
   const { visible, onHide, uri, aspectRatio = 1 } = props;
   const { top } = useSafeAreaInsets();
+  const { t } = useTranslate();
 
   return (
     <Modal
@@ -46,7 +48,7 @@ export const PhotoPreviewModal = (props: PhotoPreviewModalProps) => {
         <View style={{ position: 'absolute', top: top + 8, right: 16 }}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close image preview"
+            accessibilityLabel={t('common.closeImagePreview')}
             onPress={onHide}>
             <BlurView
               tint="dark"

@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import { translateTmdbValue, useTranslate } from '@/translate';
 
 interface CastBiographyProps {
   cast: CastDetailsProps;
@@ -19,6 +20,8 @@ interface CastGalleryProps {
 }
 
 export const CastBiography = ({ cast, images }: CastBiographyProps) => {
+  const { t } = useTranslate();
+
   const [openModalGallery, setOpenModalGallery] = useState(false);
   const [selectedImage, setSelectedImage] = useState<CastImageProfileProps>();
 
@@ -39,12 +42,10 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
 
   return (
     <>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ gap: 20 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 20 }}>
         {aliases?.length ? (
           <Text className="gap-2 !text-md">
-            Also known as:{' '}
+            {t('person.alsoKnownAs')}{' '}
             {aliases.map((name, index) => (
               <Text key={index} className="!text-neutral-400">
                 {name}
@@ -57,33 +58,38 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
 
         {cast?.birthday ? (
           <Text className="gap-2 !text-md">
-            Birthday: <Text className="!text-neutral-400">{formatDate(cast.birthday)}</Text>
+            {t('person.birthday')}{' '}
+            <Text className="!text-neutral-400">{formatDate(cast.birthday)}</Text>
           </Text>
         ) : null}
 
         {cast?.deathday ? (
           <Text className="gap-2 !text-md">
-            Died: <Text className="!text-neutral-400">{formatDate(cast.deathday)}</Text>
+            {t('person.died')}{' '}
+            <Text className="!text-neutral-400">{formatDate(cast.deathday)}</Text>
           </Text>
         ) : null}
 
         {cast?.place_of_birth ? (
           <Text className="gap-2 !text-md">
-            Born in: <Text className="!text-neutral-400">{cast.place_of_birth}</Text>
+            {t('person.bornIn')} <Text className="!text-neutral-400">{cast.place_of_birth}</Text>
           </Text>
         ) : null}
 
         {cast?.known_for_department ? (
           <Text className="gap-2 !text-md">
-            Profession: <Text className="!text-neutral-400">{cast.known_for_department}</Text>
+            {t('person.profession')}{' '}
+            <Text className="!text-neutral-400">
+              {translateTmdbValue(cast.known_for_department, t)}
+            </Text>
           </Text>
         ) : null}
 
         <View className="gap-2">
-          <SectionTitle title="Biography" />
+          <SectionTitle title={t('person.biography')} />
 
           <ExpandableText numberOfLines={8} textClassname="!text-md !text-neutral-400">
-            {cast?.biography || 'No biography available.'}
+            {cast?.biography || t('person.noBiography')}
           </ExpandableText>
         </View>
 
@@ -103,6 +109,7 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
 
 const CastGallery = (props: CastGalleryProps) => {
   const { images, handleOpenModal, castId } = props;
+  const { t } = useTranslate();
 
   const renderItem = useCallback(
     ({ item: image }: { item: CastImageProfileProps }) => {
@@ -127,7 +134,7 @@ const CastGallery = (props: CastGalleryProps) => {
   return (
     <View className="gap-3">
       <SectionTitle
-        title="Gallery"
+        title={t('common.gallery')}
         onSeeAll={
           images?.length > 1
             ? () => router.push({ pathname: '/(root)/movie/cast/gallery', params: { id: castId } })

@@ -4,27 +4,30 @@ import { tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { Linking, Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export const MovieWatchProviders = ({
   providers,
 }: {
   providers: RegionWatchProvidersProps | null;
 }) => {
+  const { t } = useTranslate();
+
   if (!providers) return null;
 
   const { flatrate, rent, buy, link } = providers;
 
   const groups = [
-    { title: 'Streaming', data: flatrate },
-    { title: 'Rent', data: rent },
-    { title: 'Buy', data: buy },
+    { title: t('detail.streaming'), data: flatrate },
+    { title: t('detail.rent'), data: rent },
+    { title: t('detail.buy'), data: buy },
   ];
 
   if (groups.every((group) => !group.data?.length)) return null;
 
   return (
     <View className="gap-3">
-      <SectionTitle title="Where to watch" />
+      <SectionTitle title={t('detail.whereToWatch')} />
 
       <View className="w-full gap-4">
         {groups.map((group, index) => {
@@ -53,7 +56,7 @@ export const MovieWatchProviders = ({
                             }}
                             contentFit="fill"
                             cachePolicy="memory-disk"
-                            accessibilityLabel={`${provider.provider_name} logo`}
+                            accessibilityLabel={t('common.logo', { name: provider.provider_name })}
                           />
                         </View>
 
@@ -72,14 +75,14 @@ export const MovieWatchProviders = ({
         {link ? (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="See all watch options on TMDB"
+            accessibilityLabel={t('detail.seeAllOptionsA11y')}
             onPress={() => Linking.openURL(link)}
             className="self-start">
-            <Text className="text-sm !text-blue-400 underline">See all options</Text>
+            <Text className="text-sm !text-blue-400 underline">{t('detail.seeAllOptions')}</Text>
           </Pressable>
         ) : null}
 
-        <Text className="!text-[11px] !text-neutral-400">Streaming availability by JustWatch</Text>
+        <Text className="!text-[11px] !text-neutral-400">{t('detail.justWatch')}</Text>
       </View>
     </View>
   );

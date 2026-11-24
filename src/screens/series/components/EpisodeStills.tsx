@@ -4,14 +4,16 @@ import { IMAGE_PLACEHOLDER, tmdbResize } from '@/utils';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export const EpisodeStills = ({ stills }: { stills: MovieImagesProps[] }) => {
   const [selected, setSelected] = useState<MovieImagesProps>();
+  const { t } = useTranslate();
 
   return (
     <>
       <View className="gap-3">
-        <SectionTitle title="Stills" />
+        <SectionTitle title={t('detail.stills')} />
 
         <FlashList
           horizontal
@@ -22,7 +24,7 @@ export const EpisodeStills = ({ stills }: { stills: MovieImagesProps[] }) => {
           renderItem={({ item, index }) => (
             <Pressable
               accessibilityRole="imagebutton"
-              accessibilityLabel={`Open still ${index + 1} of ${stills.length}`}
+              accessibilityLabel={t('detail.openStill', { index: index + 1, total: stills.length })}
               onPress={() => setSelected(item)}>
               <Image
                 source={{ uri: tmdbResize(item.url, 'w780') ?? undefined }}

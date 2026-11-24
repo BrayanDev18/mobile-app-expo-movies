@@ -5,6 +5,7 @@ import { useLocalSearchParams } from 'expo-router';
 import React, { useRef } from 'react';
 import { View } from 'react-native';
 import YoutubePlayer, { type YoutubeIframeRef } from 'react-native-youtube-iframe';
+import { useTranslate } from '@/translate';
 
 const VIDEO_QUALITIES: Record<number, string> = {
   360: '360p',
@@ -17,6 +18,8 @@ const VIDEO_QUALITIES: Record<number, string> = {
 
 const VideosScreen = () => {
   const { id, type } = useLocalSearchParams();
+  const { t } = useTranslate();
+
   const videoRef = useRef<YoutubeIframeRef | null>(null);
 
   const { movieVideos, isLoading, isError, refetch } = useMovieVideos(
@@ -27,7 +30,7 @@ const VideosScreen = () => {
   if (isLoading) return <Loader />;
 
   if (isError) {
-    return <ErrorState retryLabel="Retry loading videos" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retryVideos')} onRetry={() => refetch()} />;
   }
 
   return (

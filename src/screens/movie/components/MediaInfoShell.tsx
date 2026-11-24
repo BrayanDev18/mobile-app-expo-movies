@@ -3,6 +3,7 @@ import { GenreProps } from '@/interfaces';
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export const InfoMetaItem = ({
   icon,
@@ -33,6 +34,7 @@ interface MediaInfoShellProps {
 // meta row, certification/genre chips, credit line, and the storyline.
 export const MediaInfoShell = (props: MediaInfoShellProps) => {
   const { title, homepage, rating, metaItems, certification, genres, credit, overview } = props;
+  const { t } = useTranslate();
 
   return (
     <View className="gap-8">
@@ -45,13 +47,15 @@ export const MediaInfoShell = (props: MediaInfoShellProps) => {
           {homepage ? (
             <Pressable
               accessibilityRole="link"
-              accessibilityLabel="Open official website"
+              accessibilityLabel={t('common.openOfficialWebsite')}
               hitSlop={8}
               className="flex-row items-center gap-1 self-start py-1"
               onPress={() => Linking.openURL(homepage)}>
               <Ionicons name="globe-outline" size={14} color="#60A5FA" />
 
-              <Text className="!text-[13px] font-medium !text-blue-400">Official website</Text>
+              <Text className="!text-[13px] font-medium !text-blue-400">
+                {t('common.officialWebsite')}
+              </Text>
             </Pressable>
           ) : null}
         </View>
@@ -90,7 +94,7 @@ export const MediaInfoShell = (props: MediaInfoShellProps) => {
       </View>
 
       <View className="gap-2">
-        <SectionTitle title="Storyline" />
+        <SectionTitle title={t('detail.storyline')} />
 
         <ExpandableText numberOfLines={4} textClassname="!text-md leading-6 !text-neutral-400">
           {overview}

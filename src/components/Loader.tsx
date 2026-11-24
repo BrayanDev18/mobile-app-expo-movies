@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { Screen } from './Screen';
+import { useTranslate } from '@/translate';
 
 const SIZE = 70;
 const STROKE_WIDTH = 4;
@@ -23,6 +24,8 @@ const ROTATION_MS = 900;
 // SVG re-render and no visible seam at the loop point. Spinners keep spinning
 // under Reduce Motion (like the native ones) because they signal progress.
 export const Loader = () => {
+  const { t } = useTranslate();
+
   const rotation = useSharedValue(0);
 
   useEffect(() => {
@@ -49,7 +52,7 @@ export const Loader = () => {
     <Screen>
       <View
         accessibilityRole="progressbar"
-        accessibilityLabel="Loading"
+        accessibilityLabel={t('common.loading')}
         accessibilityLiveRegion="polite"
         className="h-full w-full items-center justify-center">
         <View style={{ width: SIZE, height: SIZE }}>

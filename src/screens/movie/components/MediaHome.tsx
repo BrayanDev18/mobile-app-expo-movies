@@ -12,6 +12,7 @@ import { HomeSkeleton } from './HomeSkeleton';
 import { MovieHorizontalList } from './MovieHorizontalList';
 import { HERO_ITEM_SIZE, MoviesHeader } from './MoviesHeader';
 import { RankedCarousel } from './RankedCarousel';
+import { useTranslate } from '@/translate';
 
 // Rails past the last visible one that are activated (fetched) ahead of the
 // scroll, so a rail's data is usually in before it scrolls into view.
@@ -46,11 +47,7 @@ const PendingRail = ({ section }: { section: HomeSection }) => (
 
     <View className="flex-row gap-3.5 overflow-hidden">
       {[0, 1, 2].map((index) => (
-        <View
-          key={index}
-          className="bg-white/10"
-          style={RAIL_CARD[section.variant ?? 'poster']}
-        />
+        <View key={index} className="bg-white/10" style={RAIL_CARD[section.variant ?? 'poster']} />
       ))}
     </View>
   </View>
@@ -75,6 +72,8 @@ export const MediaHome = (props: MediaHomeProps) => {
   } = props;
 
   const scrollX = useSharedValue(0);
+  const { t } = useTranslate();
+
   const { bottom } = useSafeAreaInsets();
   const { refreshing, onRefresh } = usePullToRefresh();
 
@@ -189,7 +188,7 @@ export const MediaHome = (props: MediaHomeProps) => {
             className="gap-8 px-3">
             {extraSections}
 
-            <RankedCarousel title="All-Time Greats" movies={topRated.slice(0, 10)} />
+            <RankedCarousel title={t('home.allTimeGreats')} movies={topRated.slice(0, 10)} />
           </View>
         }
       />

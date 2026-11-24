@@ -4,6 +4,7 @@ import { prefetchMediaDetails } from '@/hooks';
 import { openMediaDetails } from '@/utils';
 import { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 interface MediaListRowProps {
   movie: MovieProps;
@@ -35,13 +36,15 @@ const RatingDots = ({ rating }: { rating: number }) => {
 };
 
 export const MediaListRow = ({ movie, rank, subtitle, trailing }: MediaListRowProps) => {
+  const { t } = useTranslate();
+
   const year = movie.releaseDate?.slice(0, 4);
-  const mediaLabel = movie.mediaType === 'tv' ? 'Series' : 'Movie';
+  const mediaLabel = movie.mediaType === 'tv' ? t('common.series') : t('common.movie');
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`View details for ${movie.title}`}
+      accessibilityLabel={t('common.viewDetails', { title: movie.title })}
       className="flex-row items-center py-3"
       onPressIn={() => prefetchMediaDetails(movie)}
       onPress={() => openMediaDetails(movie)}>
@@ -58,7 +61,7 @@ export const MediaListRow = ({ movie, rank, subtitle, trailing }: MediaListRowPr
         size="w92"
         style={{ width: 62, height: 72, borderRadius: 8 }}
         contentFit="cover"
-        accessibilityLabel={`${movie.title} poster`}
+        accessibilityLabel={t('common.poster', { title: movie.title })}
       />
 
       <View className="ml-4 flex-1 gap-2">

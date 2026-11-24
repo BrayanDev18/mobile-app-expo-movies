@@ -2,8 +2,11 @@ import { useHomeSections, useLazyRails, useMoviesByCategory, useTrendingPeople }
 import { ReactNode } from 'react';
 import { MediaHome } from './MediaHome';
 import { PeopleHorizontalList } from './PeopleHorizontalList';
+import { useTranslate } from '@/translate';
 
 export const MoviesHome = ({ header }: { header: ReactNode }) => {
+  const { t } = useTranslate();
+
   const { activeRails, activateRail } = useLazyRails();
   const { heroMovies, sections, isHeroLoading, isHeroError, refetchHero } =
     useHomeSections(activeRails);
@@ -23,7 +26,7 @@ export const MoviesHome = ({ header }: { header: ReactNode }) => {
       topRated={topRated}
       extraSections={
         trendingPeople.length > 0 ? (
-          <PeopleHorizontalList title="Trending People" people={trendingPeople} />
+          <PeopleHorizontalList title={t('home.trendingPeople')} people={trendingPeople} />
         ) : undefined
       }
     />

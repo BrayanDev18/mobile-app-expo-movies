@@ -1,5 +1,6 @@
 import { SERIES_GENRES, SERIES_NETWORKS } from '@/constants';
 import { selectLastViewed, useViewedMediaStore } from '@/stores';
+import { useTranslate } from '@/translate';
 import { claimUnique, lazyRail } from '@/utils';
 import { useQueries } from '@tanstack/react-query';
 import { useTrending } from '../../../hooks/useTrending';
@@ -17,6 +18,7 @@ const newSeasonStartDate = () => {
 };
 
 export const useSeriesHomeSections = (activeRails: ReadonlySet<string>) => {
+  const { t } = useTranslate();
   const {
     trending: heroMedia,
     isLoading: isHeroLoading,
@@ -60,57 +62,57 @@ export const useSeriesHomeSections = (activeRails: ReadonlySet<string>) => {
   const sections: HomeSection[] = [
     {
       key: 'recommended',
-      title: lastViewed ? `Because you watched ${lastViewed.title}` : '',
+      title: lastViewed ? t('home.becauseYouWatched', { title: lastViewed.title }) : '',
       movies: lastViewed ? claimUnique(recommendedSeries, claimed) : [],
       isPending: isRecommendedLoading,
     },
     {
       key: 'trending',
-      title: 'Trending This Week',
+      title: t('home.trendingThisWeek'),
       movies: claimUnique(trendingSeries, claimed),
       ranked: true,
       isPending: isTrendingLoading,
     },
     {
       key: 'airingToday',
-      title: 'New Episodes Today',
+      title: t('home.newEpisodesToday'),
       movies: claimUnique(airingToday, claimed),
       isPending: isAiringTodayLoading,
     },
     {
       key: 'onTheAir',
-      title: 'On The Air This Week',
+      title: t('home.onTheAirThisWeek'),
       movies: claimUnique(onTheAir, claimed),
       isPending: isOnTheAirLoading,
     },
     {
       key: 'newSeason',
-      title: 'New This Season',
+      title: t('home.newThisSeason'),
       ...lazyRail(newSeasonRow, claimed),
       variant: 'backdrop' as const,
       cardWidth: 310,
     },
     ...SERIES_NETWORKS.map((network, index) => ({
       key: `network-${network.id}`,
-      title: network.title,
+      title: t(network.titleKey),
       ...lazyRail(discoverRows[index], claimed),
       seeAll: { networkId: network.id },
     })),
     ...SERIES_GENRES.map((genre, index) => ({
       key: `genre-${genre.id}`,
-      title: genre.title,
+      title: t(genre.titleKey),
       ...lazyRail(discoverRows[SERIES_NETWORKS.length + index], claimed),
       seeAll: { genreId: genre.id },
     })),
     {
       key: 'anime',
-      title: 'Anime',
+      title: t('home.anime'),
       ...lazyRail(animeRow, claimed),
       seeAll: { genreId: 16, originalLanguage: 'ja', minVotes: 300 },
     },
     {
       key: 'limited',
-      title: 'Limited Series',
+      title: t('home.limitedSeries'),
       ...lazyRail(limitedRow, claimed),
       seeAll: { showType: 2, minVotes: 200 },
     },

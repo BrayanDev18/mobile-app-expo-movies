@@ -1,12 +1,14 @@
-export const SERIES_GENRES = [
-  { id: 18, title: 'Drama' },
-  { id: 35, title: 'Comedy' },
-  { id: 80, title: 'Crime' },
-  { id: 10765, title: 'Sci-Fi & Fantasy' },
-] as const;
+import type { TxKeyPath } from '@/translate';
 
-export const SERIES_NETWORKS = [
-  { id: 213, title: 'Netflix Originals' },
-  { id: 49, title: 'HBO' },
-  { id: 2552, title: 'Apple TV+' },
-] as const;
+export const SERIES_GENRES: readonly { id: number; titleKey: TxKeyPath }[] = [
+  { id: 18, titleKey: 'home.genres.drama' },
+  { id: 35, titleKey: 'home.genres.comedy' },
+  { id: 80, titleKey: 'home.genres.crime' },
+  { id: 10765, titleKey: 'home.genres.sciFiFantasy' },
+];
+
+export const SERIES_NETWORKS: readonly { id: number; titleKey: TxKeyPath }[] = [
+  { id: 213, titleKey: 'home.networks.netflixOriginals' },
+  { id: 49, titleKey: 'home.networks.hbo' },
+  { id: 2552, titleKey: 'home.networks.appleTv' },
+];

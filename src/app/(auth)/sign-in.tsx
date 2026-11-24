@@ -3,7 +3,7 @@ import { Screen, Text } from '@/components';
 const SigninScreen = () => {
   return (
     <Screen>
-      <Text>Hola</Text>
+      <Text tx="auth.signIn" />
     </Screen>
   );
 };
