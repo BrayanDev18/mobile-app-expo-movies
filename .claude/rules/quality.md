@@ -110,16 +110,21 @@ Minimum 44×44px on all interactive elements (Apple HIG). Small icons must have 
 
 ## Screen Entrance Animations
 
-New screens should animate in — never appear instantly. Use Reanimated entering props:
+A screen's first content may fade in once. Never replay an entrance on frequent switches (tabs, scopes, chips, filters) — those swap instantly. Entrances use a short ease-out timing, never `.springify()` (springs are for gestures). See the Animations section in `styling.md`.
 
 ```tsx
-import Animated, { FadeIn, FadeInDown, SlideInRight } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInDown } from 'react-native-reanimated';
 
-// Detail screen content wrapper
-<Animated.View entering={FadeIn.duration(300)}>
+const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 
-// Staggered section list
-<Animated.View entering={FadeInDown.delay(index * 80).springify()}>
+// Detail screen content wrapper (first load only)
+<Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)}>
+
+// Staggered section list — 30–80ms per item, capped
+<Animated.View entering={FadeInDown.delay(Math.min(index, 8) * 50).duration(250).easing(EASE_OUT)}>
+
+// BAD — re-runs on every tab switch
+<Animated.View key={activeTab} entering={FadeIn.duration(250)}>
 ```
 
 ## Haptic Feedback

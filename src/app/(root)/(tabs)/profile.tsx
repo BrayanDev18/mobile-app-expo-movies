@@ -12,6 +12,7 @@ import * as Haptics from 'expo-haptics';
 import { ReactNode, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, TextInput, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { EASE_OUT } from '@/constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const LANGUAGES = [
@@ -199,7 +200,7 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
-        <Animated.View entering={FadeIn.duration(300)} className="px-4">
+        <Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)} className="px-4">
           <View className="pb-4">
             <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
               Settings

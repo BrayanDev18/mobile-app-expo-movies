@@ -5,8 +5,7 @@ import { formatDate } from '@/utils';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { Pressable, ScrollView, View } from 'react-native';
 
 interface CastBiographyProps {
   cast: CastDetailsProps;
@@ -40,8 +39,7 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
 
   return (
     <>
-      <Animated.ScrollView
-        entering={FadeInDown.springify()}
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ gap: 20 }}>
         {aliases?.length ? (
@@ -92,7 +90,7 @@ export const CastBiography = ({ cast, images }: CastBiographyProps) => {
         {images?.length ? (
           <CastGallery images={images} castId={cast.id} handleOpenModal={handleOpenModal} />
         ) : null}
-      </Animated.ScrollView>
+      </ScrollView>
 
       <ImagePreviewModal
         visible={openModalGallery}

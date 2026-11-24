@@ -1,4 +1,5 @@
 import { EmptyState, ErrorState, FlashList, Loader, RatingBadge, Screen, Text } from '@/components';
+import { EASE_OUT } from '@/constants';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
 import { formatDate, formatDuration, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
@@ -23,7 +24,10 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
     .join(' · ');
 
   return (
-    <Animated.View entering={FadeInDown.delay(Math.min(index, 8) * 60).springify()}>
+    <Animated.View
+      entering={FadeInDown.delay(Math.min(index, 8) * 50)
+        .duration(250)
+        .easing(EASE_OUT)}>
       <View className="gap-2.5 py-4">
         <View className="flex-row items-center gap-3">
           <Image

@@ -1,10 +1,11 @@
+import { EASE_OUT } from '@/constants';
 import { cn } from '@/utils';
 import { Pressable } from 'react-native';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
   useDerivedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 
 interface TabsProps {
@@ -20,11 +21,9 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const Tab = (props: TabsProps) => {
   const { title, isActive, onPress, className, adaptableWidth } = props;
 
+  // Discrete state change, no finger momentum — timing, not a spring.
   const progress = useDerivedValue(() => {
-    return withSpring(isActive ? 1 : 0, {
-      damping: 30,
-      stiffness: 200,
-    });
+    return withTiming(isActive ? 1 : 0, { duration: 180, easing: EASE_OUT });
   }, [isActive]);
 
   const animatedStyle = useAnimatedStyle(() => {

@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { EASE_OUT } from '@/constants';
 
 const CollectionScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,7 +26,7 @@ const CollectionScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: 56, paddingBottom: 40, paddingHorizontal: 16 }}>
-        <Animated.View entering={FadeIn.duration(300)}>
+        <Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)}>
           <View>
             <Image
               source={{ uri: tmdbImage(collection.backdrop, 'w780') ?? undefined }}

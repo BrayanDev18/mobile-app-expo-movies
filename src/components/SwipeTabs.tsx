@@ -1,3 +1,4 @@
+import { EASE_OUT } from '@/constants';
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -30,7 +31,7 @@ const useTabs = () => {
 
 export const TabsList = ({ children }: { children: ReactNode }) => (
   <Animated.View
-    entering={FadeInDown.delay(100).springify()}
+    entering={FadeInDown.duration(250).easing(EASE_OUT)}
     className="flex-row gap-2 rounded-full bg-neutral-800/50 p-1.5">
     {children}
   </Animated.View>

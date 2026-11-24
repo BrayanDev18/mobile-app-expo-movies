@@ -1,6 +1,6 @@
 import { BlurredBackdrop, ChipRow, EmptyState, Input, SectionTitle, Tab, Text } from '@/components';
 import { useDebouncedValue, usePullToRefresh, useSearchMulti, useTrending } from '@/hooks';
-import { MEDIA_SCOPES } from '@/constants';
+import { EASE_OUT, MEDIA_SCOPES } from '@/constants';
 import { MediaType } from '@/interfaces';
 import {
   CollectionsRow,
@@ -123,10 +123,11 @@ const ExploreScreen = () => {
             )}
           </View>
         ) : (
-          <Animated.View entering={FadeIn.duration(300)} style={{ gap: 32 }}>
+          <Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)} style={{ gap: 32 }}>
             <ChipRow items={MEDIA_SCOPES} active={scope} onSelect={setScope} />
 
-            <Animated.View key={scope} entering={FadeIn.duration(250)} style={{ gap: 32 }}>
+            {/* Keyed so scope switches reset carousels; no entrance on a frequent toggle. */}
+            <View key={scope} style={{ gap: 32 }}>
               <View className="gap-3">
                 <GenreChips mediaType={scope} />
 
@@ -148,7 +149,7 @@ const ExploreScreen = () => {
               )}
 
               {scope === 'movie' && <CollectionsRow title="Sagas & collections" />}
-            </Animated.View>
+            </View>
           </Animated.View>
         )}
       </ScrollView>

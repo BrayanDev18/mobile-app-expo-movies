@@ -7,7 +7,6 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 type CastTab = 'actors' | 'producers' | 'directors' | 'writers';
 
@@ -70,7 +69,8 @@ const CastList = () => {
 
         <ChipRow items={TABS} active={activeTab} onSelect={setActiveTab} scrollable className="" />
 
-        <Animated.View key={activeTab} entering={FadeIn.duration(250)} className="flex-1">
+        {/* Keyed so each role tab starts scrolled to the top; no fade on a frequent toggle. */}
+        <View key={activeTab} className="flex-1">
           <FlashList
             data={members}
             scrollEventThrottle={16}
@@ -81,7 +81,7 @@ const CastList = () => {
             ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
             ListEmptyComponent={<EmptyState icon="Users" message="Nothing listed here" />}
           />
-        </Animated.View>
+        </View>
       </View>
     </Screen>
   );

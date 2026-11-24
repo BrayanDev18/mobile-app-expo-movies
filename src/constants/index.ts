@@ -3,3 +3,4 @@ export * from './HomeSections';
 export * from './MediaScopes';
 export * from './SeriesSections';
 export * from './MovieApiRoutes';
+export * from './Motion';

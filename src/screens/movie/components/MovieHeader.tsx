@@ -6,6 +6,7 @@ import Animated, {
   interpolate,
   SharedValue,
   useAnimatedStyle,
+  useReducedMotion,
 } from 'react-native-reanimated';
 
 const { height: heightScreen } = Dimensions.get('screen');
@@ -19,21 +20,40 @@ export const MovieHeader = ({
   poster: string | null;
   scrollY: SharedValue<number>;
 }) => {
-  const backgroundStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: interpolate(scrollY.value, [-300, 0], [1.35, 1], Extrapolation.CLAMP) },
-    ],
-  }));
+  // Scroll-driven interpolations ignore the system setting, so gate movement
+  // here: with Reduce Motion on, keep the opacity fade and drop the parallax.
+  const reduceMotion = useReducedMotion();
 
-  const posterStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(scrollY.value, [-300, 0, 400], [-40, 0, 90], Extrapolation.CLAMP),
-      },
-      { scale: interpolate(scrollY.value, [0, 400], [1, 0.9], Extrapolation.CLAMP) },
-    ],
-    opacity: interpolate(scrollY.value, [0, 350], [1, 0.4], Extrapolation.CLAMP),
-  }));
+  const backgroundStyle = useAnimatedStyle(() => {
+    if (reduceMotion) return { transform: [] };
+
+    return {
+      transform: [
+        { scale: interpolate(scrollY.value, [-300, 0], [1.35, 1], Extrapolation.CLAMP) },
+      ],
+    };
+  });
+
+  const posterStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(scrollY.value, [0, 350], [1, 0.4], Extrapolation.CLAMP);
+
+    if (reduceMotion) return { opacity, transform: [] };
+
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollY.value,
+            [-300, 0, 400],
+            [-40, 0, 90],
+            Extrapolation.CLAMP
+          ),
+        },
+        { scale: interpolate(scrollY.value, [0, 400], [1, 0.9], Extrapolation.CLAMP) },
+      ],
+      opacity,
+    };
+  });
 
   return (
     <View style={{ height: heightScreen * 0.53 }} className="relative items-center justify-center">

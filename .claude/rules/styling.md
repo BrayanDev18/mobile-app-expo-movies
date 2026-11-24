@@ -9,7 +9,7 @@ Use NativeWind (Tailwind CSS for RN) via `className` prop — not inline `style`
 
 ## Design Identity
 
-Cinematic, dark-first, minimalist premium aesthetic. Photography is the hero — UI supports it, never competes. Depth comes from blur and overlays, not shadows. Motion is fluid and spring-based. Every screen should feel spacious and high-contrast.
+Cinematic, dark-first, minimalist premium aesthetic. Photography is the hero — UI supports it, never competes. Depth comes from blur and overlays, not shadows. Motion is restrained and purposeful: instant for frequent actions, short ease-out for entrances, springs only when a finger drives it. Every screen should feel spacious and high-contrast.
 
 ## Color System
 
@@ -78,9 +78,15 @@ No traditional shadows/elevation. Depth is achieved through:
 
 ## Animations
 
-- **Scroll-driven**: `useAnimatedScrollHandler` + `interpolate` for carousel scale (0.85→1→0.85), rotation (±8°), parallax (±20px)
-- **Spring transitions**: `withSpring` with `{ damping: 30, stiffness: 200 }` for tabs/buttons
-- **Entrance**: `FadeInDown.springify()` or `FadeInDown.delay(100).springify()`
+Decide whether something should animate before deciding how. Full rule catalog: `.claude/skills/review-animations/STANDARDS.md` (web-oriented) and the `expo:expo-animation` skill (React Native).
+
+- **Gate by frequency**: tab, scope, chip and filter switches (100+/day) get **no** animation — swap the content instantly. Never put `entering` on a view keyed by a tab/scope value; a `key` used only to reset scroll/state is fine.
+- **Curves**: `EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1)` for entering/exiting, `EASE_IN_OUT = Easing.bezier(0.77, 0, 0.175, 1)` for on-screen movement. Never ease-in on UI. UI animations stay under 300ms.
+- **Discrete state changes** (tab highlight, toggles, press feedback): `withTiming` 150–200ms with `EASE_OUT` (press feedback 100–150ms) — not a spring.
+- **Springs only when a finger carries momentum** (drag, fling, release), in the `{ duration, dampingRatio }` form: `{ duration: 400, dampingRatio: 0.8, velocity }` for snap-back, `{ duration: 300, dampingRatio: 0.8, velocity }` for sheets.
+- **Entrances** (occasional: a screen's first load, modals, empty → content): `FadeIn` / `FadeInDown` with `.duration(250–300).easing(EASE_OUT)` — not `.springify()`. Staggers 30–80ms per item, capped at ~8 items.
+- **Scroll-driven**: `useAnimatedScrollHandler` + `interpolate` for carousel scale (0.85→1→0.85), rotation (±8°), parallax (±20px). Put `translate` first in the transform array. When `useReducedMotion()` is true, flatten movement and keep opacity.
+- **No continuous/looping animations** other than loaders — per-frame work overheated devices.
 - **Carousels**: `snapToInterval={WIDTH + SPACING}`, `decelerationRate="fast"`
 - Always use `scrollEventThrottle={16}`
 - Use React Native Reanimated — never `Animated` from react-native

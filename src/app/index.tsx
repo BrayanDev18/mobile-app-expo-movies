@@ -1,4 +1,5 @@
 import { Button, Icon, Text } from '@/components';
+import { EASE_OUT } from '@/constants';
 import { useTrending } from '@/hooks';
 import { useProfileStore } from '@/stores';
 import { IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
@@ -11,6 +12,10 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const COLUMNS = 3;
+
+// 21 tiles × 25ms keeps the whole backdrop under ~0.5s of stagger; the copy and
+// CTA lead so the button is usable almost immediately.
+const TILE_STAGGER_MS = 25;
 
 const TILE_HEIGHTS = [210, 150, 180, 160, 220, 140];
 
@@ -79,7 +84,9 @@ const MainIndex = () => {
               {column.map((tile, tileIndex) => (
                 <Animated.View
                   key={`${tile.uri}-${tileIndex}`}
-                  entering={FadeIn.delay((tileIndex * COLUMNS + columnIndex) * 60).duration(400)}>
+                  entering={FadeIn.delay((tileIndex * COLUMNS + columnIndex) * TILE_STAGGER_MS)
+                    .duration(400)
+                    .easing(EASE_OUT)}>
                   <Image
                     source={{ uri: tmdbImage(tile.uri, 'w342') ?? undefined }}
                     style={{ width: '100%', height: tile.height, borderRadius: 12 }}
@@ -101,7 +108,9 @@ const MainIndex = () => {
       />
 
       <View style={{ paddingBottom: bottom + 24 }} className="flex-1 justify-end gap-6 px-6">
-        <Animated.View entering={FadeInDown.delay(350).duration(500)} className="gap-2">
+        <Animated.View
+          entering={FadeInDown.delay(150).duration(300).easing(EASE_OUT)}
+          className="gap-2">
           <View className="h-1 w-10 rounded-full bg-blue-500" />
 
           <Text className="font-black" style={{ fontSize: 56, lineHeight: 58, letterSpacing: -2 }}>
@@ -113,7 +122,9 @@ const MainIndex = () => {
           </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(500).duration(500)} className="gap-3">
+        <Animated.View
+          entering={FadeInDown.delay(230).duration(300).easing(EASE_OUT)}
+          className="gap-3">
           {FEATURES.map((feature) => (
             <View key={feature.icon} className="flex-row items-center gap-3">
               <Icon name={feature.icon} size={18} color="#60A5FA" />
@@ -123,7 +134,9 @@ const MainIndex = () => {
           ))}
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(650).duration(500)} className="gap-3">
+        <Animated.View
+          entering={FadeInDown.delay(320).duration(300).easing(EASE_OUT)}
+          className="gap-3">
           <Button
             title="Get started"
             onPress={() => {

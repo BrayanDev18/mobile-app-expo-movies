@@ -8,7 +8,7 @@ import {
   Text,
 } from '@/components';
 import { MediaType, MyListFlag, SavedMediaProps } from '@/interfaces';
-import { MEDIA_SCOPES } from '@/constants';
+import { EASE_IN_OUT, EASE_OUT, MEDIA_SCOPES } from '@/constants';
 import { useMyListStore } from '@/stores';
 import { MediaListRow } from '@/screens/movie/components';
 import * as Haptics from 'expo-haptics';
@@ -97,7 +97,7 @@ const MyListScreen = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
-          <Animated.View entering={FadeIn.duration(300)}>
+          <Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)}>
             <View className="gap-1 px-4 pb-5">
               <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
                 My List
@@ -130,16 +130,16 @@ const MyListScreen = () => {
             )}
 
             {listItems.length === 0 ? (
-              <Animated.View key={activeList} entering={FadeIn.duration(250)} className="py-8">
+              <View className="py-8">
                 <EmptyState icon="ListX" message={list.emptyMessage} />
-              </Animated.View>
+              </View>
             ) : (
               <View className="px-4">
                 {filtered.map((movie, index) => (
                   <Animated.View
                     key={`${movie.mediaType ?? 'movie'}-${movie.id}`}
-                    exiting={FadeOut.duration(200)}
-                    layout={LinearTransition.springify().damping(30).stiffness(200)}
+                    exiting={FadeOut.duration(200).easing(EASE_OUT)}
+                    layout={LinearTransition.duration(250).easing(EASE_IN_OUT)}
                     className={index < filtered.length - 1 ? 'border-b border-white/10' : ''}>
                     <MediaListRow
                       movie={movie}
