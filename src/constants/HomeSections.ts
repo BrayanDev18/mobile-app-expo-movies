@@ -1,10 +1,12 @@
-export const HOME_GENRES = [
-  { id: 28, title: 'Action' },
-  { id: 35, title: 'Comedy' },
-  { id: 16, title: 'Animation' },
-] as const;
+import type { TxKeyPath } from '@/translate';
 
-export const HOME_PROVIDERS = [
-  { id: 8, title: 'Popular on Netflix' },
-  { id: 337, title: 'Popular on Disney+' },
-] as const;
+export const HOME_GENRES: readonly { id: number; titleKey: TxKeyPath }[] = [
+  { id: 28, titleKey: 'home.genres.action' },
+  { id: 35, titleKey: 'home.genres.comedy' },
+  { id: 16, titleKey: 'home.genres.animation' },
+];
+
+export const HOME_PROVIDERS: readonly { id: number; titleKey: TxKeyPath }[] = [
+  { id: 8, titleKey: 'home.providers.popularOnNetflix' },
+  { id: 337, titleKey: 'home.providers.popularOnDisney' },
+];

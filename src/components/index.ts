@@ -10,6 +10,7 @@ export * from './RatingBadge';
 export * from './SectionTitle';
 export * from './ImagePreviewModal';
 export * from './Input';
+export * from './PhotoPreviewModal';
 export * from './Loader';
 export * from './RowBack';
 export * from './Screen';

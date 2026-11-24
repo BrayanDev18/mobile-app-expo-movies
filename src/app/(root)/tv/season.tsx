@@ -1,20 +1,36 @@
 import { EmptyState, ErrorState, FlashList, Loader, RatingBadge, Screen, Text } from '@/components';
+import { EASE_OUT } from '@/constants';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
-import { formatDate, formatDuration, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
+import {
+  formatDate,
+  formatDuration,
+  formatMinutes,
+  IMAGE_PLACEHOLDER,
+  openEpisode,
+  tmdbImage,
+} from '@/utils';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useTranslate } from '@/translate';
 
 const episodeDuration = (runtime: number | null) => {
   if (!runtime) return null;
 
-  return runtime < 60 ? `${runtime}m` : formatDuration(runtime);
+  return runtime < 60 ? formatMinutes(runtime) : formatDuration(runtime);
 };
 
-const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number }) => {
+interface EpisodeRowProps {
+  episode: TvEpisodeProps;
+  index: number;
+  onPress: (episode: TvEpisodeProps) => void;
+}
+
+const EpisodeRow = ({ episode, index, onPress }: EpisodeRowProps) => {
+  const { t } = useTranslate();
   const meta = [
     episode.airDate ? formatDate(episode.airDate) : null,
     episodeDuration(episode.runtime),
@@ -23,8 +39,19 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
     .join(' · ');
 
   return (
-    <Animated.View entering={FadeInDown.delay(Math.min(index, 8) * 60).springify()}>
-      <View className="gap-2.5 py-4">
+    <Animated.View
+      entering={FadeInDown.delay(Math.min(index, 8) * 50)
+        .duration(250)
+        .easing(EASE_OUT)}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('detail.episodeRow', {
+          number: episode.episodeNumber,
+          name: episode.name,
+        })}
+        accessibilityHint={t('detail.opensEpisode')}
+        onPress={() => onPress(episode)}
+        className="min-h-11 gap-2.5 py-4 active:opacity-70">
         <View className="flex-row items-center gap-3">
           <Image
             source={{ uri: tmdbImage(episode.still, 'w342') ?? undefined }}
@@ -32,7 +59,7 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
             contentFit="cover"
             cachePolicy="memory-disk"
             placeholder={IMAGE_PLACEHOLDER}
-            accessibilityLabel={`${episode.name} still`}
+            accessibilityLabel={t('common.still', { name: episode.name })}
           />
 
           <View className="flex-1 gap-1">
@@ -51,7 +78,7 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
             {episode.overview}
           </Text>
         ) : null}
-      </View>
+      </Pressable>
     </Animated.View>
   );
 };
@@ -62,20 +89,32 @@ const SeasonScreen = () => {
     season: string;
     seriesTitle?: string;
   }>();
+  const { t } = useTranslate();
 
   const { season: seasonDetails, isLoading, isError, refetch } = useTvSeason(+id, +season);
 
+  const onEpisodePress = useCallback(
+    (episode: TvEpisodeProps) =>
+      openEpisode({
+        seriesId: +id,
+        seasonNumber: +season,
+        episodeNumber: episode.episodeNumber,
+        seriesTitle,
+      }),
+    [id, season, seriesTitle]
+  );
+
   const renderItem = useCallback(
     ({ item, index }: { item: TvEpisodeProps; index: number }) => (
-      <EpisodeRow episode={item} index={index} />
+      <EpisodeRow episode={item} index={index} onPress={onEpisodePress} />
     ),
-    []
+    [onEpisodePress]
   );
 
   if (isLoading) return <Loader />;
 
   if (isError || !seasonDetails) {
-    return <ErrorState retryLabel="Retry loading season details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retrySeason')} onRetry={() => refetch()} />;
   }
 
   const year = seasonDetails.airDate?.slice(0, 4);
@@ -98,7 +137,7 @@ const SeasonScreen = () => {
                   contentFit="cover"
                   cachePolicy="memory-disk"
                   placeholder={IMAGE_PLACEHOLDER}
-                  accessibilityLabel={`${seasonDetails.name} poster`}
+                  accessibilityLabel={t('common.poster', { title: seasonDetails.name })}
                 />
 
                 <View className="flex-1 gap-1">
@@ -113,7 +152,7 @@ const SeasonScreen = () => {
                   </Text>
 
                   <Text className="!text-[13px] !text-neutral-400">
-                    {[year, `${seasonDetails.episodes.length} episodes`]
+                    {[year, t('common.episodeCount', { count: seasonDetails.episodes.length })]
                       .filter(Boolean)
                       .join(' · ')}
                   </Text>
@@ -127,7 +166,7 @@ const SeasonScreen = () => {
               ) : null}
             </View>
           }
-          ListEmptyComponent={<EmptyState icon="Film" message="No episodes yet" />}
+          ListEmptyComponent={<EmptyState icon="Film" message={t('detail.noEpisodes')} />}
           renderItem={renderItem}
         />
       </View>

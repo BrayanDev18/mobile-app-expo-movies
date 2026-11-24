@@ -1,4 +1,5 @@
 import { Text } from '@/components';
+import { prefetchMediaDetails } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { formatDate, IMAGE_PLACEHOLDER, openMediaDetails, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
@@ -11,6 +12,7 @@ import Animated, {
   SharedValue,
   useAnimatedScrollHandler,
   useAnimatedStyle,
+  useReducedMotion,
 } from 'react-native-reanimated';
 
 interface MoviesHeaderProps {
@@ -62,8 +64,12 @@ export const MoviesHeader = (props: MoviesHeaderProps) => {
 
 const ImageItem = (props: ImageItemProps) => {
   const { image, index, scrollX } = props;
+  // With Reduce Motion on, cards stay flat; the dimming overlay still marks the active one.
+  const reduceMotion = useReducedMotion();
 
   const imageStyle = useAnimatedStyle(() => {
+    if (reduceMotion) return { transform: [] };
+
     const inputRange = [index - 1, index, index + 1];
 
     const scale = interpolate(scrollX.value, inputRange, [0.85, 1, 0.85], Extrapolation.CLAMP);
@@ -71,7 +77,8 @@ const ImageItem = (props: ImageItemProps) => {
     const translateY = interpolate(scrollX.value, inputRange, [20, 0, 20], Extrapolation.CLAMP);
 
     return {
-      transform: [{ scale }, { rotate: `${rotate}deg` }, { translateY }],
+      // Translate first so the offset isn't scaled and rotated with the card.
+      transform: [{ translateY }, { scale }, { rotate: `${rotate}deg` }],
     };
   });
 
@@ -88,6 +95,7 @@ const ImageItem = (props: ImageItemProps) => {
 
   return (
     <Pressable
+      onPressIn={() => prefetchMediaDetails(image)}
       onPress={() => openMediaDetails(image)}
       style={{ width: IMAGE_WIDTH, height: IMAGE_HEIGHT }}>
       <Animated.View style={[{ flex: 1 }, imageStyle]}>

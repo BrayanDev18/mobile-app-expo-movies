@@ -7,9 +7,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { EASE_OUT } from '@/constants';
+import { useTranslate } from '@/translate';
 
 const CollectionScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useTranslate();
+
   const { collection, isLoading } = useCollection(id ? +id : undefined);
 
   if (isLoading) return <Loader />;
@@ -25,7 +29,7 @@ const CollectionScreen = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: 56, paddingBottom: 40, paddingHorizontal: 16 }}>
-        <Animated.View entering={FadeIn.duration(300)}>
+        <Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)}>
           <View>
             <Image
               source={{ uri: tmdbImage(collection.backdrop, 'w780') ?? undefined }}
@@ -33,7 +37,7 @@ const CollectionScreen = () => {
               contentFit="cover"
               cachePolicy="memory-disk"
               placeholder={IMAGE_PLACEHOLDER}
-              accessibilityLabel={`${collection.name} backdrop`}
+              accessibilityLabel={t('common.backdrop', { name: collection.name })}
             />
 
             <LinearGradient
@@ -52,7 +56,9 @@ const CollectionScreen = () => {
               </Text>
 
               <Text className="!text-[13px] !text-neutral-400">
-                {[`${collection.parts.length} movies`, yearRange].filter(Boolean).join(' · ')}
+                {[t('common.movieCount', { count: collection.parts.length }), yearRange]
+                  .filter(Boolean)
+                  .join(' · ')}
               </Text>
             </View>
           </View>

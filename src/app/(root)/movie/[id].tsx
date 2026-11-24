@@ -1,8 +1,9 @@
-import { ErrorState, Loader } from '@/components';
+import { ErrorState } from '@/components';
 import { useMovieFull } from '@/hooks';
 import {
   MediaActionsBar,
   MediaDetailShell,
+  MediaDetailSkeleton,
   MovieCastAndCrew,
   MovieCollectionBanner,
   MovieComments,
@@ -16,9 +17,11 @@ import {
 import { useViewedMediaStore } from '@/stores';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
+import { useTranslate } from '@/translate';
 
 const MovieDescriptionScreen = () => {
-  const { id } = useLocalSearchParams();
+  const { id, poster } = useLocalSearchParams<{ id: string; poster?: string }>();
+  const { t } = useTranslate();
   const recordView = useViewedMediaStore((state) => state.recordView);
 
   const { movie, isLoading, isError, refetch } = useMovieFull(+id);
@@ -30,10 +33,17 @@ const MovieDescriptionScreen = () => {
     }
   }, [details?.id, details?.title, recordView]);
 
-  if (isLoading) return <Loader />;
+  // Same shell as the loaded state, so the header stays mounted when data lands
+  if (isLoading) {
+    return (
+      <MediaDetailShell poster={poster ?? null}>
+        <MediaDetailSkeleton />
+      </MediaDetailShell>
+    );
+  }
 
   if (isError || !movie || !details) {
-    return <ErrorState retryLabel="Retry loading movie details" onRetry={() => refetch()} />;
+    return <ErrorState retryLabel={t('errors.retryMovie')} onRetry={() => refetch()} />;
   }
 
   const { trailers, cast, images, hasGallery, reviews, related, watchProviders } = movie;

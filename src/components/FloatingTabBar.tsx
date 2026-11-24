@@ -1,3 +1,4 @@
+import { EASE_OUT } from '@/constants';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { BlurView } from 'expo-blur';
 import * as Haptics from 'expo-haptics';
@@ -90,7 +91,7 @@ export const FloatingTabBar = ({ state, descriptors, navigation }: BottomTabBarP
               return (
                 <Animated.View
                   key={route.key}
-                  layout={LinearTransition.springify().damping(40).stiffness(150)}
+                  layout={LinearTransition.duration(200).easing(EASE_OUT)}
                   style={{ flex: isFocused ? 2 : 1 }}>
                   <Pressable
                     accessibilityRole="button"
@@ -119,7 +120,7 @@ export const FloatingTabBar = ({ state, descriptors, navigation }: BottomTabBarP
                     />
 
                     {isFocused && (
-                      <Animated.View entering={FadeIn.duration(300)}>
+                      <Animated.View entering={FadeIn.duration(150).easing(EASE_OUT)}>
                         <Text numberOfLines={1} className="!text-[13px] font-semibold">
                           {label}
                         </Text>

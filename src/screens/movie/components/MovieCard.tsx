@@ -1,10 +1,12 @@
 import { RatingBadge, Text } from '@/components';
+import { prefetchMediaDetails } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { cn, formatDate, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 interface MovieCardProps {
   onPress?: () => void;
@@ -18,6 +20,7 @@ interface MovieCardProps {
 
 export const MovieCard = (props: MovieCardProps) => {
   const { onPress, variant = 'poster', width, height, movie, className } = props;
+  const { t } = useTranslate();
 
   const isBackdrop = variant === 'backdrop';
 
@@ -30,7 +33,8 @@ export const MovieCard = (props: MovieCardProps) => {
       style={{ width: cardWidth }}
       className={cn(className, 'relative')}
       accessibilityRole="button"
-      accessibilityLabel={`View details for ${movie.title}`}
+      accessibilityLabel={t('common.viewDetails', { title: movie.title })}
+      onPressIn={onPress ? () => prefetchMediaDetails(movie) : undefined}
       onPress={onPress}>
       <Image
         source={{ uri: tmdbImage(movieImage, isBackdrop ? 'w780' : 'w342') ?? undefined }}

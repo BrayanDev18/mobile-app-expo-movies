@@ -3,6 +3,7 @@ import { MediaType, MovieCastProps } from '@/interfaces';
 import { IMAGE_PLACEHOLDER, openCastList, openPersonDetails } from '@/utils';
 import { Image } from 'expo-image';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 interface MovieCastAndCrewProps {
   movieId: number;
@@ -13,13 +14,14 @@ interface MovieCastAndCrewProps {
 
 export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
   const { movieId, cast, director, mediaType = 'movie' } = props;
+  const { t } = useTranslate();
 
   const members = [...(cast?.slice(0, 5) ?? []), ...(director ? [director] : [])];
 
   return (
     <View className="gap-1">
       <SectionTitle
-        title="Cast & Crew"
+        title={t('detail.castAndCrew')}
         onSeeAll={cast?.length > 5 ? () => openCastList(movieId, mediaType) : undefined}
       />
 
@@ -33,7 +35,7 @@ export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
         renderItem={({ item: cast }) => (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`View details for ${cast.name}`}
+            accessibilityLabel={t('common.viewDetails', { title: cast.name })}
             className="w-[145px] items-center gap-1.5"
             onPress={() => openPersonDetails(cast.id)}>
             <Image
@@ -42,7 +44,7 @@ export const MovieCastAndCrew = (props: MovieCastAndCrewProps) => {
               contentFit="cover"
               cachePolicy="memory-disk"
               placeholder={IMAGE_PLACEHOLDER}
-              accessibilityLabel={`${cast.name} portrait`}
+              accessibilityLabel={t('common.portrait', { name: cast.name })}
             />
 
             <View className="w-full flex-1 items-center justify-center gap-1">

@@ -9,6 +9,7 @@ import {
   RegionWatchProvidersProps,
 } from '@/interfaces';
 import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import { translate } from '@/translate';
 import {
   deviceRegion,
   mapCastMembers,
@@ -21,7 +22,7 @@ import {
   pickRegion,
   tmdbImage,
 } from '@/utils';
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
 const APPEND_TO_RESPONSE =
   'videos,credits,images,reviews,similar,recommendations,release_dates,watch/providers';
@@ -63,22 +64,18 @@ const mapDirector = (crew?: CrewMemberProps[]) => {
   return {
     id: director.id,
     name: director.name ?? '',
-    character: 'Director',
+    character: translate('detail.director'),
     avatar: tmdbImage(director.profile_path, 'w342') ?? '',
   };
 };
 
-export const useMovieFull = (movieId: number) => {
+// Shared by the hook and by prefetchMediaDetails, so a press-in prefetch lands
+// in exactly the cache entry the detail screen reads.
+export const movieFullQuery = (movieId: number) => {
   const region = deviceRegion();
 
-  const {
-    data: movie,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  return queryOptions({
     queryKey: tmdbKey('movieFull', movieId),
-    enabled: !!movieId,
     queryFn: async () => {
       const { data } = await moviesApi.get<MovieFullResponse>(MovieApiRoutes.details(movieId), {
         params: {
@@ -120,13 +117,24 @@ export const useMovieFull = (movieId: number) => {
             }
           : null,
         director: mapDirector(data.credits?.crew),
-        certification: pickCertification(data.release_dates?.results, region, (entry) =>
-          entry.release_dates?.find((date) => date.certification)?.certification
+        certification: pickCertification(
+          data.release_dates?.results,
+          region,
+          (entry) => entry.release_dates?.find((date) => date.certification)?.certification
         ),
         watchProviders: pickRegion(data['watch/providers']?.results, region),
       };
     },
   });
+};
+
+export const useMovieFull = (movieId: number) => {
+  const {
+    data: movie,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({ ...movieFullQuery(movieId), enabled: !!movieId });
 
   return { movie, isLoading, isError, refetch };
 };

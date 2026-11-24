@@ -8,7 +8,7 @@ import {
   Text,
 } from '@/components';
 import { MediaType, MyListFlag, SavedMediaProps } from '@/interfaces';
-import { MEDIA_SCOPES } from '@/constants';
+import { EASE_IN_OUT, EASE_OUT, MEDIA_SCOPES } from '@/constants';
 import { useMyListStore } from '@/stores';
 import { MediaListRow } from '@/screens/movie/components';
 import * as Haptics from 'expo-haptics';
@@ -17,42 +17,45 @@ import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TxKeyPath, useTranslate } from '@/translate';
 
 type ListFilter = 'all' | MediaType;
 
-const FILTERS: { key: ListFilter; label: string }[] = [
-  { key: 'all', label: 'All' },
+const FILTERS: { key: ListFilter; labelKey: TxKeyPath }[] = [
+  { key: 'all', labelKey: 'common.all' },
   ...MEDIA_SCOPES,
 ];
 
 const LISTS: {
   key: MyListFlag;
-  label: string;
+  labelKey: TxKeyPath;
   removeIcon: IconName;
-  emptyMessage: string;
+  emptyKey: TxKeyPath;
 }[] = [
   {
     key: 'watchlist',
-    label: 'Watchlist',
+    labelKey: 'myList.lists.watchlist',
     removeIcon: 'BookmarkMinus',
-    emptyMessage: 'Titles you want to watch will show up here.',
+    emptyKey: 'myList.empty.watchlist',
   },
   {
     key: 'watched',
-    label: 'Watched',
+    labelKey: 'myList.lists.watched',
     removeIcon: 'EyeOff',
-    emptyMessage: 'Mark titles as watched to keep track of them here.',
+    emptyKey: 'myList.empty.watched',
   },
   {
     key: 'favorite',
-    label: 'Favorites',
+    labelKey: 'myList.lists.favorites',
     removeIcon: 'HeartOff',
-    emptyMessage: 'Your favorite titles will live here.',
+    emptyKey: 'myList.empty.favorites',
   },
 ];
 
 const MyListScreen = () => {
   const { top, bottom } = useSafeAreaInsets();
+  const { t } = useTranslate();
+
   const items = useMyListStore((state) => state.items);
   const toggleFlag = useMyListStore((state) => state.toggleFlag);
   const [activeList, setActiveList] = useState<MyListFlag>('watchlist');
@@ -85,10 +88,10 @@ const MyListScreen = () => {
         <View style={{ paddingTop: top }} className="flex-1 justify-center">
           <EmptyState
             icon="Bookmark"
-            title="Nothing saved yet"
-            message="Add titles to your watchlist, mark them watched, or favorite them from any detail screen."
+            title={t('myList.nothingSaved')}
+            message={t('myList.nothingSavedMessage')}
             action={{
-              title: 'Explore titles',
+              title: t('myList.exploreTitles'),
               onPress: () => router.navigate('/(root)/(tabs)/explore'),
             }}
           />
@@ -97,14 +100,14 @@ const MyListScreen = () => {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: top + 15, paddingBottom: bottom + 80 }}>
-          <Animated.View entering={FadeIn.duration(300)}>
+          <Animated.View entering={FadeIn.duration(300).easing(EASE_OUT)}>
             <View className="gap-1 px-4 pb-5">
               <Text className="!text-5xl font-black" style={{ lineHeight: 42, letterSpacing: -1 }}>
-                My List
+                {t('myList.title')}
               </Text>
 
               <Text className="!text-[13px] !text-neutral-400">
-                {items.length} {items.length === 1 ? 'title' : 'titles'} saved
+                {t('myList.titlesSaved', { count: items.length })}
               </Text>
             </View>
 
@@ -112,8 +115,12 @@ const MyListScreen = () => {
               <ChipRow
                 items={LISTS.map((item) => {
                   const count = items.filter((saved) => saved[item.key]).length;
+                  const label = t(item.labelKey);
 
-                  return { key: item.key, label: count ? `${item.label} (${count})` : item.label };
+                  return {
+                    key: item.key,
+                    label: count ? t('myList.listWithCount', { label, count }) : label,
+                  };
                 })}
                 active={activeList}
                 onSelect={(key) => {
@@ -125,21 +132,25 @@ const MyListScreen = () => {
 
             {showFilters && (
               <View className="mb-6">
-                <ChipRow items={FILTERS} active={filter} onSelect={setFilter} />
+                <ChipRow
+                  items={FILTERS.map((item) => ({ key: item.key, label: t(item.labelKey) }))}
+                  active={filter}
+                  onSelect={setFilter}
+                />
               </View>
             )}
 
             {listItems.length === 0 ? (
-              <Animated.View key={activeList} entering={FadeIn.duration(250)} className="py-8">
-                <EmptyState icon="ListX" message={list.emptyMessage} />
-              </Animated.View>
+              <View className="py-8">
+                <EmptyState icon="ListX" message={t(list.emptyKey)} />
+              </View>
             ) : (
               <View className="px-4">
                 {filtered.map((movie, index) => (
                   <Animated.View
                     key={`${movie.mediaType ?? 'movie'}-${movie.id}`}
-                    exiting={FadeOut.duration(200)}
-                    layout={LinearTransition.springify().damping(30).stiffness(200)}
+                    exiting={FadeOut.duration(200).easing(EASE_OUT)}
+                    layout={LinearTransition.duration(250).easing(EASE_IN_OUT)}
                     className={index < filtered.length - 1 ? 'border-b border-white/10' : ''}>
                     <MediaListRow
                       movie={movie}
@@ -161,7 +172,7 @@ const MyListScreen = () => {
                           size={20}
                           color="rgba(255,255,255,0.55)"
                           className="h-11 w-11 items-center justify-center"
-                          accessibilityLabel={`Remove ${movie.title} from this list`}
+                          accessibilityLabel={t('myList.removeFromList', { title: movie.title })}
                           onPress={() => onRemove(movie)}
                         />
                       }

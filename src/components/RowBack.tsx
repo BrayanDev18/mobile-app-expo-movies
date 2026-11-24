@@ -3,17 +3,20 @@ import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslate } from '@/translate';
 
 const ICON_SIZE = 44;
 
 export const RowBack = ({ onPress = () => router.back() }) => {
+  const { t } = useTranslate();
+
   const { top } = useSafeAreaInsets();
 
   return (
     <View style={{ top: Math.max(top - 25, 8) }} className="absolute z-20 p-4">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Go back"
+        accessibilityLabel={t('common.goBack')}
         hitSlop={8}
         onPress={() => {
           onPress();

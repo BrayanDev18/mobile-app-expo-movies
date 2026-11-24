@@ -8,6 +8,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import YoutubePlayer from 'react-native-youtube-iframe';
+import { useTranslate } from '@/translate';
 
 const CARD_WIDTH = 270;
 
@@ -19,13 +20,15 @@ export const MovieTrailers = ({
   mediaType?: MediaType;
 }) => {
   const { id } = useLocalSearchParams();
+  const { t } = useTranslate();
+
   const [playingKey, setPlayingKey] = useState<string | null>(null);
 
   return (
     <View className="gap-1">
       <SectionTitle
-        title="Trailers & Teasers"
-        seeAllLabel="See all trailers and teasers"
+        title={t('detail.trailers')}
+        seeAllLabel={t('detail.seeAllTrailers')}
         onSeeAll={
           videos.length > 3
             ? () =>
@@ -55,7 +58,7 @@ export const MovieTrailers = ({
               ) : (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`Play ${video.name}`}
+                  accessibilityLabel={t('detail.play', { name: video.name })}
                   onPress={() => setPlayingKey(video.key)}>
                   <Image
                     source={{ uri: `https://img.youtube.com/vi/${video.key}/hqdefault.jpg` }}
@@ -63,7 +66,7 @@ export const MovieTrailers = ({
                     contentFit="cover"
                     cachePolicy="memory-disk"
                     placeholder={IMAGE_PLACEHOLDER}
-                    accessibilityLabel={`${video.name} thumbnail`}
+                    accessibilityLabel={t('common.thumbnail', { name: video.name })}
                   />
 
                   <View style={StyleSheet.absoluteFill} className="items-center justify-center">

@@ -1,10 +1,11 @@
 import { Text as RNText, TextProps as RNTextProps } from 'react-native';
-import { translate } from '../translate';
+import { TxKeyPath, useTranslate } from '../translate';
 import { cn } from '../utils';
 
 interface TextProps extends RNTextProps {
-  tx?: string;
-  txOptions?: Record<string, any>;
+  /** Translation key — re-renders when the app language changes. */
+  tx?: TxKeyPath;
+  txOptions?: Record<string, unknown>;
   text?: string;
   style?: RNTextProps['style'];
   className?: string;
@@ -20,7 +21,8 @@ export function Text({
   className = '',
   ...rest
 }: TextProps) {
-  const i18nText = tx ? translate(tx, txOptions) : undefined;
+  const { t } = useTranslate();
+  const i18nText = tx ? t(tx, txOptions) : undefined;
   const content = text ?? i18nText ?? children;
 
   return (

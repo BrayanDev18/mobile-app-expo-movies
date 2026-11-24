@@ -1,13 +1,19 @@
 import { HomeSection, MediaType, MovieProps } from '@/interfaces';
 import { router } from 'expo-router';
 
-export const openMediaDetails = (media: Pick<MovieProps, 'id' | 'mediaType'>) => {
+// The poster path rides along so the detail screen can show its header while
+// the payload loads, instead of a blank spinner.
+export const openMediaDetails = (
+  media: Pick<MovieProps, 'id' | 'mediaType'> & { poster?: string | null }
+) => {
+  const params = { id: media.id, ...(media.poster ? { poster: media.poster } : {}) };
+
   if (media.mediaType === 'tv') {
-    router.push({ pathname: '/(root)/tv/[id]', params: { id: media.id } });
+    router.push({ pathname: '/(root)/tv/[id]', params });
     return;
   }
 
-  router.push({ pathname: '/(root)/movie/[id]', params: { id: media.id } });
+  router.push({ pathname: '/(root)/movie/[id]', params });
 };
 
 export const openPersonDetails = (personId: number) =>
@@ -35,4 +41,20 @@ export const openGallery = (mediaId: number, mediaType: MediaType = 'movie') =>
   router.push({
     pathname: '/(root)/movie/gallery',
     params: { id: mediaId, type: mediaType },
+  });
+
+export const openEpisode = (params: {
+  seriesId: number;
+  seasonNumber: number;
+  episodeNumber: number;
+  seriesTitle?: string;
+}) =>
+  router.push({
+    pathname: '/(root)/tv/episode',
+    params: {
+      id: params.seriesId,
+      season: params.seasonNumber,
+      episode: params.episodeNumber,
+      ...(params.seriesTitle ? { seriesTitle: params.seriesTitle } : {}),
+    },
   });

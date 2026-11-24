@@ -9,6 +9,7 @@ import {
   TvDetails,
 } from '@/interfaces';
 import { moviesApi, tmdbImageLanguages, tmdbKey } from '@/services';
+import { translate } from '@/translate';
 import {
   deviceRegion,
   mapCastMembers,
@@ -21,7 +22,7 @@ import {
   pickRegion,
   tmdbImage,
 } from '@/utils';
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 
 const APPEND_TO_RESPONSE =
   'videos,credits,images,reviews,similar,recommendations,content_ratings,watch/providers';
@@ -42,17 +43,13 @@ interface TvFullResponse extends TvDetails {
   'watch/providers'?: { results: Record<string, RegionWatchProvidersProps> };
 }
 
-export const useTvFull = (seriesId: number) => {
+// Shared by the hook and by prefetchMediaDetails, so a press-in prefetch lands
+// in exactly the cache entry the detail screen reads.
+export const tvFullQuery = (seriesId: number) => {
   const region = deviceRegion();
 
-  const {
-    data: series,
-    isLoading,
-    isError,
-    refetch,
-  } = useQuery({
+  return queryOptions({
     queryKey: tmdbKey('tvFull', seriesId),
-    enabled: !!seriesId,
     queryFn: async () => {
       const { data } = await moviesApi.get<TvFullResponse>(MovieApiRoutes.tvDetails(seriesId), {
         params: {
@@ -87,7 +84,7 @@ export const useTvFull = (seriesId: number) => {
           ? {
               id: data.created_by[0].id,
               name: data.created_by[0].name ?? '',
-              character: 'Creator',
+              character: translate('detail.creator'),
               avatar: tmdbImage(data.created_by[0].profile_path, 'w342') ?? '',
             }
           : null,
@@ -100,6 +97,15 @@ export const useTvFull = (seriesId: number) => {
       };
     },
   });
+};
+
+export const useTvFull = (seriesId: number) => {
+  const {
+    data: series,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({ ...tvFullQuery(seriesId), enabled: !!seriesId });
 
   return { series, isLoading, isError, refetch };
 };

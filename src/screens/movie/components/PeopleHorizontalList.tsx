@@ -4,6 +4,7 @@ import { IMAGE_PLACEHOLDER, openPersonDetails } from '@/utils';
 import { Image } from 'expo-image';
 import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 interface PeopleHorizontalListProps {
   title?: string;
@@ -13,11 +14,13 @@ interface PeopleHorizontalListProps {
 const AVATAR_SIZE = 110;
 
 export const PeopleHorizontalList = ({ title, people }: PeopleHorizontalListProps) => {
+  const { t } = useTranslate();
+
   const renderItem = useCallback(
     ({ item }: { item: PersonProps }) => (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`View details for ${item.name}`}
+        accessibilityLabel={t('common.viewDetails', { title: item.name })}
         style={{ width: AVATAR_SIZE }}
         className="items-center gap-2"
         onPress={() => openPersonDetails(item.id)}>
@@ -27,7 +30,7 @@ export const PeopleHorizontalList = ({ title, people }: PeopleHorizontalListProp
           contentFit="cover"
           cachePolicy="memory-disk"
           placeholder={IMAGE_PLACEHOLDER}
-          accessibilityLabel={`${item.name} portrait`}
+          accessibilityLabel={t('common.portrait', { name: item.name })}
         />
 
         <View className="items-center">
@@ -43,7 +46,7 @@ export const PeopleHorizontalList = ({ title, people }: PeopleHorizontalListProp
         </View>
       </Pressable>
     ),
-    []
+    [t]
   );
 
   return (

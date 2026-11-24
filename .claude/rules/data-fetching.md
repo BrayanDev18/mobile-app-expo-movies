@@ -20,4 +20,11 @@ paths:
 
 ## i18n
 
-i18next + react-i18next with expo-localization for locale detection. Translations in `src/translate/en.ts` and `src/translate/es.ts`. Language preference persisted via Zustand store.
+`i18n-js` + `expo-localization` (initial locale). Copy lives in `src/translate/en.ts` (source of truth, namespaced: `common.*`, `home.*`, `explore.*`, `myList.*`, `profile.*`, `detail.*`, `facts.*`, `person.*`, `errors.*`…) and `src/translate/es.ts` (typed as `Translations`, so a missing/extra key fails `tsc`).
+
+- In components: `const { t } = useTranslate()` from `@/translate` — it subscribes to `useLanguageStore`, so switching language in Profile re-renders immediately. Keys are typed (`TxKeyPath`).
+- Outside React (query functions, interceptors): `translate(key)` — uses `i18n.locale`, which the store keeps in sync on `setLanguage` and on rehydrate.
+- Plurals: `{ one, other }` entries + `t('myList.titlesSaved', { count })`. Placeholders: `{{name}}`.
+- Constants hold keys, not copy (`titleKey`, `labelKey`) — resolve with `t()` at render.
+- Dates/money go through `@/utils` formatters, which read `intlLocale()`. TMDB enum values that it always returns in English (status, series type, department) go through `translateTmdbValue`.
+- Never hardcode user-visible English (including `accessibilityLabel`s) outside `src/translate/`.

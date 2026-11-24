@@ -7,15 +7,15 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { TxKeyPath, useTranslate } from '@/translate';
 
 type CastTab = 'actors' | 'producers' | 'directors' | 'writers';
 
-const TABS: { key: CastTab; label: string }[] = [
-  { key: 'actors', label: 'Actors' },
-  { key: 'directors', label: 'Directors' },
-  { key: 'producers', label: 'Producers' },
-  { key: 'writers', label: 'Writers' },
+const TABS: { key: CastTab; labelKey: TxKeyPath }[] = [
+  { key: 'actors', labelKey: 'castList.actors' },
+  { key: 'directors', labelKey: 'castList.directors' },
+  { key: 'producers', labelKey: 'castList.producers' },
+  { key: 'writers', labelKey: 'castList.writers' },
 ];
 
 const WRITER_JOBS = ['Writer', 'Screenplay', 'Story', 'Novel', 'Author', 'Characters'];
@@ -34,11 +34,9 @@ const uniqueById = <T extends { id: number }>(members: T[]): T[] => {
 const CastList = () => {
   const { id, type } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState<CastTab>('actors');
+  const { t } = useTranslate();
 
-  const { movieCast, movieCrew, isLoading } = useMovieCast(
-    +id,
-    type === 'tv' ? 'tv' : 'movie'
-  );
+  const { movieCast, movieCrew, isLoading } = useMovieCast(+id, type === 'tv' ? 'tv' : 'movie');
 
   const members = useMemo(() => {
     if (activeTab === 'actors') return movieCast;
@@ -65,12 +63,19 @@ const CastList = () => {
     <Screen safeAreaEdges={['top', 'bottom']} canGoBack preset="fixed" className="gap-4 px-4">
       <View className="h-full gap-4 pt-14">
         <Text accessibilityRole="header" className="!text-2xl font-bold">
-          Cast & Crew
+          {t('castList.title')}
         </Text>
 
-        <ChipRow items={TABS} active={activeTab} onSelect={setActiveTab} scrollable className="" />
+        <ChipRow
+          items={TABS.map((tab) => ({ key: tab.key, label: t(tab.labelKey) }))}
+          active={activeTab}
+          onSelect={setActiveTab}
+          scrollable
+          className=""
+        />
 
-        <Animated.View key={activeTab} entering={FadeIn.duration(250)} className="flex-1">
+        {/* Keyed so each role tab starts scrolled to the top; no fade on a frequent toggle. */}
+        <View key={activeTab} className="flex-1">
           <FlashList
             data={members}
             scrollEventThrottle={16}
@@ -79,9 +84,9 @@ const CastList = () => {
             showsVerticalScrollIndicator={false}
             keyExtractor={(item, index) => `${item.id}-${index}`}
             ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            ListEmptyComponent={<EmptyState icon="Users" message="Nothing listed here" />}
+            ListEmptyComponent={<EmptyState icon="Users" message={t('castList.nothingListed')} />}
           />
-        </Animated.View>
+        </View>
       </View>
     </Screen>
   );
@@ -90,10 +95,12 @@ const CastList = () => {
 export default CastList;
 
 const CastItem = ({ cast }: { cast: MovieCastProps }) => {
+  const { t } = useTranslate();
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`View details for ${cast.name}`}
+      accessibilityLabel={t('common.viewDetails', { title: cast.name })}
       onPress={() => openPersonDetails(cast.id)}
       className="flex-row items-center justify-between rounded-2xl bg-neutral-800 p-2.5">
       <View className="flex-1 flex-row items-center gap-x-3 pr-2">
@@ -103,7 +110,7 @@ const CastItem = ({ cast }: { cast: MovieCastProps }) => {
           contentFit="cover"
           cachePolicy="memory-disk"
           placeholder={IMAGE_PLACEHOLDER}
-          accessibilityLabel={`${cast.name} portrait`}
+          accessibilityLabel={t('common.portrait', { name: cast.name })}
         />
 
         <View className="flex-1 gap-1.5">

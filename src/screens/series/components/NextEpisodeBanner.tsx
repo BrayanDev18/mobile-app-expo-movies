@@ -3,8 +3,11 @@ import { NextEpisodeProps } from '@/interfaces';
 import { formatDate } from '@/utils';
 import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import { useTranslate } from '@/translate';
 
 export const NextEpisodeBanner = ({ nextEpisode }: { nextEpisode: NextEpisodeProps }) => {
+  const { t } = useTranslate();
+
   if (!nextEpisode.airDate) return null;
 
   return (
@@ -17,11 +20,14 @@ export const NextEpisodeBanner = ({ nextEpisode }: { nextEpisode: NextEpisodePro
 
       <View className="flex-1 gap-0.5">
         <Text className="!text-md font-semibold">
-          New episode {formatDate(nextEpisode.airDate)}
+          {t('detail.newEpisode', { date: formatDate(nextEpisode.airDate) })}
         </Text>
 
         <Text numberOfLines={1} className="!text-[13px] !text-neutral-400">
-          S{nextEpisode.seasonNumber} E{nextEpisode.episodeNumber}
+          {t('detail.episodeCode', {
+            season: nextEpisode.seasonNumber,
+            episode: nextEpisode.episodeNumber,
+          })}
           {nextEpisode.name ? ` · ${nextEpisode.name}` : ''}
         </Text>
       </View>
