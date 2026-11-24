@@ -2,11 +2,11 @@ import { EmptyState, ErrorState, FlashList, Loader, RatingBadge, Screen, Text } 
 import { EASE_OUT } from '@/constants';
 import { useTvSeason } from '@/hooks';
 import { TvEpisodeProps } from '@/interfaces';
-import { formatDate, formatDuration, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
+import { formatDate, formatDuration, IMAGE_PLACEHOLDER, openEpisode, tmdbImage } from '@/utils';
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 const episodeDuration = (runtime: number | null) => {
@@ -15,7 +15,13 @@ const episodeDuration = (runtime: number | null) => {
   return runtime < 60 ? `${runtime}m` : formatDuration(runtime);
 };
 
-const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number }) => {
+interface EpisodeRowProps {
+  episode: TvEpisodeProps;
+  index: number;
+  onPress: (episode: TvEpisodeProps) => void;
+}
+
+const EpisodeRow = ({ episode, index, onPress }: EpisodeRowProps) => {
   const meta = [
     episode.airDate ? formatDate(episode.airDate) : null,
     episodeDuration(episode.runtime),
@@ -28,7 +34,12 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
       entering={FadeInDown.delay(Math.min(index, 8) * 50)
         .duration(250)
         .easing(EASE_OUT)}>
-      <View className="gap-2.5 py-4">
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Episode ${episode.episodeNumber}: ${episode.name}`}
+        accessibilityHint="Opens episode details"
+        onPress={() => onPress(episode)}
+        className="min-h-11 gap-2.5 py-4 active:opacity-70">
         <View className="flex-row items-center gap-3">
           <Image
             source={{ uri: tmdbImage(episode.still, 'w342') ?? undefined }}
@@ -55,7 +66,7 @@ const EpisodeRow = ({ episode, index }: { episode: TvEpisodeProps; index: number
             {episode.overview}
           </Text>
         ) : null}
-      </View>
+      </Pressable>
     </Animated.View>
   );
 };
@@ -69,11 +80,22 @@ const SeasonScreen = () => {
 
   const { season: seasonDetails, isLoading, isError, refetch } = useTvSeason(+id, +season);
 
+  const onEpisodePress = useCallback(
+    (episode: TvEpisodeProps) =>
+      openEpisode({
+        seriesId: +id,
+        seasonNumber: +season,
+        episodeNumber: episode.episodeNumber,
+        seriesTitle,
+      }),
+    [id, season, seriesTitle]
+  );
+
   const renderItem = useCallback(
     ({ item, index }: { item: TvEpisodeProps; index: number }) => (
-      <EpisodeRow episode={item} index={index} />
+      <EpisodeRow episode={item} index={index} onPress={onEpisodePress} />
     ),
-    []
+    [onEpisodePress]
   );
 
   if (isLoading) return <Loader />;

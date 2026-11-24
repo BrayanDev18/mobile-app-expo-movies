@@ -1,4 +1,5 @@
 import { RatingBadge, Text } from '@/components';
+import { prefetchMediaDetails } from '@/hooks';
 import { MovieProps } from '@/interfaces';
 import { cn, formatDate, IMAGE_PLACEHOLDER, tmdbImage } from '@/utils';
 import { BlurView } from 'expo-blur';
@@ -31,6 +32,7 @@ export const MovieCard = (props: MovieCardProps) => {
       className={cn(className, 'relative')}
       accessibilityRole="button"
       accessibilityLabel={`View details for ${movie.title}`}
+      onPressIn={onPress ? () => prefetchMediaDetails(movie) : undefined}
       onPress={onPress}>
       <Image
         source={{ uri: tmdbImage(movieImage, isBackdrop ? 'w780' : 'w342') ?? undefined }}

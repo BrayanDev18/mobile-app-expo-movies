@@ -7,6 +7,8 @@ export interface HomeSection {
   variant?: 'poster' | 'backdrop';
   cardWidth?: number;
   ranked?: boolean;
+  /** Lazy rail whose data hasn't loaded yet — rendered as a skeleton until it does. */
+  isPending?: boolean;
   seeAll?: {
     genreId?: number;
     providerId?: number;

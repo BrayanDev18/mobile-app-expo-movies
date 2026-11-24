@@ -9,6 +9,7 @@ export * from './GenreChips';
 export * from './HomeSkeleton';
 export * from './MediaActionsBar';
 export * from './MediaDetailShell';
+export * from './MediaDetailSkeleton';
 export * from './MediaHome';
 export * from './MediaListRow';
 export * from './MediaScopeTabs';

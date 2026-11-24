@@ -8,6 +8,7 @@ export const StorageKeys = {
   mediaScope: `${NS}-media-scope-store`,
   myList: `${NS}-my-list-store`,
   profile: `${NS}-profile-store`,
+  queryCache: `${NS}-query-cache`,
   recentSearches: `${NS}-recent-searches-store`,
   viewedMedia: `${NS}-viewed-media-store`,
 } as const;

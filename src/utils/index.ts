@@ -5,6 +5,7 @@ export * from './mapMovieDetails';
 export * from './mapTvDetails';
 export * from './mapMedia';
 export * from './mapTmdb';
+export * from './mapTvEpisode';
 export * from './mediaIdentity';
 export * from './navigateMedia';
 export * from './region';

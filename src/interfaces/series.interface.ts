@@ -1,4 +1,15 @@
-import { GenreProps, SpokenLanguageProps, TmdbPaginated } from './movie.interface';
+import {
+  GenreProps,
+  MovieCast,
+  MovieCastProps,
+  MovieCrewProps,
+  MovieImages,
+  MovieImagesProps,
+  MovieVideoResponse,
+  MovieVideosProps,
+  SpokenLanguageProps,
+  TmdbPaginated,
+} from './movie.interface';
 
 export interface TvResultProps {
   id: number;
@@ -93,6 +104,44 @@ export interface TvSeasonDetailsProps {
   poster: string | null;
   airDate: string | null;
   episodes: TvEpisodeProps[];
+}
+
+export interface TvEpisodeCrewMember {
+  id: number;
+  name: string | null;
+  job: string | null;
+  department: string | null;
+  profile_path: string | null;
+}
+
+export interface TvEpisodeDetailsResponse extends TvEpisode {
+  season_number: number;
+  vote_count: number;
+  crew?: TvEpisodeCrewMember[];
+  guest_stars?: MovieCast[];
+  credits?: { cast?: MovieCast[]; guest_stars?: MovieCast[]; crew?: TvEpisodeCrewMember[] };
+  images?: { stills?: MovieImages[] };
+  videos?: MovieVideoResponse;
+}
+
+export interface TvEpisodeDetailsProps {
+  id: number;
+  name: string;
+  overview: string;
+  /** Raw TMDB path — resolve the size at render with `TmdbImage` / `tmdbImage`. */
+  still: string | null;
+  seasonNumber: number;
+  episodeNumber: number;
+  airDate: string | null;
+  runtime: number | null;
+  rating: number;
+  voteCount: number;
+  guestStars: MovieCastProps[];
+  /** Directors and writers; `job` holds the credit (e.g. "Director", "Teleplay"). */
+  crew: MovieCrewProps[];
+  /** URL-based by contract, like every gallery image. */
+  stills: MovieImagesProps[];
+  videos: MovieVideosProps[];
 }
 
 export interface NextEpisodeProps {
